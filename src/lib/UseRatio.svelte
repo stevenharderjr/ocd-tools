@@ -125,14 +125,15 @@
 				<Slider {factor} {relativeRange} on:update={handleSliderInput} />
 			{/if}
 		{/each}
+    {#if locked}
+    <div class="factors"></div>
+      <Slider
+        factor={{ name: floorName, value: floorValue }}
+        {relativeRange}
+        on:update={handleSliderInput}
+      />
+    {/if}
 	</div>
-	{#if locked}
-		<Slider
-			factor={{ name: floorName, value: floorValue }}
-			{relativeRange}
-			on:update={handleSliderInput}
-		/>
-	{/if}
 	<div class="shortcuts">
 		<button class="shortcut" on:click={half} title="halve"> ½ </button>
 		<button class="shortcut" on:click={resetValues} title="restore initial values">
@@ -147,20 +148,20 @@
 	<div class="options">
 		<button
 			class="option-button"
-			on:click|stopPropagation={close}
+			on:click={close}
 			title="stop using ratio and return to overview"
 		>
 			<img src="x.svg" alt="x" />
 		</button>
 		<button
 			class="option-button"
-			on:click|stopPropagation={toggleLock}
+			on:click={toggleLock}
 			title={locked ? 'locked for precision' : 'unlocked for variability'}
 		>
 			{#if locked}
-				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
+				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-2px;" />
 			{:else}
-				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
+				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-2px;" />
 			{/if}
 		</button>
 	</div>
@@ -187,7 +188,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-		padding: 1rem 0.5rem 1rem 0.5rem;
+		padding: 1rem 0.75rem 1rem 0.5rem;
 	}
 	.title-bar {
 		position: relative;
@@ -227,12 +228,12 @@
 		stroke: #666;
 	}
 
-	img {
+	/* img {
 		height: 1.5rem;
 		width: 1.5rem;
 		display: flex;
 		border-radius: 6px;
-	}
+	} */
 
 	.option-button {
 		position: relative;
@@ -255,6 +256,7 @@
 		top: 0;
 		right: 0;
 		pointer-events: auto;
+    margin: 1px;
 	}
 	.shortcuts {
 		display: flex;

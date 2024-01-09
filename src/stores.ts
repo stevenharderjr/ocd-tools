@@ -10,22 +10,25 @@ export const ratios = writable<App.Ratio[]>([
 				id: '0',
 				name: 'coffee',
 				label: 'Coffee',
+				prefix: '',
 				value: 200,
-				unit: 'g'
+				suffix: ' g'
 			},
 			{
 				id: '1',
 				name: 'half & half',
 				label: 'Half & Half',
+				prefix: '',
 				value: 150,
-				unit: 'g'
+				suffix: ' g'
 			},
 			{
 				id: '2',
 				name: 'sugar',
 				label: 'Sugar',
+				prefix: '',
 				value: 20,
-				unit: 'g'
+				suffix: ' g'
 			}
 		]
 	},
@@ -38,15 +41,17 @@ export const ratios = writable<App.Ratio[]>([
 				id: '0',
 				name: 'coffee grounds',
 				label: 'Coffee Grounds',
+				prefix: '',
 				value: 36,
-				unit: 'g'
+				suffix: ' g'
 			},
 			{
 				id: '1',
 				name: 'water',
 				label: 'Water',
+				prefix: '',
 				value: 1140,
-				unit: 'g'
+				suffix: ' g'
 			}
 		]
 	}
@@ -61,8 +66,9 @@ export const newRatio = () => ({
 export const newFactor = () => ({
 	id: crypto.randomUUID(),
 	label: '',
+	prefix: '',
 	value: 1,
-	unit: ''
+	suffix: ''
 });
 
 export const toasts = writable([]);

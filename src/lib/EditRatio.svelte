@@ -13,27 +13,25 @@
 	export let ratio: App.Ratio;
 	export let edit = true;
 	const { name } = ratio;
-	const initialRatio = { ...ratio };
-	const initialFactors = [...ratio.factors];
 	let partialFactor: App.FactorFlag;
 	let currentLabel = ratio.label;
-	let labelInput;
+	let labelInput: HTMLInputElement;
 
 	export let locked = true;
 	let dirty = false;
 	$: image = locked ? 'lock.svg' : 'unlock.svg';
 	let factors = [...ratio.factors].sort(descendingValue);
 
-	function descendingValue({ value: a }, { value: b }) {
+	function descendingValue({ value: a }: App.Factor, { value: b }: App.Factor) {
 		return a > b ? -1 : a < b ? 1 : 0;
 	}
 
-	function handleBlur({ currentTarget }) {
+	function handleBlur({ currentTarget }: { currentTarget: HTMLInputElement }) {
 		const { value: inputValue, name: key } = currentTarget;
 		if (currentLabel && !inputValue) currentTarget.value = currentLabel;
 	}
 
-	function handleFocus({ currentTarget }) {
+	function handleFocus({ currentTarget }: { currentTarget: HTMLInputElement }) {
 		currentTarget.value = '';
 	}
 
@@ -55,7 +53,7 @@
 			if (update.softDelete && !update.name) return cancelPartialFactor();
 			factors = factors.map((factor) => (factor.name === update.name ? update : factor));
 		} else {
-			if (update.value) partialFactor = false;
+			if (update.value) partialFactor = undefined;
 			let rename = update.label.toLowerCase();
 			if (rename === update.name) {
 				// no name change, so just record other changes
@@ -77,7 +75,7 @@
 	}
 
 	function handleReset() {
-		dispatch('reset', { ...initialRatio, factors: [...initialFactors] });
+		dispatch('reset', ratio);
 	}
 
 	function applyChanges() {
@@ -116,27 +114,27 @@
 		dispatch('update', { ...ratio, label, factors: finalFactors.sort(descendingValue) });
 	}
 
-	function handleDelete({ detail: { factor } }) {
+	function handleDelete({ detail: factor }: { detail: App.Factor }) {
 		const { name: factorName } = factor;
 		if (!factorName) return cancelPartialFactor();
 	}
 
 	function cancelPartialFactor() {
 		factors = factors.filter(({ name }) => !!name);
-		partialFactor = false;
+		partialFactor = undefined;
 	}
 
 	function handleClose() {
-		dispatch('close');
+		dispatch('close', ratio);
 	}
 
 	function toggleEdit() {
 		if (edit) {
 			cancelPartialFactor();
-			return dispatch('close');
+			return dispatch('close', ratio);
 		}
 
-		dispatch('edit', ratio.name);
+		dispatch('edit', ratio);
 		labelInput.focus();
 	}
 
@@ -148,7 +146,7 @@
 	function handleSelection() {
 		if (edit) return;
 		// console.log('selection:', detail)
-		dispatch('use', { name: ratio.name });
+		dispatch('use', ratio);
 	}
 
 	function addFactor() {
@@ -157,7 +155,7 @@
 		factors = [...factors, partialFactor];
 	}
 
-	function handleKeyPress({ key, currentTarget }) {
+	function handleKeyPress({ key }: KeyboardEvent) {
 		if (key === 'esc') return toggleEdit();
 		if (key === 'Enter') {
 			if (ratio.name) return applyChanges();
@@ -201,10 +199,10 @@
 	{#if edit}
 		<div class="edit-actions">
 			<button class="edit-action" on:click|stopPropagation={selfDestruct} title="delete this ratio">
-				<img src="trash-2.svg" alt="trashcan" />
+				<img class="inverted-icon" src="trash-2.svg" alt="trashcan" />
 			</button>
 			<button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
-				<img src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
+				<img class="inverted-icon" src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
 			</button>
 			<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
 			<button
@@ -212,7 +210,7 @@
 				on:click|stopPropagation={applyChanges}
 				title="save updates and return to overview"
 			>
-				<img class="save-icon" src="check-circle.svg" alt="check-circle" />
+				<img class="inverted-icon" src="check-circle.svg" alt="check-circle" />
 				<span class="action-label">SAVE</span>
 			</button>
 		</div>
@@ -322,12 +320,12 @@
 		font-weight: 300;
 	}
 
-	.save-icon {
+	.inverted-icon {
 		filter: invert(1);
 		opacity: 0.95;
-		height: 5mm;
-		width: 5mm;
-		padding-left: 3px;
+		height: 4.5mm;
+		width: 4.5mm;
+		/* padding-left: 3px; */
 	}
 
 	.edit-action {
@@ -337,10 +335,11 @@
 		width: 10mm;
 		height: 10mm;
 		padding: none;
-		background: transparent;
-		border: 2px solid #333;
+		background: #666;
+		/* border: 2px solid #333; */
+    border: none;
 		border-radius: 4px;
-		opacity: 0.5;
+		/* opacity: 0.8; */
 	}
 
 	.add-factor {

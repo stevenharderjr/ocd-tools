@@ -11,9 +11,8 @@ declare global {
 			name?: string;
 			label: string;
 			value: number;
-			unit: string | 'g';
-			parentName?: string;
-			parentLabel?: string;
+			prefix: string;
+			suffix: string;
 			softDelete?: boolean;
 		}
 

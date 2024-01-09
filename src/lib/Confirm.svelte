@@ -26,7 +26,7 @@
 		{/if}
 		{#if question}
 			<p class="description">
-				{split[0]}<span style="font-weight:600;">{split[1]}</span>{split[2]}
+				{question}
 			</p>
 		{/if}
 		<div class="buttons">

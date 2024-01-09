@@ -5,8 +5,8 @@
   export let factor = {};
   export let relativeRange = [0.25, 1.75];
 
-  const baseline = factor.value;
-  $: delta = Math.round(factor.value - baseline);
+  const baseline = +factor.value;
+  $: delta = Math.round(+factor.value - baseline);
   $: min = Math.max(1, Math.round(baseline * relativeRange[0]));
   $: max = Math.round(baseline * relativeRange[1]);
   // const min = Math.round(baseline * 0.25);
@@ -24,12 +24,12 @@
       {#if delta}
         <span class="delta">({delta > 0 ? '+' : ''}{delta})</span>
       {/if}
-      <span class="value">{Math.round(factor.value)} {factor.unit}</span>
+      <span class="value">{factor.prefix + Math.round(factor.value) + factor.suffix}</span>
       <!-- <span class="unit">{factor.unit}</span> -->
     </div>
   </div>
 {/if}
-<input class="slider" type="range" {min} {max} value={factor?.value} on:input={handleChange} />
+<input class="slider" type="range" {min} {max} value={+factor?.value} on:input={handleChange} />
 
 <style>
   .factor {

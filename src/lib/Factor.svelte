@@ -10,8 +10,7 @@
     {#if delta}
       <span class="delta">({delta > 0 ? '+' : ''}{delta})</span>
     {/if}
-    <span class="value">{factor.value}</span>
-    <span class="unit">{factor.unit}</span>
+    <span class="value">{factor.prefix + factor.value + factor.suffix}</span>
   </div>
 </div>
 
