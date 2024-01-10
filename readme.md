@@ -2,7 +2,8 @@
 
 ### Keep sets of values and allow dynamic adjustments without changing proportions between them.
 
-For example, my nominal cup of coffee comprises 20g sugar, 200ml coffee, and 150ml half & half. Ratioizer gives me an easy way to modify the amount of any ingredient or target a total serving size without changing the flavor.
+For example, my nominal cup of coffee comprises 20g sugar, 200ml coffee, and 150ml half & half.
+Now let's say I want to modify the amount of an ingredient or target a total serving size without changing the flavor.
 
 ### Problem 1
 If I'm short on half & half, I can use the ratio between the available amount (128 ml) and the nominal amount (150 ml).
