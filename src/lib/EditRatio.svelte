@@ -1,26 +1,20 @@
 <script lang="ts">
-	import EditFactor from '$lib/EditFactor.svelte';
-	import CloseButton from '$lib/CloseButton.svelte';
-	import selectOnFocus from '$lib/utils/selectOnFocus';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { editing, toasts, using, newFactor } from '../stores';
+	import EditFactor from '$lib/EditFactor.svelte';
+	import { newFactor } from '../stores';
 	import Toast from '../toast';
-	import Factor from './Factor.svelte';
-	// import '$static/lock.svg';
-	// import '$static/unlock.svg';
 	const dispatch = createEventDispatcher();
 
 	export let ratio: App.Ratio;
-	export let edit = true;
-	const { name } = ratio;
+	let edit = { ...ratio };
+	let factors = [...edit.factors].sort(descendingValue);
+
+	// const { name } = edit;
 	let partialFactor: App.FactorFlag;
-	let currentLabel = ratio.label;
+	let currentLabel = edit.label;
 	let labelInput: HTMLInputElement;
 
 	export let locked = true;
-	let dirty = false;
-	$: image = locked ? 'lock.svg' : 'unlock.svg';
-	let factors = [...ratio.factors].sort(descendingValue);
 
 	function descendingValue({ value: a }: App.Factor, { value: b }: App.Factor) {
 		return a > b ? -1 : a < b ? 1 : 0;
@@ -35,20 +29,18 @@
 		currentTarget.value = '';
 	}
 
-	function handleRename(e) {
-		const { value } = e.currentTarget;
+	function handleRename({ currentTarget }: { currentTarget: HTMLInputElement }) {
+		const { value } = currentTarget;
 		if (!value) return;
-		e.currentTarget.blur();
-		// console.log('Should rename "' + currentLabel + '" to "' + value + '"');
-		currentLabel = value;
+		currentTarget.blur();
 	}
 
 	function updateFactor({ detail: update }: { detail: App.Factor }) {
-		if (!update.name) {
-			if (update.softDelete) return cancelPartialFactor();
-			factors.pop();
-		}
-
+    const updateId = update.id;
+    if (update.softDelete && !update.label) {
+      factors = factors.filter(({ id }) => id !== updateId);
+      return;
+    }
 		if (!update.label) {
 			if (update.softDelete && !update.name) return cancelPartialFactor();
 			factors = factors.map((factor) => (factor.name === update.name ? update : factor));
@@ -75,18 +67,19 @@
 	}
 
 	function handleReset() {
-		dispatch('reset', ratio);
+    edit = { ...ratio };
+		// dispatch('reset', ratio);
 	}
 
 	function applyChanges() {
 		const errors = [];
-		const error = { duration: 5000, type: 'error' };
+		const error = { duration: 2000, type: 'error' };
 		let validated = true;
 		const label = labelInput?.value || currentLabel;
 
 		if (!label) {
 			validated = false;
-			errors.push({ ...error, message: 'Ratio must be named.' });
+			errors.push({ ...error, message: 'Ratio must have a name.' });
 		}
 
 		const finalFactors = factors.filter((factor) => {
@@ -111,16 +104,17 @@
 
 		if (!validated) return errors.forEach((error) => Toast.add(error));
 
-		dispatch('update', { ...ratio, label, factors: finalFactors.sort(descendingValue) });
+		dispatch('update', { ...ratio, ...edit, label, factors: finalFactors.sort(descendingValue) });
 	}
 
 	function handleDelete({ detail: factor }: { detail: App.Factor }) {
-		const { name: factorName } = factor;
+		const { id: deleteId, label } = factor;
 		if (!factorName) return cancelPartialFactor();
 	}
 
 	function cancelPartialFactor() {
-		factors = factors.filter(({ name }) => !!name);
+    const partialId = partialFactor?.id;
+		factors = factors.filter(({ id }) => id !== partialId);
 		partialFactor = undefined;
 	}
 
@@ -156,11 +150,10 @@
 	}
 
 	function handleKeyPress({ key }: KeyboardEvent) {
+    if (key !== 'esc' && key !== 'Enter') return;
 		if (key === 'esc') return toggleEdit();
-		if (key === 'Enter') {
-			if (ratio.name) return applyChanges();
-			if (factors.length < 2) addFactor();
-		}
+    // if (edit.label) return applyChanges();
+    if (edit.factors.length < 2) addFactor();
 	}
 
 	function selfDestruct() {
@@ -177,9 +170,10 @@
 			class="label"
 			name="label"
 			type="text"
-			value={ratio.label}
+			value={edit.label}
 			placeholder={currentLabel || 'Ratio Name'}
 			title="edit ratio name"
+      autocomplete="off"
 			on:focus={handleFocus}
 			on:blur={handleBlur}
 			on:change={handleRename}
@@ -201,9 +195,9 @@
 			<button class="edit-action" on:click|stopPropagation={selfDestruct} title="delete this ratio">
 				<img class="inverted-icon" src="trash-2.svg" alt="trashcan" />
 			</button>
-			<button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
+			<!-- <button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
 				<img class="inverted-icon" src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
-			</button>
+			</button> -->
 			<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
 			<button
 				class="save-action"
@@ -279,6 +273,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+    align-self: flex-start;
 	}
 	.options {
 		position: absolute;
@@ -291,6 +286,7 @@
 	}
 	.label {
 		max-height: 2rem;
+    max-width: 85%;
 	}
 
 	.edit-actions {
@@ -308,7 +304,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem 1.75rem 0.5rem 1rem;
 		background: #666;
 		color: #fff;
 		font-size: 1rem;

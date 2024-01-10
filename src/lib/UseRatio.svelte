@@ -112,7 +112,7 @@
 	}
 </script>
 
-<div class="floating container">
+<div class="floating container" on:click={close}>
 	<div class="title-bar">
 		<h2>{ratio.label}</h2>
 		<span>({Math.round(total)} g)</span>
@@ -135,27 +135,27 @@
     {/if}
 	</div>
 	<div class="shortcuts">
-		<button class="shortcut" on:click={half} title="halve"> ½ </button>
-		<button class="shortcut" on:click={resetValues} title="restore initial values">
+		<button class="shortcut" on:click|stopPropagation={half} title="halve"> ½ </button>
+		<button class="shortcut" on:click|stopPropagation={resetValues} title="restore initial values">
 			<img
 				class="shortcut-icon"
 				src="rotate-ccw.svg"
 				alt="arrow indicating a counterclockwise circle"
 			/>
 		</button>
-		<button class="shortcut" on:click={double} style="font-size:small;" title="double"> ×2 </button>
+		<button class="shortcut" on:click|stopPropagation={double} style="font-size:small;" title="double"> ×2 </button>
 	</div>
 	<div class="options">
-		<button
+		<!-- <button
 			class="option-button"
 			on:click={close}
 			title="stop using ratio and return to overview"
 		>
 			<img src="x.svg" alt="x" />
-		</button>
+		</button> -->
 		<button
 			class="option-button"
-			on:click={toggleLock}
+			on:click|stopPropagation={toggleLock}
 			title={locked ? 'locked for precision' : 'unlocked for variability'}
 		>
 			{#if locked}
@@ -173,6 +173,10 @@
 		flex-direction: row;
 		align-items: baseline;
 	}
+  span {
+		font-size: 1rem;
+		padding-left: 0.5rem;
+	}
 	.container {
 		position: relative;
 		display: flex;
@@ -188,53 +192,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-		padding: 1rem 0.75rem 1rem 0.5rem;
+		padding: 1rem 0.5rem;
 	}
 	.title-bar {
 		position: relative;
 		display: flex;
 		flex-direction: row;
 		align-items: baseline;
-		/* align-items: center; */
-		/* margin-bottom: 2rem; */
 	}
-	span {
-		font-size: 1rem;
-		padding-left: 0.5rem;
-	}
-	.x-button {
-		width: 1.5rem;
-		height: 1.5rem;
-		background: transparent;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 0;
-		touch-action: manipulation;
-		pointer-events: auto;
-		top: 0.5rem;
-		right: 0.5rem;
-		cursor: pointer;
-	}
-
-	svg {
-		width: 100%;
-		height: 100%;
-	}
-
-	path {
-		vector-effect: non-scaling-stroke;
-		stroke-width: 2px;
-		stroke: #666;
-	}
-
-	/* img {
-		height: 1.5rem;
-		width: 1.5rem;
-		display: flex;
-		border-radius: 6px;
-	} */
-
 	.option-button {
 		position: relative;
 		display: flex;
@@ -246,12 +211,11 @@
 		background: transparent;
 		cursor: pointer;
 		opacity: 0.5;
-		/* background: #f006; */
 	}
 	.options {
 		position: absolute;
 		display: flex;
-		flex-direction: row-reverse;
+		flex-direction: column;
 		align-items: center;
 		top: 0;
 		right: 0;
@@ -261,13 +225,10 @@
 	.shortcuts {
 		display: flex;
 		flex-direction: row;
-		/* justify-content: stretch; */
 		gap: 0.75rem;
 		margin: 0.25rem 0;
 	}
-
 	.shortcut {
-		/* padding: 0.5rem 1rem; */
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -280,7 +241,6 @@
 		border-radius: 4px;
 		flex: 1;
 	}
-
 	.shortcut-icon {
 		filter: invert(1);
 		opacity: 0.95;

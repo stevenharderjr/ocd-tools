@@ -2,18 +2,14 @@
 	import { createEventDispatcher, onMount } from 'svelte';
   import { fixes } from '$lib/utils/fixes';
 	import Toast from '../toast';
+	import { diff } from './utils/tester';
 	const dispatch = createEventDispatcher();
 	export let factor: App.Factor;
-  let edits = { softDelete: false, ...factor };
-  // let label = factor.label;
-  // let value = factor.value;
-  // let prefix = factor.prefix;
-  // let suffix = factor.suffix;
+  let edits = { softDelete: false, ...factor }
   let labelInput: HTMLInputElement;
   let valueInput: HTMLInputElement;
-  // $: fixed = fixes(value);
 
-	function handleBlur({ currentTarget }: { currentTarget: HTMLInputElement }) {
+	function handleLabelBlur({ currentTarget }: { currentTarget: HTMLInputElement }) {
 		const { value: inputValue, name: key } = currentTarget;
 		const defaultValue = factor[key as keyof App.Factor];
     let override = defaultValue + '';
@@ -21,51 +17,36 @@
       currentTarget.value = override;
     }
     edits = { ...edits, [key]: inputValue || override };
-    dispatch('update', edits);
+    if (diff(factor, edits)) dispatch('update', { ...factor, [key]: inputValue || override });
 	}
 
-  function handleValueBlur({ currentTarget }) {
+  function handleValueBlur({ currentTarget }: { currentTarget: HTMLInputElement }) {
     const { value: inputValue } = currentTarget;
     if (!inputValue) {
       const { prefix, value, suffix } = factor;
       edits = { ...edits, prefix, value, suffix };
-      valueInput.value = prefix + value + suffix;
+      currentTarget.value = prefix + value + suffix;
     }
-    dispatch('update', edits);
+    // dispatch('update', edits);
   }
 
 	function handleFocus({ currentTarget }: { currentTarget: HTMLInputElement }) {
 		currentTarget.value = '';
 	}
 
-  function handleLabelInput({ currentTarget: { value }}) {
-    edits = { ...edits, label: value };
-  }
-
-  function handleValueInput({ currentTarget: { value: inputValue } }) {
-    edits = { ...edits, value: inputValue };
-  }
-
-	function handleEdits({ currentTarget: { value: inputValue, name: key } }: { currentTarget: HTMLInputElement | { value: string | number | boolean, name: keyof App.Factor }}) {
-		if (!inputValue && inputValue !== false) return;
-		if (key === 'value') inputValue = +inputValue;
-		edits = {
-			...edits,
-			[key]: inputValue || inputValue === false ? inputValue : factor[key as keyof App.Factor]
-		};
-		// dispatch('update', payload);
-	}
+	// function handleEdits({ currentTarget: { value: inputValue, name: key } }: { currentTarget: HTMLInputElement | { value: string | number | boolean, name: keyof App.Factor }}) {
+	// 	if (!inputValue && inputValue !== false) return;
+	// 	if (key === 'value') inputValue = +inputValue;
+	// 	edits = {
+	// 		...edits,
+	// 		[key]: inputValue || inputValue === false ? inputValue : factor[key as keyof App.Factor]
+	// 	};
+	// 	// dispatch('update', payload);
+	// }
 
 	function toggleDelete() {
-		handleEdits({ currentTarget: { value: !edits.softDelete, name: 'softDelete' } });
-	}
-
-	function handleKeyPress(event: KeyboardEvent) {
-    const { currentTarget, key }: { currentTarget: HTMLInputElement, key: string } = event;
-    console.log({ key });
-    if (key !== 'esc' && key !== 'Enter') return;
-    if (key === 'esc') edits = { softDelete: false, ...factor };
-    currentTarget.blur();
+		// handleEdits({ currentTarget: { value: !edits.softDelete, name: 'softDelete' } });
+    dispatch('update', { ...edits, softDelete: !edits.softDelete });
 	}
 
 	onMount(() => {
@@ -83,16 +64,17 @@
 		placeholder={factor.label || 'Factor Name'}
 		value={edits.label}
 		on:focus={handleFocus}
-		on:blur={handleBlur}
+		on:blur={handleLabelBlur}
 		on:change={({ currentTarget: { value }}) => (edits = { ...edits, label: value })}
-		on:keypress={({ key }) => {
-      if (key === 'esc') edits = { ...edits, label: factor.label };
+		on:keypress={({ key, currentTarget }) => {
+      if (key === 'esc') currentTarget.blur();
       if (key === 'Enter') {
         if (edits.label) return valueInput.focus();
         else Toast.add('Factor requires a name.');
       }
     }}
-		disabled={factor.softDelete}
+		disabled={edits.softDelete}
+    autocomplete="off"
 		title="edit factor name"
 	/>
 	<div class="components">
@@ -108,17 +90,19 @@
 			on:blur={handleValueBlur}
 			on:change={({ currentTarget: { value: inputValue }}) => {
         const { value, prefix, suffix } = fixes(inputValue);
-        edits = { ...edits, value, prefix, suffix };
+        edits = { ...edits, value: +value, prefix, suffix };
       }}
 			on:keypress={({ key }) => {
-        if (key === 'esc') value = factor.value + '';
+        let value = edits.value;
+        if (key === 'esc') value = factor.value;
         if (key === 'Enter') {
-          dispatch('update', { ...factor, ...edits, label });
           dispatch('tab');
         }
+        dispatch('update', { ...edits, value });
       }}
-			disabled={edits.softDelete}
+			disabled={!!edits.softDelete}
 			title="edit quantity"
+      autocomplete="off"
 		/>
 		<!-- <input
 			name="unit"
@@ -134,9 +118,9 @@
 			title="edit unit of measure"
 		/> -->
 	</div>
-	{#if factor.softDelete}
+	{#if edits.softDelete}
 		<button class="button-action" on:click={toggleDelete} title={'restore this factor'}>
-			<img src="undo.svg" alt="right to left u-turn arrow" />
+			<img src="rotate-ccw.svg" alt="right to left u-turn arrow" />
 		</button>
 		<div class="strikethrough"></div>
 	{:else}
@@ -175,12 +159,17 @@
 
 	.numeric {
 		text-align: right;
-		max-width: 6rem
+		max-width: 4rem;
+    padding: 0;
 	}
+
+  .numeric:focus {
+    padding: 2px 4px;
+  }
 
 	.strikethrough {
 		position: absolute;
-		width: 85%;
+		width: 90%;
 		border: 1.5px solid #0006;
 		height: 1px;
 		bottom: 1.15rem;

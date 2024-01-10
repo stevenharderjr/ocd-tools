@@ -7,8 +7,6 @@
   import { diff, invalidate } from '$lib/utils/tester';
 	import Toast from '../toast';
 
-  console.log(Object.keys(crypto));
-
   interface Confirmation {
     prompt: string;
     accept: () => void;
@@ -97,7 +95,8 @@
     confirmation = { prompt: editing?.label ? `Delete "${editing.label}"?` : 'Ratio will be discarded.', accept, reject };
   }
 
-	function cancel({ detail: ratio }) {
+	function cancel(detail?: any) {
+    console.log('cancel')
     const accept = () => {
       deleting = undefined;
       using = undefined;
@@ -105,12 +104,8 @@
       confirmation = undefined;
     }
 
-    let reason = !editing;
-
-    if (reason) {
-      console.log('not editing');
-      return accept();
-    }
+    const ratio = detail;
+    if (!ratio || !editing || ratio.currentTarget) return accept();
 
     const reject = () => {
       confirmation = undefined;
@@ -119,9 +114,9 @@
     const editingId = ratio.id;
     const currentEdit = $ratios.find(({ id }, index) => id === editingId) as App.Ratio;
 
-    reason = invalidate(currentEdit);
+    let reason = invalidate(currentEdit) && invalidate(ratio);
     if (reason) {
-      return deleteRatio(ratio);
+      return deleteRatio({ detail: ratio });
     }
 
     reason = !diff(currentEdit, ratio);
@@ -133,9 +128,14 @@
 
     confirmation = { prompt: 'Discard changes?', accept, reject }
 	}
+
+  function handleKeyboardCancel({ key }) {
+    if (key === 'esc') cancel({});
+  }
 </script>
 
-<div class="ratios">
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="ratios" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-roledescription="cancel using or editing">
 	{#each $ratios as ratio}
 		{#if using?.id === ratio.id}
 			<UseRatio {ratio} on:close={cancel} />
