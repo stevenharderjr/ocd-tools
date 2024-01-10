@@ -20,7 +20,7 @@
 {#if factor?.label }
   <div class="factor">
     <span class="label">{factor.label}</span>
-    <div>
+    <div class='dynamics'>
       {#if delta}
         <span class="delta">({delta > 0 ? '+' : ''}{delta})</span>
       {/if}
@@ -36,7 +36,14 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding-right: 1rem;
+  }
+  .dynamics {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.25rem;
+    flex-wrap: wrap;
   }
   .label, .value {
     font-size: 1rem;

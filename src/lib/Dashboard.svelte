@@ -129,13 +129,12 @@
     confirmation = { prompt: 'Discard changes?', accept, reject }
 	}
 
-  function handleKeyboardCancel({ key }) {
+  function handleKeyboardCancel({ key }: KeyboardEvent) {
     if (key === 'esc') cancel({});
   }
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="ratios" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-roledescription="cancel using or editing">
+<div class="ratios" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-hidden={true}>
 	{#each $ratios as ratio}
 		{#if using?.id === ratio.id}
 			<UseRatio {ratio} on:close={cancel} />

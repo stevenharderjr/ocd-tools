@@ -106,13 +106,17 @@
 		dispatch('close');
 	}
 
+  function handleKeyboardCancel({ key }: KeyboardEvent) {
+    if (key === 'esc') close();
+  }
+
 	function toggleLock() {
 		locked = !locked;
 		if (locked) updateValues({ name: floorName, value: floorValue });
 	}
 </script>
 
-<div class="floating container" on:click={close}>
+<div class="floating container" on:click={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
 	<div class="title-bar">
 		<h2>{ratio.label}</h2>
 		<span>({Math.round(total)} g)</span>
@@ -159,9 +163,9 @@
 			title={locked ? 'locked for precision' : 'unlocked for variability'}
 		>
 			{#if locked}
-				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-2px;" />
+				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
 			{:else}
-				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-2px;" />
+				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
 			{/if}
 		</button>
 	</div>

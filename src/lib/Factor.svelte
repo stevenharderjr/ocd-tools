@@ -35,17 +35,16 @@
     align-items: baseline;
     justify-content: flex-end;
     gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .value {
+    white-space: nowrap;
   }
 
   .label {
     min-width: 50%;
     max-width: 8rem;
-  }
-
-  .unit {
-    max-width: 2rem;
-    margin-left: 0;
-    padding-left: 0;
   }
 
   .delta {

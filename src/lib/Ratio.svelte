@@ -91,7 +91,7 @@
 		align-self: flex-start;
 		padding: 1rem 0.5rem 1rem 0.5rem;
 		width: 100%;
-		max-width: 15.9rem;
+		/* max-width: 17rem; */
 		gap: 0.5rem;
 		/* background: #f006; */
 	}
