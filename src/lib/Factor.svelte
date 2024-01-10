@@ -10,8 +10,7 @@
     {#if delta}
       <span class="delta">({delta > 0 ? '+' : ''}{delta})</span>
     {/if}
-    <span class="value">{factor.value}</span>
-    <span class="unit">{factor.unit}</span>
+    <span class="value">{factor.prefix + factor.value + factor.suffix}</span>
   </div>
 </div>
 
@@ -36,17 +35,16 @@
     align-items: baseline;
     justify-content: flex-end;
     gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .value {
+    white-space: nowrap;
   }
 
   .label {
     min-width: 50%;
     max-width: 8rem;
-  }
-
-  .unit {
-    max-width: 2rem;
-    margin-left: 0;
-    padding-left: 0;
   }
 
   .delta {

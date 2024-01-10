@@ -1,17 +1,13 @@
 <script lang="ts">
 	import Factor from '$lib/Factor.svelte';
-	import CloseButton from '$lib/CloseButton.svelte';
-	import selectOnFocus from '$lib/utils/selectOnFocus';
 	import { createEventDispatcher } from 'svelte';
-	import { editing, toasts, using, blur } from '../stores';
-	import Toast from '../toast';
 	// import '$static/lock.svg';
 	// import '$static/unlock.svg';
 	const dispatch = createEventDispatcher();
 
-	export let ratio: App.Ratio = { label: '', factors: [] };
+	export let ratio: App.Ratio;
 	let factors: App.Factor[] = ratio.factors.sort(({ value: a }, { value: b }) =>
-		a > b ? -1 : a < b ? 1 : 0
+		+a > +b ? -1 : +a < +b ? 1 : 0
 	);
 
 	function use() {
@@ -22,7 +18,7 @@
 		dispatch('edit', ratio);
 	}
 
-	function handleKeyPress(event) {
+	function handleKeyPress(event: KeyboardEvent) {
 		const { key } = event;
 		if (key === 'Space' || key === 'Enter') use();
 	}
@@ -95,7 +91,7 @@
 		align-self: flex-start;
 		padding: 1rem 0.5rem 1rem 0.5rem;
 		width: 100%;
-		max-width: 15.9rem;
+		/* max-width: 17rem; */
 		gap: 0.5rem;
 		/* background: #f006; */
 	}

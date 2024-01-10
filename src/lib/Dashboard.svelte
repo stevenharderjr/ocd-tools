@@ -1,97 +1,150 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import Confirm from '$lib/Confirm.svelte';
 	import Ratio from '$lib/Ratio.svelte';
 	import EditRatio from '$lib/EditRatio.svelte';
 	import UseRatio from '$lib/UseRatio.svelte';
-	import { ratios } from '../stores';
+	import { ratios, newRatio } from '../stores';
+  import { diff, invalidate } from '$lib/utils/tester';
 	import Toast from '../toast';
-	const dispatch = createEventDispatcher();
+
+  interface Confirmation {
+    prompt: string;
+    accept: () => void;
+    reject: () => void;
+  }
 
 	let using: App.RatioFlag = undefined;
 	let editing: App.RatioFlag = undefined;
 	let deleting: App.RatioFlag = undefined;
-	let partialRatio: App.RatioFlag = undefined;
-
-	console.log(crypto);
+  let confirmation: Confirmation | undefined;
 
 	function addRatio() {
-		if (partialRatio) return;
+		if (editing) return;
 
-		partialRatio = { name: '', label: '', factors: [] };
-		$ratios = [...$ratios, partialRatio];
-		editing = partialRatio;
+    using = undefined;
+		editing = newRatio();
+		$ratios = [...$ratios, editing];
 	}
 
-	function updateFactor({ detail: { parentName, label, value, unit } }: { detail: App.Factor }) {
-		const name = label.toLowerCase();
-	}
-
-	function awaitConfirmation({ detail: ratio }: { detail: App.Ratio }) {
-		deleting = ratio;
+	function confirm(callbacks) {
+    confirmation = callbacks;
 	}
 
 	function useRatio({ detail: ratio }: { detail: App.Ratio }) {
 		editing = undefined;
-		using = ratio;
+		using = { ...ratio };
 	}
 
 	function updateRatio({ detail: update }: { detail: App.Ratio }) {
-		let rename = update.label!.toLowerCase();
-		if (!update.name) {
-			$ratios.pop();
-			// must be a new ratio
-			console.log('add', rename);
-			$ratios = [...$ratios, { ...update, name: rename }];
-		} else if (rename === update.name) {
-			// no name change, so just record other changes
-			console.log('update', rename);
-			$ratios = $ratios.map((ratio) => (ratio.name === rename ? update : ratio));
-		} else {
-			// ratio has been renamed
-			console.log(`rename ${update.name} to ${rename}`);
-			$ratios = $ratios.map((ratio) =>
-				ratio.name === update.name ? { ...update, name: rename } : ratio
-			);
-		}
+    // save updated ratio (if it cannot be invalidated)
+    const updateId = update.id;
+    let updateIndex = -1;
+    const updatedRatios = $ratios.map((ratio, i) => {
+      if (ratio.id === updateId) {
+        updateIndex = i;
+        return { ...update };
+      }
+      return ratio;
+    });
 
-		editing = undefined;
+    const prior = $ratios[updateIndex];
+    const difference = diff(update, prior);
+
+    if (difference) {
+      console.log('Change recognized: ', difference);
+      const reason = invalidate(update);
+      if (reason) return Toast.add({ message: reason, blur: true });
+      $ratios = updatedRatios;
+    }
+
+    editing = undefined;
 	}
 
-	function resetRatio({ detail: initialRatio }: { detail: App.Ratio }) {
-		console.log('should reset', initialRatio.name);
-	}
+	function resetRatio() {
+    const resetRatio = using || editing;
+    if (!resetRatio) return;
+    const resetId = resetRatio.id;
+    $ratios = $ratios.map(ratio => (ratio.id === resetId ? { ...resetRatio } : ratio));
+  }
 
 	function editRatio({ detail: ratio }: { detail: App.Ratio }) {
 		using = undefined;
-		editing = ratio;
+		editing = { ...ratio };
 	}
 
-	function deleteRatio() {
-		const deleteName = deleting!.name;
-		$ratios = $ratios.filter(({ name }) => name !== deleteName);
-		cancel();
+	function deleteRatio({ detail: ratio }: { detail: App.Ratio }) {
+    const deleteId = ratio?.id;
+    const filteredRatios = $ratios.filter(({ id }) => id !== deleteId);
+
+    const accept = () => {
+      $ratios = filteredRatios;
+      deleting = undefined;
+      using = undefined;
+      editing = undefined;
+      confirmation = undefined;
+    }
+
+    const reject = () => {
+      confirmation = undefined;
+    }
+
+    const reason = invalidate(ratio);
+    console.log(reason);
+    if (reason) return accept();
+
+    confirmation = { prompt: editing?.label ? `Delete "${editing.label}"?` : 'Ratio will be discarded.', accept, reject };
+  }
+
+	function cancel(detail?: any) {
+    console.log('cancel')
+    const accept = () => {
+      deleting = undefined;
+      using = undefined;
+      editing = undefined;
+      confirmation = undefined;
+    }
+
+    const ratio = detail;
+    if (!ratio || !editing || ratio.currentTarget) return accept();
+
+    const reject = () => {
+      confirmation = undefined;
+    }
+
+    const editingId = ratio.id;
+    const currentEdit = $ratios.find(({ id }, index) => id === editingId) as App.Ratio;
+
+    let reason = invalidate(currentEdit) && invalidate(ratio);
+    if (reason) {
+      return deleteRatio({ detail: ratio });
+    }
+
+    reason = !diff(currentEdit, ratio);
+    if (reason) {
+      deleting = currentEdit;
+      console.log('no changes');
+      return accept();
+    }
+
+    confirmation = { prompt: 'Discard changes?', accept, reject }
 	}
 
-	function cancel() {
-		deleting = undefined;
-		partialRatio = undefined;
-		using = undefined;
-		editing = undefined;
-	}
+  function handleKeyboardCancel({ key }: KeyboardEvent) {
+    if (key === 'esc') cancel({});
+  }
 </script>
 
-<div class="ratios">
+<div class="ratios" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-hidden={true}>
 	{#each $ratios as ratio}
-		{#if using?.name === ratio.name}
+		{#if using?.id === ratio.id}
 			<UseRatio {ratio} on:close={cancel} />
-		{:else if editing?.name === ratio.name}
+		{:else if editing?.id === ratio.id}
 			<EditRatio
 				{ratio}
 				on:update={updateRatio}
 				on:close={cancel}
 				on:reset={resetRatio}
-				on:delete={awaitConfirmation}
+				on:delete={deleteRatio}
 			/>
 		{:else}
 			<Ratio {ratio} on:use={useRatio} on:edit={editRatio} />
@@ -99,11 +152,11 @@
 	{/each}
 </div>
 
-{#if deleting}
+{#if confirmation}
 	<Confirm
-		question={`Delete "${deleting.label}"?`}
-		on:confirm={deleteRatio}
-		on:reject={() => (deleting = undefined)}
+		question={confirmation.prompt}
+		on:confirm={confirmation.accept}
+		on:reject={confirmation.reject}
 	/>
 {/if}
 

@@ -4,8 +4,7 @@
 	const dispatch = createEventDispatcher();
 
 	export let title = '';
-	export let question = '';
-	$: split = question.split('"');
+	export let question = 'Are you sure?';
 
 	function confirm() {
 		dispatch('confirm');
@@ -26,13 +25,13 @@
 		{/if}
 		{#if question}
 			<p class="description">
-				{split[0]}<span style="font-weight:600;">{split[1]}</span>{split[2]}
+				{question}
 			</p>
 		{/if}
 		<div class="buttons">
 			<button class="reject" on:click={reject}>
 				<img src="x-circle.svg" alt="reject" />
-				Never mind
+				Cancel
 			</button>
 			<button class="confirm" on:click={confirm}>
 				<img src="check-circle.svg" alt="confirm" />

@@ -7,16 +7,17 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 		interface Factor {
+			id: string;
 			name?: string;
 			label: string;
 			value: number;
-			unit: string | 'g';
-			parentName?: string;
-			parentLabel?: string;
+			prefix: string;
+			suffix: string;
 			softDelete?: boolean;
 		}
 
 		interface Ratio {
+			id: string;
 			name?: string;
 			label?: string;
 			factors: Factor[] | [];
