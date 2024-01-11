@@ -237,7 +237,7 @@
     overflow-y: scroll;
     /* padding-top: 2.5rem;
     padding-bottom: 2rem; */
-    padding: 1.25rem 0.75rem 75vh 0.75rem;
+    padding: 1.25rem 0.75rem 40vh 0.75rem;
     /* padding-top: calc(1.15rem + var(--header-height)); */
     justify-content: center;
   }
