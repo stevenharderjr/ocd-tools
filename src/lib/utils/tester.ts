@@ -1,11 +1,28 @@
-export const diff = (entity1: App.Ratio | App.Factor, entity2: App.Ratio | App.Factor) =>
-	Array.isArray(entity1?.factors) ? diffRatio(entity1, entity2) : diffFactor(entity1, entity2);
+export const diff = (entity1?: App.Ratio | App.Factor, entity2?: App.Ratio | App.Factor) => {
+	if (entity1 === undefined || entity2 === undefined) {
+		if (entity1 === undefined && entity2 === undefined)
+			throw new Error('expected at least one ratio or factor');
+		return 'undefined argument';
+	}
+	if (typeof entity1.label !== 'string' || typeof entity2.label !== 'string')
+		throw new Error('provided arguments should be ratios or factors');
+	// @ts-expect-error: type checked at runtime
+	return Array.isArray(entity1?.factors)
+		? (diffRatio(entity1 as App.Ratio, entity2 as App.Ratio) as string)
+		: (diffFactor(entity1 as App.Factor, entity2 as App.Factor) as string);
+};
 
-export const invalidate = (entity: App.Ratio | App.Factor) =>
-	Array.isArray(entity?.factors) ? invalidateRatio(entity) : invalidateFactor(entity);
+export const invalidate = (entity?: App.Ratio | App.Factor) => {
+	if (entity === undefined) return 'undefined argument';
+	if (typeof entity.label !== 'string')
+		throw new Error('provided argument should be a ratio or factor');
+	// @ts-expect-error: type checked at runtime
+	return Array.isArray(entity?.factors)
+		? (invalidateRatio(entity as App.Ratio) as string)
+		: (invalidateFactor(entity as App.Factor) as string);
+};
 
 function diffRatio(r1: App.Ratio, r2: App.Ratio) {
-	console.log('diff ratio');
 	if (r1.label !== r2.label) return 'rename';
 
 	const r1Factors = r1.factors;

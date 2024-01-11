@@ -5,6 +5,7 @@
 
 	export let title = '';
 	export let question = 'Are you sure?';
+  const split = question.split('"');
 
 	function confirm() {
 		dispatch('confirm');
@@ -25,7 +26,11 @@
 		{/if}
 		{#if question}
 			<p class="description">
-				{question}
+        {#if split.length}
+          {split[0]}<strong>{split[1]}</strong>{split[2]}
+        {:else}
+				  {question}
+        {/if}
 			</p>
 		{/if}
 		<div class="buttons">

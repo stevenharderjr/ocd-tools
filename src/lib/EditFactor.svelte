@@ -30,6 +30,14 @@
     // dispatch('update', edits);
   }
 
+  function handleValueInput({ currentTarget }: { currentTarget: HTMLInputElement }) {
+    const inputValue = currentTarget.value;
+    const { value, prefix, suffix } = fixes(inputValue);
+    dispatch('update', { ...factor, prefix, value, suffix });
+    const string = prefix + value + suffix;
+    if (string !== inputValue) currentTarget.value = string;
+  }
+
 	function handleFocus({ currentTarget }: { currentTarget: HTMLInputElement }) {
 		currentTarget.value = '';
 	}
@@ -44,9 +52,11 @@
 	// 	// dispatch('update', payload);
 	// }
 
-	function toggleDelete() {
+	function toggleSoftDelete() {
 		// handleEdits({ currentTarget: { value: !edits.softDelete, name: 'softDelete' } });
-    dispatch('update', { ...edits, softDelete: !edits.softDelete });
+    const softDelete = !factor.softDelete;
+    // if (factor.label) Toast.add({ message: `${factor.label} should be ${softDelete ? 'crossed out' : 'restored'}`, blur: false });
+    dispatch('update', { ...factor, softDelete });
 	}
 
 	onMount(() => {
@@ -69,11 +79,11 @@
 		on:keypress={({ key, currentTarget }) => {
       if (key === 'esc') currentTarget.blur();
       if (key === 'Enter') {
-        if (edits.label) return valueInput.focus();
+        if (currentTarget.value) return valueInput.focus();
         else Toast.add('Factor requires a name.');
       }
     }}
-		disabled={edits.softDelete}
+		disabled={!!factor.softDelete}
     autocomplete="off"
 		title="edit factor name"
 	/>
@@ -88,19 +98,16 @@
 			value={edits.prefix + edits.value + edits.suffix}
 			on:focus={handleFocus}
 			on:blur={handleValueBlur}
-			on:change={({ currentTarget: { value: inputValue }}) => {
-        const { value, prefix, suffix } = fixes(inputValue);
-        edits = { ...edits, value: +value, prefix, suffix };
-      }}
+			on:change={handleValueInput}
 			on:keypress={({ key }) => {
         let value = edits.value;
         if (key === 'esc') value = factor.value;
+        dispatch('update', { ...factor, value });
         if (key === 'Enter') {
-          dispatch('tab');
+          dispatch('add');
         }
-        dispatch('update', { ...edits, value });
       }}
-			disabled={!!edits.softDelete}
+			disabled={!!factor.softDelete}
 			title="edit quantity"
       autocomplete="off"
 		/>
@@ -118,13 +125,13 @@
 			title="edit unit of measure"
 		/> -->
 	</div>
-	{#if edits.softDelete}
-		<button class="button-action" on:click={toggleDelete} title={'restore this factor'}>
+	{#if factor.softDelete}
+		<button class="button-action" on:click={toggleSoftDelete} title={'restore this factor'}>
 			<img src="rotate-ccw.svg" alt="right to left u-turn arrow" />
 		</button>
 		<div class="strikethrough"></div>
 	{:else}
-		<button class="button-action" on:click={toggleDelete} title={'remove this factor'}>
+		<button class="button-action" on:click={toggleSoftDelete} title={'remove this factor'}>
 			<img src="trash-2.svg" alt="trash can" />
 		</button>
 	{/if}
@@ -185,6 +192,10 @@
 		font-size: 1rem;
 		font-weight: 300;
 	}
+
+  input:disabled {
+    background: transparent;
+  }
 
 	button {
 		position: relative;

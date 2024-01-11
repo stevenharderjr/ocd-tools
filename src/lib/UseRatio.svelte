@@ -5,7 +5,7 @@
 	import Fraction from '$lib/Fraction.svelte';
 	const dispatch = createEventDispatcher();
 
-	export let ratio = { label: '', factors: [] };
+	export let ratio: App.Ratio;
 	let factors: App.Factor[] = [];
 	let relativeRange = [0.125, 1.985];
 	let lowFactor,

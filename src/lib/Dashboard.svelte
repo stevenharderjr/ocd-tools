@@ -13,120 +13,146 @@
     reject: () => void;
   }
 
-	let using: App.RatioFlag = undefined;
-	let editing: App.RatioFlag = undefined;
-	let deleting: App.RatioFlag = undefined;
+	let use: App.RatioFlag = undefined;
+	let edit: App.RatioFlag = undefined;
   let confirmation: Confirmation | undefined;
+  let copy = [...$ratios];
+
+  function initialize() {
+    use = undefined;
+    edit = undefined;
+    confirmation = undefined;
+  }
+
+  const reject = () => {
+    confirmation = undefined;
+  }
 
 	function addRatio() {
-		if (editing) return;
+		if (edit) cancel();
 
-    using = undefined;
-		editing = newRatio();
-		$ratios = [...$ratios, editing];
-	}
-
-	function confirm(callbacks) {
-    confirmation = callbacks;
+    use = undefined;
+		edit = newRatio();
+		copy = [...copy, edit];
 	}
 
 	function useRatio({ detail: ratio }: { detail: App.Ratio }) {
-		editing = undefined;
-		using = { ...ratio };
+    const accept = () => {
+      initialize();
+      use = { ...ratio };
+    }
+
+    if (!edit) return accept();
+
+    const editId = edit.id;
+    const original = copy.find(({ id }) => (id === editId));
+    if (!original || !diff(original, edit)) return accept();
+
+    confirmation = { prompt: `Discard changes${original?.label ? ` to "${original.label}"` : ''}?`, accept, reject };
 	}
 
-	function updateRatio({ detail: update }: { detail: App.Ratio }) {
-    // save updated ratio (if it cannot be invalidated)
+  function renameRatio({ detail: ratio }: { detail: App.Ratio }) {
+    edit = { ...edit, ...ratio };
+  }
+
+  function updateFactor({ detail: update }: { detail: App.Factor }) {
+    if (!edit) return;
     const updateId = update.id;
-    let updateIndex = -1;
-    const updatedRatios = $ratios.map((ratio, i) => {
+    let factors: App.Factor[];
+    let original: App.FactorFlag = undefined;
+
+    if (update.softDelete && invalidate(update)) factors = edit.factors.filter(({ id }) => (id !== updateId));
+    else factors = edit?.factors.map(factor => {
+      if (factor.id === updateId) {
+        original = factor;
+        return update;
+      }
+      return factor;
+    });
+
+    if (!original && !update.softDelete) factors.push(update);
+
+    edit = { ...edit, factors };
+  }
+
+	function saveRatio() {
+    if (!edit) return;
+    const factors = edit?.factors.filter(({ softDelete }) => (!softDelete));
+    let temp = { ...edit, factors };
+
+    const reason = invalidate(edit);
+    if (reason) return Toast.add({ message: reason, blur: true });
+
+    const updateId = edit.id;
+    let original: App.RatioFlag;
+    const updatedRatios: App.Ratio[] = copy.map((ratio, i) => {
       if (ratio.id === updateId) {
-        updateIndex = i;
-        return { ...update };
+        original = ratio;
+        return { ...temp } as App.Ratio;
       }
       return ratio;
     });
 
-    const prior = $ratios[updateIndex];
-    const difference = diff(update, prior);
+    if (!original) updatedRatios.push(temp);
 
-    if (difference) {
-      console.log('Change recognized: ', difference);
-      const reason = invalidate(update);
-      if (reason) return Toast.add({ message: reason, blur: true });
-      $ratios = updatedRatios;
-    }
+    if (!diff(original, temp)) return initialize();
 
-    editing = undefined;
+    $ratios = updatedRatios;
+    copy = [...$ratios];
+    initialize();
 	}
 
 	function resetRatio() {
-    const resetRatio = using || editing;
+    const resetRatio = use || edit;
     if (!resetRatio) return;
     const resetId = resetRatio.id;
-    $ratios = $ratios.map(ratio => (ratio.id === resetId ? { ...resetRatio } : ratio));
+    const original = $ratios.find(({ id }) => (id === resetId));
+    copy = [...$ratios];
+    if (use) use = original;
+    if (edit) edit = original;
   }
 
 	function editRatio({ detail: ratio }: { detail: App.Ratio }) {
-		using = undefined;
-		editing = { ...ratio };
+		use = undefined;
+		edit = { ...ratio };
 	}
 
-	function deleteRatio({ detail: ratio }: { detail: App.Ratio }) {
-    const deleteId = ratio?.id;
+	function deleteRatio() {
+    if (!edit) return;
+
+    const deleteId = edit?.id;
     const filteredRatios = $ratios.filter(({ id }) => id !== deleteId);
 
     const accept = () => {
       $ratios = filteredRatios;
-      deleting = undefined;
-      using = undefined;
-      editing = undefined;
-      confirmation = undefined;
+      copy = [...$ratios];
+      initialize();
     }
 
-    const reject = () => {
-      confirmation = undefined;
-    }
+    if (invalidate(edit)) return accept();
 
-    const reason = invalidate(ratio);
-    console.log(reason);
-    if (reason) return accept();
-
-    confirmation = { prompt: editing?.label ? `Delete "${editing.label}"?` : 'Ratio will be discarded.', accept, reject };
+    confirmation = { prompt: edit?.label ? `Delete "${edit.label}"?` : 'Ratio will be discarded.', accept, reject };
   }
 
-	function cancel(detail?: any) {
-    console.log('cancel')
+	function cancel(callback?: any) {
     const accept = () => {
-      deleting = undefined;
-      using = undefined;
-      editing = undefined;
-      confirmation = undefined;
+      copy = [...$ratios];
+      initialize();
+      if (typeof callback === 'function') callback();
     }
 
-    const ratio = detail;
-    if (!ratio || !editing || ratio.currentTarget) return accept();
+    if (use || !edit) return accept();
 
-    const reject = () => {
-      confirmation = undefined;
-    }
+    const editingId = edit.id;
+    // is there a fallback for this ratio?
+    const original: App.RatioFlag = $ratios.find(({ id }) => (id === editingId));
+    // is this a new ratio that's not ready to be saved?
+    if (invalidate(original) && invalidate(edit)) return deleteRatio({ detail: edit });
 
-    const editingId = ratio.id;
-    const currentEdit = $ratios.find(({ id }, index) => id === editingId) as App.Ratio;
+    // have any changes been made?
+    if (!diff(original, edit)) return accept();
 
-    let reason = invalidate(currentEdit) && invalidate(ratio);
-    if (reason) {
-      return deleteRatio({ detail: ratio });
-    }
-
-    reason = !diff(currentEdit, ratio);
-    if (reason) {
-      deleting = currentEdit;
-      console.log('no changes');
-      return accept();
-    }
-
-    confirmation = { prompt: 'Discard changes?', accept, reject }
+    confirmation = { prompt: `Discard changes${original?.label ? ` to "${original.label}"` : ''}?`, accept, reject }
 	}
 
   function handleKeyboardCancel({ key }: KeyboardEvent) {
@@ -134,22 +160,26 @@
   }
 </script>
 
-<div class="ratios" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-hidden={true}>
-	{#each $ratios as ratio}
-		{#if using?.id === ratio.id}
-			<UseRatio {ratio} on:close={cancel} />
-		{:else if editing?.id === ratio.id}
-			<EditRatio
-				{ratio}
-				on:update={updateRatio}
-				on:close={cancel}
-				on:reset={resetRatio}
-				on:delete={deleteRatio}
-			/>
-		{:else}
-			<Ratio {ratio} on:use={useRatio} on:edit={editRatio} />
-		{/if}
-	{/each}
+<div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-hidden={true}>
+  <div class="ratios" on:click|self={cancel} aria-hidden={true}>
+    {#each copy as ratio}
+      {#if use?.id === ratio.id}
+        <UseRatio ratio={use} on:close={cancel} />
+      {:else if edit?.id === ratio.id}
+        <EditRatio
+        ratio={edit}
+          on:close={cancel}
+          on:save={saveRatio}
+          on:reset={resetRatio}
+          on:delete={deleteRatio}
+          on:rename={renameRatio}
+          on:update={updateFactor}
+        />
+      {:else}
+        <Ratio {ratio} on:use={useRatio} on:edit={editRatio} on:reset={resetRatio} />
+      {/if}
+    {/each}
+  </div>
 </div>
 
 {#if confirmation}
@@ -169,6 +199,20 @@
 </div>
 
 <style>
+  .backdrop {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    /* padding-top: 2.5rem;
+    padding-bottom: 2rem; */
+    padding: 1.25rem 0.75rem 6rem 0.75rem;
+    /* padding-top: calc(1.15rem + var(--header-height)); */
+    justify-content: center;
+  }
 	.ratios {
 		max-width: 100%;
 		display: flex;
