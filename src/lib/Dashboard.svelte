@@ -80,7 +80,7 @@
     const factors = edit?.factors.filter(({ softDelete }) => (!softDelete));
     let temp = { ...edit, factors };
 
-    const reason = invalidate(edit);
+    const reason = invalidate(temp);
     if (reason) return Toast.add({ message: reason, blur: true });
 
     const updateId = edit.id;
