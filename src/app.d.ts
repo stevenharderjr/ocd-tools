@@ -21,6 +21,10 @@ declare global {
 			name?: string;
 			label?: string;
 			factors: Factor[] | [];
+			useConversionRate: number;
+			inputRange: [number, number];
+			derivedPrefix: string;
+			derivedSuffix: string;
 		}
 
 		type RatioFlag = Ratio | undefined;

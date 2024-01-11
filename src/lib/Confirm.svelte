@@ -48,7 +48,7 @@
 
 <style>
 	.backdrop {
-		z-index: 4;
+		z-index: 5;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -66,7 +66,7 @@
 		height: fit-content;
 		background: #000b;
 		border-radius: 8px;
-		/* backdrop-filter: blur(8px); */
+		backdrop-filter: blur(8px);
 		color: #fff;
 		padding: 1rem;
 	}

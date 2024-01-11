@@ -26,7 +26,7 @@
   .blur {
     backdrop-filter: blur(4px);
     position: absolute;
-    z-index: 3;
+    z-index: 4;
     top: 0;
     left: 0;
     right: 0;
@@ -61,7 +61,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-image: linear-gradient(#fff0, #ffff);
+    /* background-image: linear-gradient(#fff0, #ffff); */
     font-size: x-small;
     text-align: center;
   }

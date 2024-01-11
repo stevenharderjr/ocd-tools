@@ -122,10 +122,10 @@
 
 <div bind:this={container} class="floating container" on:click={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
 <!-- <div class="floating container"> -->
-	<button class="title-bar" on:click|stopPropagation={toggleLock}>
+	<div class="title-bar">
 		<h2>{ratio.label}</h2>
 		<span>({Math.round(total)} g)</span>
-	</button>
+	</div>
 	<div class="factors">
 		{#each factors as factor}
 			{#if locked}
