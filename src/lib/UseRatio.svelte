@@ -147,7 +147,7 @@
 		<button class="shortcut" on:click|stopPropagation={resetValues} title="restore initial values">
 			<img
 				class="shortcut-icon"
-				src="rotate-ccw.svg"
+				src="images/rotate-ccw.svg"
 				alt="arrow indicating a counterclockwise circle"
 			/>
 		</button>
@@ -159,7 +159,7 @@
 			on:click={close}
 			title="stop using ratio and return to overview"
 		>
-			<img src="x.svg" alt="x" />
+			<img src="images/x.svg" alt="x" />
 		</button> -->
 		<button
 			class="option-button"
@@ -167,9 +167,9 @@
 			title={locked ? 'locked for precision' : 'unlocked for variability'}
 		>
 			{#if locked}
-				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
+				<img src="images/lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
 			{:else}
-				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
+				<img src="images/unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
 			{/if}
 		</button>
 	</div>

@@ -103,10 +103,10 @@
 	{#if ratio.factors.length > 1}
 		<div class="edit-actions">
 			<button class="edit-action" on:click|stopPropagation={selfDestruct} title="delete this ratio">
-				<img class="inverted-icon" src="trash-2.svg" alt="trashcan" />
+				<img class="inverted-icon" src="images/trash-2.svg" alt="trashcan" />
 			</button>
 			<button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
-				<img class="inverted-icon" src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
+				<img class="inverted-icon" src="images/rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
 			</button>
 			<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
 			<button
@@ -114,7 +114,7 @@
 				on:click|stopPropagation={saveChanges}
 				title="save updates and return to overview"
 			>
-				<img class="inverted-icon" src="check-circle.svg" alt="check-circle" />
+				<img class="inverted-icon" src="images/check-circle.svg" alt="check-circle" />
 				<span class="action-label">SAVE</span>
 			</button>
 		</div>
@@ -125,7 +125,7 @@
 			on:click|stopPropagation={handleClose}
 			title="discard all changes and return to overview"
 		>
-			<img src="x.svg" alt="x" />
+			<img src="images/x.svg" alt="x" />
 		</button>
 	</div>
 </div>

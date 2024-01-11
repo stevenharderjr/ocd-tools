@@ -1,8 +1,6 @@
 <script lang="ts">
 	import Factor from '$lib/Factor.svelte';
 	import { createEventDispatcher } from 'svelte';
-	// import '$static/lock.svg';
-	// import '$static/unlock.svg';
 	const dispatch = createEventDispatcher();
 
 	export let ratio: App.Ratio;
@@ -47,7 +45,7 @@
 			on:click|stopPropagation={edit}
 			title={'edit "' + ratio.name + '"'}
 		>
-			<img src="edit.svg" alt="pen on paper" />
+			<img src="images/edit.svg" alt="pen on paper" />
 		</button>
 	</div>
 </div>
