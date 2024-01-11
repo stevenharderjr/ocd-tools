@@ -16,6 +16,7 @@
 
 <style>
   .factor {
+    pointer-events: none;
     /* position: relative; */
     display: flex;
     flex-direction: row;

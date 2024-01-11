@@ -65,4 +65,8 @@
     font-size: x-small;
     text-align: center;
   }
+
+  .footer > p {
+    z-index: 4;
+  }
 </style>

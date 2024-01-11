@@ -8,9 +8,9 @@
 
 	export let ratio: App.Ratio;
   const defaultLabel = ratio.label || '';
+  let container: HTMLDivElement;
 	let labelInput: HTMLInputElement;
   $: partialFactor = ratio.factors.find(factor => (factor.label === ''));
-  console.log(partialFactor);
 
 	function descendingValue({ value: a }: App.Factor, { value: b }: App.Factor) {
 		return a > b ? -1 : a < b ? 1 : 0;
@@ -67,10 +67,13 @@
 		dispatch('delete', ratio);
 	}
 
-	onMount(() => labelInput.focus());
+	onMount(() => {
+    container.scrollIntoView({ behavior: 'smooth' });
+    labelInput.focus();
+  });
 </script>
 
-<div class="floating ratio">
+<div bind:this={container} class="floating ratio">
 	<div class="label-bar">
 		<input
 			bind:this={labelInput}
@@ -89,7 +92,7 @@
 	</div>
 	<div class="factors">
 		{#each ratio.factors as factor}
-			<EditFactor {factor} on:update on:add={addFactor} />
+			<EditFactor {factor} on:update on:add={addFactor} on:save={saveChanges} />
 		{/each}
 		{#if !partialFactor}
 			<button class="add-factor" on:click|stopPropagation={addFactor} title={'add factor to "' + name + '"'}>
@@ -129,6 +132,8 @@
 
 <style>
 	.ratio {
+    z-index: 4;
+    scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
 		flex-direction: column;

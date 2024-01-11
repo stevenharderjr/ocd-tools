@@ -26,7 +26,7 @@
 		{/if}
 		{#if question}
 			<p class="description">
-        {#if split.length}
+        {#if split.length > 2}
           {split[0]}<strong>{split[1]}</strong>{split[2]}
         {:else}
 				  {question}
@@ -72,6 +72,7 @@
 	}
 	.description {
 		font-size: 1rem;
+    hyphens: auto;
 	}
 	.buttons {
 		display: flex;

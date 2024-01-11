@@ -61,7 +61,7 @@
 
 	onMount(() => {
     edits = { softDelete: false, ...factor };
-		if (!factor.name) labelInput.focus();
+		if (!factor.label) labelInput.focus();
 	});
 </script>
 
@@ -80,7 +80,7 @@
       if (key === 'esc') currentTarget.blur();
       if (key === 'Enter') {
         if (currentTarget.value) return valueInput.focus();
-        else Toast.add('Factor requires a name.');
+        else dispatch('save');
       }
     }}
 		disabled={!!factor.softDelete}

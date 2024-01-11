@@ -39,6 +39,7 @@
 	function useRatio({ detail: ratio }: { detail: App.Ratio }) {
     const accept = () => {
       initialize();
+      copy = [...$ratios];
       use = { ...ratio };
     }
 
@@ -54,6 +55,25 @@
   function renameRatio({ detail: ratio }: { detail: App.Ratio }) {
     edit = { ...edit, ...ratio };
   }
+
+	function editRatio({ detail: ratio }: { detail: App.Ratio }) {
+    const accept = () => {
+      initialize();
+      copy = [...$ratios];
+      edit = { ...ratio };
+    }
+
+    if (!edit) return accept();
+
+    const factors = edit.factors.filter(factor => factor.label !== '');
+    const temp = { ...edit, factors };
+
+    const editId = temp.id;
+    const original = copy.find(({ id }) => (id === editId));
+    if (!original || !diff(original, temp)) return accept();
+
+    confirmation = { prompt: `Discard changes${original?.label ? ` to "${original.label}"` : ''}?`, accept, reject };
+	}
 
   function updateFactor({ detail: update }: { detail: App.Factor }) {
     if (!edit) return;
@@ -77,7 +97,7 @@
 
 	function saveRatio() {
     if (!edit) return;
-    const factors = edit?.factors.filter(({ softDelete }) => (!softDelete));
+    const factors = edit?.factors.filter(({ label, softDelete }) => (!softDelete && label !== ''));
     let temp = { ...edit, factors };
 
     const reason = invalidate(temp);
@@ -87,6 +107,7 @@
     let original: App.RatioFlag;
     const updatedRatios: App.Ratio[] = copy.map((ratio, i) => {
       if (ratio.id === updateId) {
+        const name = temp.label?.toLowerCase();
         original = ratio;
         return { ...temp } as App.Ratio;
       }
@@ -108,20 +129,24 @@
     const resetId = resetRatio.id;
     const original = $ratios.find(({ id }) => (id === resetId));
     copy = [...$ratios];
-    if (use) use = original;
-    if (edit) edit = original;
+    if (use) use = { ...original };
+    if (edit) edit = { ...original };
+    console.log('reset', resetRatio);
   }
-
-	function editRatio({ detail: ratio }: { detail: App.Ratio }) {
-		use = undefined;
-		edit = { ...ratio };
-	}
 
 	function deleteRatio() {
     if (!edit) return;
 
-    const deleteId = edit?.id;
-    const filteredRatios = $ratios.filter(({ id }) => id !== deleteId);
+    const factors = edit.factors.filter(factor => factor.label !== '');
+    const temp = { ...edit, factors };
+
+    const deleteId = temp.id;
+    let original: App.RatioFlag = undefined;
+    const filteredRatios = $ratios.filter(ratio => {
+      if (ratio.id !== deleteId) return true;
+      original = { ...ratio };
+      return false;
+    });
 
     const accept = () => {
       $ratios = filteredRatios;
@@ -129,9 +154,9 @@
       initialize();
     }
 
-    if (invalidate(edit)) return accept();
+    if (!temp?.factors?.length || 0 > 1) return accept();
 
-    confirmation = { prompt: edit?.label ? `Delete "${edit.label}"?` : 'Ratio will be discarded.', accept, reject };
+    confirmation = { prompt: temp?.label ? `Delete "${temp.label}"?` : 'Ratio will be discarded.', accept, reject };
   }
 
 	function cancel(callback?: any) {
@@ -147,7 +172,7 @@
     // is there a fallback for this ratio?
     const original: App.RatioFlag = $ratios.find(({ id }) => (id === editingId));
     // is this a new ratio that's not ready to be saved?
-    if (invalidate(original) && invalidate(edit)) return deleteRatio({ detail: edit });
+    if (invalidate(original) && invalidate(edit)) return deleteRatio();
 
     // have any changes been made?
     if (!diff(original, edit)) return accept();
@@ -161,11 +186,14 @@
 </script>
 
 <div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-hidden={true}>
+  {#if use || edit}
+    <div class="background-tint" />
+  {/if}
   <div class="ratios" on:click|self={cancel} aria-hidden={true}>
     {#each copy as ratio}
-      {#if use?.id === ratio.id}
-        <UseRatio ratio={use} on:close={cancel} />
-      {:else if edit?.id === ratio.id}
+      {#if ratio.id === use?.id}
+        <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
+      {:else if ratio.id === edit?.id}
         <EditRatio
         ratio={edit}
           on:close={cancel}
@@ -209,9 +237,20 @@
     overflow-y: scroll;
     /* padding-top: 2.5rem;
     padding-bottom: 2rem; */
-    padding: 1.25rem 0.75rem 6rem 0.75rem;
+    padding: 1.25rem 0.75rem 75vh 0.75rem;
     /* padding-top: calc(1.15rem + var(--header-height)); */
     justify-content: center;
+  }
+  .background-tint {
+    z-index: 3;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right:0;
+    background: #6663;
+    pointer-events: none;
+    backdrop-filter: blur(1px);
   }
 	.ratios {
 		max-width: 100%;
@@ -220,6 +259,7 @@
 		pointer-events: auto;
 	}
 	.button-container {
+    z-index: 4;
 		position: absolute;
 		display: flex;
 		justify-content: center;
