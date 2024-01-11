@@ -11,12 +11,12 @@
   <div class="header-shadow"></div>
   <!-- <Header /> -->
 
-  <footer class="footer">
-    <p>Copyright © Steven Harder 2023</p>
-  </footer>
   {#if $blur}
     <div class="blur" />
   {/if}
+  <footer class="footer">
+    <p>Copyright © Steven Harder 2023</p>
+  </footer>
   {#if toasts}
     <Toast toasts={$toasts} />
   {/if}
@@ -55,18 +55,16 @@
   }
 
   .footer {
+    z-index: 6;
     position: absolute;
     padding-top: 2px;
-    padding-bottom: env(safe-area-inset-bottom, 2px);
+    padding-bottom: 2px;
+    margin-bottom: env(safe-area-inset-bottom, 2px);
     bottom: 0;
     left: 0;
     right: 0;
-    /* background-image: linear-gradient(#fff0, #ffff); */
+    background-image: linear-gradient(#fff0, #ffff);
     font-size: x-small;
     text-align: center;
-  }
-
-  .footer > p {
-    z-index: 4;
   }
 </style>

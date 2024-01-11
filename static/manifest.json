@@ -8,97 +8,92 @@
 	"theme_color": "#ffffff",
 	"icons": [
 		{
-			"src": "/favicon.png",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "cancel.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "edit1.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "lock.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "refresh.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "trash-2.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "undo.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "x-circle.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "check-circle.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "edit2.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "lock2.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "save.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "trash.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "unlock.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "x.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
-			"src": "edit.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		},
-		{
 			"src": "favicon.png",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "trash2.svg",
+			"src": "images/cancel.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "unlock2.svg",
+			"src": "images/edit1.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/lock.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/refresh.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/trash-2.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/undo.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/x-circle.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/check-circle.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/edit2.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/lock2.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/save.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/trash.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/unlock.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/x.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/edit.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/trash2.svg",
+			"type": "image/svg+xml",
+			"sizes": "any"
+		},
+		{
+			"src": "images/unlock2.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		}
