@@ -6,9 +6,7 @@
 </script>
 
 <div class="container">
-  <div class="content">
     <slot />
-  </div>
 
   <div class="header-shadow"></div>
   <!-- <Header /> -->
@@ -28,7 +26,7 @@
   .blur {
     backdrop-filter: blur(4px);
     position: absolute;
-    z-index: 3;
+    z-index: 4;
     top: 0;
     left: 0;
     right: 0;
@@ -55,20 +53,7 @@
     height: 0.5rem;
     background-image: linear-gradient(#0006, #0000);
   }
-  .content {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    height: 100%;
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    /* padding-top: 2.5rem;
-    padding-bottom: 2rem; */
-    padding: 1.25rem 0.75rem 6rem 0.75rem;
-    /* padding-top: calc(1.15rem + var(--header-height)); */
-    justify-content: center;
-  }
+
   .footer {
     position: absolute;
     padding-top: 2px;
@@ -76,8 +61,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-image: linear-gradient(#fff0, #ffff);
+    /* background-image: linear-gradient(#fff0, #ffff); */
     font-size: x-small;
     text-align: center;
+  }
+
+  .footer > p {
+    z-index: 4;
   }
 </style>

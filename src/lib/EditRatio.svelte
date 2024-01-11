@@ -2,27 +2,23 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import EditFactor from '$lib/EditFactor.svelte';
 	import { newFactor } from '../stores';
+  import { invalidate } from '$lib/utils/tester';
 	import Toast from '../toast';
 	const dispatch = createEventDispatcher();
 
 	export let ratio: App.Ratio;
-	let edit = { ...ratio };
-	let factors = [...edit.factors].sort(descendingValue);
-
-	// const { name } = edit;
-	let partialFactor: App.FactorFlag;
-	let currentLabel = edit.label;
+  const defaultLabel = ratio.label || '';
+  let container: HTMLDivElement;
 	let labelInput: HTMLInputElement;
-
-	export let locked = true;
+  $: partialFactor = ratio.factors.find(factor => (factor.label === ''));
 
 	function descendingValue({ value: a }: App.Factor, { value: b }: App.Factor) {
 		return a > b ? -1 : a < b ? 1 : 0;
 	}
 
 	function handleBlur({ currentTarget }: { currentTarget: HTMLInputElement }) {
-		const { value: inputValue, name: key } = currentTarget;
-		if (currentLabel && !inputValue) currentTarget.value = currentLabel;
+		const { value } = currentTarget;
+    if (!value) currentTarget.value = defaultLabel;
 	}
 
 	function handleFocus({ currentTarget }: { currentTarget: HTMLInputElement }) {
@@ -32,176 +28,90 @@
 	function handleRename({ currentTarget }: { currentTarget: HTMLInputElement }) {
 		const { value } = currentTarget;
 		if (!value) return;
+    dispatch('rename', { ...ratio, label: value });
 		currentTarget.blur();
 	}
 
-	function updateFactor({ detail: update }: { detail: App.Factor }) {
-    const updateId = update.id;
-    if (update.softDelete && !update.label) {
-      factors = factors.filter(({ id }) => id !== updateId);
-      return;
-    }
-		if (!update.label) {
-			if (update.softDelete && !update.name) return cancelPartialFactor();
-			factors = factors.map((factor) => (factor.name === update.name ? update : factor));
-		} else {
-			if (update.value) partialFactor = undefined;
-			let rename = update.label.toLowerCase();
-			if (rename === update.name) {
-				// no name change, so just record other changes
-				console.log('update', rename);
-				factors = factors.map((factor) => (factor.name === rename ? update : factor));
-			} else if (update.name) {
-				// factor has been renamed
-				console.log(`rename ${update.name} to ${rename}`);
-				factors = factors.map((factor) =>
-					factor.name === update.name ? { ...update, name: rename } : factor
-				);
-			} else {
-				// must be a new factor
-				console.log('add', rename);
-				factors = [...factors, { ...update, name: rename }];
-			}
-		}
-		return partialFactor;
+  // function deleteFactor({ detail: factor }: { detail: App.Factor }) {
+  //   const deleteId = factor.id;
+  //   const factors: App.Factor[] = ratio.factors;
+  //   if (invalidate(factor)) return updateFactor({ detail: { ...ratio, factors: factors.filter(({ id }) => (id !== deleteId)) } });
+  // }
+
+	function saveChanges() {
+		dispatch('save', { ...ratio, factors: ratio.factors.sort(descendingValue) });
 	}
 
-	function handleReset() {
-    edit = { ...ratio };
-		// dispatch('reset', ratio);
-	}
-
-	function applyChanges() {
-		const errors = [];
-		const error = { duration: 2000, type: 'error' };
-		let validated = true;
-		const label = labelInput?.value || currentLabel;
-
-		if (!label) {
-			validated = false;
-			errors.push({ ...error, message: 'Ratio must have a name.' });
-		}
-
-		const finalFactors = factors.filter((factor) => {
-			const { name, label, value, softDelete } = factor;
-			if (softDelete) return false;
-
-			if (!label) {
-				validated = false;
-				errors.push({ ...error, message: 'Each factor must be named.' });
-			}
-			if (!value) {
-				validated = false;
-				errors.push({ ...error, message: 'Each factor must have a value.' });
-			}
-			if (isNaN(value) || value < 1) {
-				validated = false;
-				errors.push({ ...error, message: 'Each value must be a positive number.' });
-			}
-			if (!name) factor.name = label.toLowerCase();
-			return true;
-		});
-
-		if (!validated) return errors.forEach((error) => Toast.add(error));
-
-		dispatch('update', { ...ratio, ...edit, label, factors: finalFactors.sort(descendingValue) });
-	}
-
-	function handleDelete({ detail: factor }: { detail: App.Factor }) {
-		const { id: deleteId, label } = factor;
-		if (!factorName) return cancelPartialFactor();
-	}
-
-	function cancelPartialFactor() {
-    const partialId = partialFactor?.id;
-		factors = factors.filter(({ id }) => id !== partialId);
-		partialFactor = undefined;
-	}
+  function handleReset() {
+    dispatch('reset', ratio);
+  }
 
 	function handleClose() {
-		dispatch('close', ratio);
+		dispatch('close');
 	}
 
-	function toggleEdit() {
-		if (edit) {
-			cancelPartialFactor();
-			return dispatch('close', ratio);
-		}
-
-		dispatch('edit', ratio);
-		labelInput.focus();
-	}
-
-	function toggleRatioLock() {
-		locked = !locked;
-		Toast.add({ message: locked ? 'Unlocked' : 'Locked', blur: false, replace: true });
-	}
-
-	function handleSelection() {
-		if (edit) return;
-		// console.log('selection:', detail)
-		dispatch('use', ratio);
-	}
 
 	function addFactor() {
-		// Toast.add({ message: 'Should add another factor', blur: false })
-    partialFactor = newFactor();
-		factors = [...factors, partialFactor];
+    if (partialFactor) return Toast.add(invalidate(partialFactor));
+    dispatch('update', newFactor());
 	}
 
 	function handleKeyPress({ key }: KeyboardEvent) {
     if (key !== 'esc' && key !== 'Enter') return;
-		if (key === 'esc') return toggleEdit();
+		// if (key === 'esc') return toggleEdit();
     // if (edit.label) return applyChanges();
-    if (edit.factors.length < 2) addFactor();
+    if (ratio.factors.length < 2) addFactor();
 	}
 
 	function selfDestruct() {
 		dispatch('delete', ratio);
 	}
 
-	onMount(() => labelInput.focus());
+	onMount(() => {
+    container.scrollIntoView({ behavior: 'smooth' });
+    labelInput.focus();
+  });
 </script>
 
-<div class="floating ratio">
+<div bind:this={container} class="floating ratio">
 	<div class="label-bar">
 		<input
 			bind:this={labelInput}
 			class="label"
 			name="label"
 			type="text"
-			value={edit.label}
-			placeholder={currentLabel || 'Ratio Name'}
+			value={ratio.label}
+			placeholder={ratio.label || 'Ratio Name'}
 			title="edit ratio name"
       autocomplete="off"
+      on:change={handleRename}
 			on:focus={handleFocus}
 			on:blur={handleBlur}
-			on:change={handleRename}
 			on:keypress={handleKeyPress}
 		/>
 	</div>
 	<div class="factors">
-		{#each factors as factor}
-			<EditFactor {factor} on:update={updateFactor} on:delete={handleDelete} on:add={addFactor} />
+		{#each ratio.factors as factor}
+			<EditFactor {factor} on:update on:add={addFactor} on:save={saveChanges} />
 		{/each}
-		{#if edit && !partialFactor}
-			<button class="add-factor" on:click={addFactor} title={'add factor to "' + name + '"'}>
+		{#if !partialFactor}
+			<button class="add-factor" on:click|stopPropagation={addFactor} title={'add factor to "' + name + '"'}>
 				+ New Factor
 			</button>
 		{/if}
 	</div>
-	{#if edit}
+	{#if ratio.factors.length > 1}
 		<div class="edit-actions">
 			<button class="edit-action" on:click|stopPropagation={selfDestruct} title="delete this ratio">
 				<img class="inverted-icon" src="trash-2.svg" alt="trashcan" />
 			</button>
-			<!-- <button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
+			<button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
 				<img class="inverted-icon" src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
-			</button> -->
+			</button>
 			<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
 			<button
 				class="save-action"
-				on:click|stopPropagation={applyChanges}
+				on:click|stopPropagation={saveChanges}
 				title="save updates and return to overview"
 			>
 				<img class="inverted-icon" src="check-circle.svg" alt="check-circle" />
@@ -222,6 +132,8 @@
 
 <style>
 	.ratio {
+    z-index: 4;
+    scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
 		flex-direction: column;

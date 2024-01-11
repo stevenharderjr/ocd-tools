@@ -1,19 +1,18 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let factor = {};
+  export let factor: App.Factor;
   export let relativeRange = [0.25, 1.75];
 
-  const baseline = +factor.value;
-  $: delta = Math.round(+factor.value - baseline);
+  const baseline = factor.value;
+  $: delta = Math.round(factor.value - baseline);
   $: min = Math.max(1, Math.round(baseline * relativeRange[0]));
   $: max = Math.round(baseline * relativeRange[1]);
-  // const min = Math.round(baseline * 0.25);
-  // const max = Math.round(baseline * 1.75);
 
   function handleChange({ currentTarget: { value }}) {
-    dispatch('update', { name: factor.name, value });
+    const { name, id } = factor;
+    dispatch('update', { name, id, value });
   }
 </script>
 
@@ -29,13 +28,17 @@
     </div>
   </div>
 {/if}
-<input class="slider" type="range" {min} {max} value={+factor?.value} on:input={handleChange} />
+<button class="slider-base" on:click|stopPropagation tabindex={-1} aria-hidden={true}>
+  <input class="slider" type="range" {min} {max} value={factor.value} on:input={handleChange} />
+</button>
 
 <style>
   .factor {
+    position: relative;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    margin-bottom: -1.5rem;
   }
   .dynamics {
     display: flex;
@@ -61,9 +64,22 @@
     color: #999;
   }
 
+  .slider-base {
+    position: relative;
+    left: 0;
+    /* background: #f006; */
+    border: none;
+    background: none;
+    height: 4rem;
+    /* margin-bottom: 1.5rem; */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   input {
     width: 100%;
-    margin-bottom: 1.5rem;
   }
 
 </style>

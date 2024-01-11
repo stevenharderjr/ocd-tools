@@ -5,6 +5,7 @@
 
 	export let title = '';
 	export let question = 'Are you sure?';
+  const split = question.split('"');
 
 	function confirm() {
 		dispatch('confirm');
@@ -25,7 +26,11 @@
 		{/if}
 		{#if question}
 			<p class="description">
-				{question}
+        {#if split.length > 2}
+          {split[0]}<strong>{split[1]}</strong>{split[2]}
+        {:else}
+				  {question}
+        {/if}
 			</p>
 		{/if}
 		<div class="buttons">
@@ -43,7 +48,7 @@
 
 <style>
 	.backdrop {
-		z-index: 4;
+		z-index: 5;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -61,12 +66,13 @@
 		height: fit-content;
 		background: #000b;
 		border-radius: 8px;
-		/* backdrop-filter: blur(8px); */
+		backdrop-filter: blur(8px);
 		color: #fff;
 		padding: 1rem;
 	}
 	.description {
 		font-size: 1rem;
+    hyphens: auto;
 	}
 	.buttons {
 		display: flex;

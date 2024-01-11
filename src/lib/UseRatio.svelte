@@ -2,52 +2,52 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Slider from '$lib/Slider.svelte';
 	import Factor from './Factor.svelte';
-	import Fraction from '$lib/Fraction.svelte';
 	const dispatch = createEventDispatcher();
 
-	export let ratio = { label: '', factors: [] };
+	export let ratio: App.Ratio;
+  let container: HTMLDivElement;
 	let factors: App.Factor[] = [];
-	let relativeRange = [0.125, 1.985];
+	let relativeRange = [0.125, 1.875];
 	let lowFactor,
-		highFactor,
-		floorName: string,
+		floorId: string,
+    floorName: string,
 		floorValue: number,
-		maxName: string,
+		maxId: string,
 		maxValue: number;
 	let total = 0;
 	let locked = true;
 	let valueMap: Map<string, number> = new Map(
 		ratio.factors.map((factor) => {
-			const { name, value } = factor;
+			const { id, name, value } = factor;
 			factors.push(factor);
 			total += +value;
 			if (!maxValue || value > maxValue) {
 				maxValue = value;
-				maxName = name;
+				maxId = id;
 			}
 			if (!floorValue || value < floorValue) {
-				lowFactor = factor;
-				floorName = name;
+				lowFactor = { ...factor };
+				floorId = id;
 				floorValue = value;
+        floorName = name || '';
 			}
-			return [name, value];
+			return [id, value];
 		})
 	);
 	updateRange(floorValue!);
 
 	function updateRange(floor?: number) {
-		const staticFloor = valueMap.get(floorName) as number;
+		const staticFloor = valueMap.get(floorId) as number;
 		const conversion = (floor || staticFloor) / staticFloor;
 		relativeRange = [+(conversion * 0.125).toPrecision(3), +(conversion * 1.875).toPrecision(3)];
 	}
 
-	function updateValues({ name, value: targetValue }: { name: string; value: number }) {
-		const conversionRate = targetValue / (valueMap.get(name) as number);
+	function updateValues({ id, value: targetValue }: { id: string; value: number }) {
+		const conversionRate = targetValue / (valueMap.get(id) as number);
 		let min: number,
 			max: number,
 			sum = 0;
 		const refactor = factors.map((factor, i) => {
-			const { name: factorName, value: currentValue } = factor;
 			const staticFactor: App.Factor = ratio.factors[i];
 			const value = Math.round(staticFactor.value * conversionRate);
 			sum += value;
@@ -63,16 +63,17 @@
 	}
 
 	function resetValues() {
+    // return dispatch('reset');
 		let sum = 0;
 		factors = factors.map((factor, i) => {
 			const value = ratio.factors[i].value;
 			sum += value;
 			return { ...factor, value };
 		});
-		floorValue = valueMap.get(floorName) as number;
-		maxValue = valueMap.get(maxName) as number;
+		floorValue = valueMap.get(floorId) as number;
+		maxValue = valueMap.get(maxId) as number;
 		total = sum;
-		updateRange();
+		updateRange(floorValue);
 	}
 
 	function half() {
@@ -84,7 +85,7 @@
 		value = Math.round(value);
 		floorValue = value;
 
-		updateValues({ name: floorName, value });
+		updateValues({ id: floorId, value });
 	}
 
 	function double() {
@@ -94,7 +95,7 @@
 		value = Math.round(value);
 		floorValue = value;
 
-		updateValues({ name: floorName, value });
+		updateValues({ id: floorId, value });
 	}
 
 	function handleSliderInput({ detail }) {
@@ -112,11 +113,15 @@
 
 	function toggleLock() {
 		locked = !locked;
-		if (locked) updateValues({ name: floorName, value: floorValue });
+		if (locked) updateValues({ id: floorId, value: floorValue });
+    // updateRange(floorValue);
 	}
+
+  onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
 </script>
 
-<div class="floating container" on:click={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
+<div bind:this={container} class="floating container" on:click={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
+<!-- <div class="floating container"> -->
 	<div class="title-bar">
 		<h2>{ratio.label}</h2>
 		<span>({Math.round(total)} g)</span>
@@ -130,15 +135,14 @@
 			{/if}
 		{/each}
     {#if locked}
-    <div class="factors"></div>
       <Slider
-        factor={{ name: floorName, value: floorValue }}
+        factor={{ id: floorId, value: floorValue }}
         {relativeRange}
         on:update={handleSliderInput}
       />
     {/if}
 	</div>
-	<div class="shortcuts">
+	<button class="shortcuts" on:click|stopPropagation aria-hidden={true}>
 		<button class="shortcut" on:click|stopPropagation={half} title="halve"> ½ </button>
 		<button class="shortcut" on:click|stopPropagation={resetValues} title="restore initial values">
 			<img
@@ -148,7 +152,7 @@
 			/>
 		</button>
 		<button class="shortcut" on:click|stopPropagation={double} style="font-size:small;" title="double"> ×2 </button>
-	</div>
+	</button>
 	<div class="options">
 		<!-- <button
 			class="option-button"
@@ -182,6 +186,8 @@
 		padding-left: 0.5rem;
 	}
 	.container {
+    z-index: 4;
+    scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -193,6 +199,7 @@
 		margin-bottom: 1rem;
 	}
 	.factors {
+    position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
@@ -203,6 +210,8 @@
 		display: flex;
 		flex-direction: row;
 		align-items: baseline;
+    border: none;
+    background: none;
 	}
 	.option-button {
 		position: relative;
@@ -230,7 +239,9 @@
 		display: flex;
 		flex-direction: row;
 		gap: 0.75rem;
-		margin: 0.25rem 0;
+		padding: 0.25rem 0;
+    border: none;
+    background: none;
 	}
 	.shortcut {
 		display: flex;
