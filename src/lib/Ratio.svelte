@@ -24,7 +24,7 @@
 
 <div
 	class="floating ratio"
-	on:click={use}
+	on:click|stopPropagation={use}
 	tabindex="0"
 	role="button"
 	on:keypress={handleKeyPress}
@@ -52,6 +52,7 @@
 
 <style>
 	.ratio {
+    pointer-events: auto;
 		position: relative;
 		display: flex;
 		flex-direction: column;

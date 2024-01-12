@@ -120,7 +120,7 @@
   onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
 </script>
 
-<div bind:this={container} class="floating container" on:click={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
+<div bind:this={container} class="floating container" on:click|self={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
 <!-- <div class="floating container"> -->
 	<div class="title-bar">
 		<h2>{ratio.label}</h2>
@@ -186,7 +186,8 @@
 		padding-left: 0.5rem;
 	}
 	.container {
-    z-index: 4;
+    z-index: 5;
+    pointer-events: auto;
     scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;

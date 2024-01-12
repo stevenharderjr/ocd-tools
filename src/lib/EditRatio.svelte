@@ -142,7 +142,8 @@
 	}
 
 	.ratio {
-    z-index: 4;
+    z-index: 5;
+    pointer-events: auto;
     scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;

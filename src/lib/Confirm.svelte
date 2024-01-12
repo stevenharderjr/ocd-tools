@@ -48,7 +48,7 @@
 
 <style>
 	.backdrop {
-		z-index: 5;
+		z-index: 6;
 		position: absolute;
 		top: 0;
 		left: 0;

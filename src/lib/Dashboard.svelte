@@ -160,6 +160,7 @@
   }
 
 	function cancel(callback?: any) {
+    console.log(callback.currentTarget);
     const accept = () => {
       copy = [...$ratios];
       initialize();
@@ -185,11 +186,12 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel}>
-  {#if use || edit}
-    <div class="background-tint" />
-  {/if}
-  <div class="ratios" on:click|self={cancel}>
+  <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(1px) opacity(1) brightness(0.9)'};`} />
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="ratios" on:click={cancel}>
     {#each copy as ratio}
       {#if ratio.id === use?.id}
         <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
@@ -208,41 +210,41 @@
       {/if}
     {/each}
   </div>
+  <div class="button-container">
+    <button on:click={addRatio} title="open user profile" disabled={!!(edit)}>
+      <!-- svelte-ignore a11y-missing-attribute -->
+      <img src="user.svg" aria-hidden={true}/>
+    </button>
+    <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
+      <svg aria-hidden="true" viewBox="0 0 1 1">
+        <path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
+      </svg>
+    </button>
+    <button on:click={addRatio} title="download for offline use" disabled={!!(edit)}>
+      <!-- svelte-ignore a11y-missing-attribute -->
+      <img src="download.svg" aria-hidden={true}/>
+    </button>
+  </div>
+  {#if confirmation}
+    <Confirm
+      question={confirmation.prompt}
+      on:confirm={confirmation.accept}
+      on:reject={confirmation.reject}
+    />
+  {/if}
 </div>
 
-{#if confirmation}
-	<Confirm
-		question={confirmation.prompt}
-		on:confirm={confirmation.accept}
-		on:reject={confirmation.reject}
-	/>
-{/if}
 
-<div class="button-container">
-	<button on:click={addRatio} title="open user profile" disabled={!!(edit || use)}>
-		<img src="user.svg" alt="download icon"/>
-	</button>
-	<button on:click={addRatio} title="add new ratio" disabled={!!(edit || use)}>
-		<svg aria-hidden="true" viewBox="0 0 1 1">
-			<path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
-		</svg>
-	</button>
-	<button on:click={addRatio} title="download for offline use" disabled={!!(edit || use)}>
-		<img src="download.svg" alt="download icon"/>
-	</button>
-</div>
 
 <style>
   .backdrop {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     height: 100%;
     width: 100%;
+    align-items: space-between;
     overflow-x: hidden;
     overflow-y: scroll;
-    padding: 1.25rem 0.75rem 40vh 0.75rem;
-    justify-content: center;
   }
 
   .background-tint {
@@ -251,10 +253,11 @@
     top: 0;
     left: 0;
     bottom: 0;
-    right:0;
-    background: #6663;
+    right: 0;
+    background: #eee3;
     pointer-events: none;
-    backdrop-filter: blur(1px);
+    transition: 0.1s opacity ease-out;
+    transition: 1s backdrop-filter ease-out;
   }
 
 	.ratios {
@@ -263,28 +266,29 @@
 		display: flex;
 		flex-direction: column;
 		pointer-events: auto;
+    align-self: center;
+    padding: 1.25rem 0.75rem 40vh 0.75rem;
+    pointer-events: none;
 	}
 
 	.button-container {
     pointer-events: none;
-    /* z-index: 2; */
+    z-index: 4;
 		position: absolute;
 		display: flex;
 		justify-content: space-between;
+    align-self: center;
     align-items: flex-end;
     gap: 1rem;
     padding: 0 1.5rem;
-		bottom: 1.25rem;
+    bottom: 1.5rem;
 		pointer-events: none;
-		width: 100%;
-    max-width: var(--column-width);
-		/* padding-bottom: env(safe-area-inset-bottom); */
-		/* margin-top: -env(safe-area-inset-bottom); */
+		max-width: 100%;
+    width: var(--column-width);
 	}
 
   img {
-    filter: invert(0.95);
-    /* opacity: 0.7; */
+    filter: invert(0.1);
     height: 1.25rem;
     width: 1.25rem;
   }
@@ -292,7 +296,7 @@
 	button {
     pointer-events: auto;
 		border-radius: 9999px;
-		background: #0007;
+		background: #fffc;
 		width: 3rem;
 		height: 3rem;
 		display: flex;
@@ -301,7 +305,7 @@
 		border: none;
 		touch-action: manipulation;
 		font-size: 2rem;
-		box-shadow: 0 0 4px 2px #ddd;
+		box-shadow: 0 0 4px 2px #0003;
 		backdrop-filter: blur(4px);
 		pointer-events: auto;
 	}
@@ -314,6 +318,6 @@
 	path {
 		vector-effect: non-scaling-stroke;
 		stroke-width: 2px;
-		stroke: #fffe;
+		stroke: #000c;
 	}
 </style>
