@@ -3,7 +3,7 @@
 	import Ratio from '$lib/Ratio.svelte';
 	import EditRatio from '$lib/EditRatio.svelte';
 	import UseRatio from '$lib/UseRatio.svelte';
-	import { ratios, newRatio } from '../stores';
+	import { ratios, newRatio, blur } from '../stores';
   import { diff, invalidate } from '$lib/utils/tester';
 	import Toast from '../toast';
 
@@ -185,11 +185,11 @@
   }
 </script>
 
-<div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel} aria-hidden={true}>
+<div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel}>
   {#if use || edit}
     <div class="background-tint" />
   {/if}
-  <div class="ratios" on:click|self={cancel} aria-hidden={true}>
+  <div class="ratios" on:click|self={cancel}>
     {#each copy as ratio}
       {#if ratio.id === use?.id}
         <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
@@ -219,10 +219,16 @@
 {/if}
 
 <div class="button-container">
-	<button on:click={addRatio} aria-label="Add new ratio.">
+	<button on:click={addRatio} title="open user profile" disabled={!!(edit || use)}>
+		<img src="user.svg" alt="download icon"/>
+	</button>
+	<button on:click={addRatio} title="add new ratio" disabled={!!(edit || use)}>
 		<svg aria-hidden="true" viewBox="0 0 1 1">
 			<path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
 		</svg>
+	</button>
+	<button on:click={addRatio} title="download for offline use" disabled={!!(edit || use)}>
+		<img src="download.svg" alt="download icon"/>
 	</button>
 </div>
 
@@ -238,6 +244,7 @@
     padding: 1.25rem 0.75rem 40vh 0.75rem;
     justify-content: center;
   }
+
   .background-tint {
     z-index: 3;
     position: absolute;
@@ -245,50 +252,68 @@
     left: 0;
     bottom: 0;
     right:0;
-    background: #6663;
+    background: #ddd;
     pointer-events: none;
     backdrop-filter: blur(1px);
   }
+
 	.ratios {
+    width: var(--column-width);
 		max-width: 100%;
 		display: flex;
 		flex-direction: column;
 		pointer-events: auto;
 	}
+
 	.button-container {
-    z-index: 4;
+    pointer-events: none;
+    /* z-index: 2; */
 		position: absolute;
 		display: flex;
-		justify-content: center;
-		bottom: 1.5rem;
+		justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 0 1.5rem;
+		bottom: 1.25rem;
 		pointer-events: none;
 		width: 100%;
-		padding-bottom: env(safe-area-inset-bottom);
+    max-width: var(--column-width);
+		/* padding-bottom: env(safe-area-inset-bottom); */
+		/* margin-top: -env(safe-area-inset-bottom); */
 	}
+
+  img {
+    filter: invert(0.95);
+    /* opacity: 0.7; */
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+
 	button {
+    pointer-events: auto;
 		border-radius: 9999px;
-		background: #fff9;
-		width: 4rem;
-		height: 4rem;
+		background: #0007;
+		width: 3rem;
+		height: 3rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border: 0;
+		border: none;
 		touch-action: manipulation;
 		font-size: 2rem;
-		box-shadow: 0 0 4px 2px #0003;
+		box-shadow: 0 0 4px 2px #ddd;
 		backdrop-filter: blur(4px);
 		pointer-events: auto;
 	}
 
 	svg {
-		width: 30%;
-		height: 30%;
+		width: 33%;
+		height: 33%;
 	}
 
 	path {
 		vector-effect: non-scaling-stroke;
 		stroke-width: 2px;
-		stroke: #444;
+		stroke: #fffe;
 	}
 </style>

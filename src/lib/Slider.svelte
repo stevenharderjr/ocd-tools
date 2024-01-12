@@ -28,7 +28,7 @@
     </div>
   </div>
 {/if}
-<button class="slider-base" on:click|stopPropagation tabindex={-1} aria-hidden={true}>
+<button class="slider-base" on:click|stopPropagation tabindex={-1}>
   <input class="slider" type="range" {min} {max} value={factor.value} on:input={handleChange} />
 </button>
 

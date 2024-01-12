@@ -8,92 +8,103 @@
 	"theme_color": "#ffffff",
 	"icons": [
 		{
+			"src": "512.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		},
+		{
+			"src": "192.png",
+			"type": "image/png",
+			"sizes": "192x192",
+			"purpose": "maskable"
+		},
+		{
 			"src": "favicon.png",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/cancel.svg",
+			"src": "cancel.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/edit1.svg",
+			"src": "edit1.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/lock.svg",
+			"src": "lock.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/refresh.svg",
+			"src": "refresh.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/trash-2.svg",
+			"src": "trash-2.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/undo.svg",
+			"src": "undo.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/x-circle.svg",
+			"src": "x-circle.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/check-circle.svg",
+			"src": "check-circle.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/edit2.svg",
+			"src": "edit2.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/lock2.svg",
+			"src": "lock2.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/save.svg",
+			"src": "save.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/trash.svg",
+			"src": "trash.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/unlock.svg",
+			"src": "unlock.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/x.svg",
+			"src": "x.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/edit.svg",
+			"src": "edit.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/trash2.svg",
+			"src": "trash2.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		},
 		{
-			"src": "images/unlock2.svg",
+			"src": "unlock2.svg",
 			"type": "image/svg+xml",
 			"sizes": "any"
 		}

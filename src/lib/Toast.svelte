@@ -13,7 +13,7 @@
 </script>
 
 {#if toasts?.[0]?.message}
-<div class={`backdrop${$blur ? '' : ' non-blocking'}`} on:click={dismiss} aria-hidden={true}>
+<div class={`backdrop${$blur ? '' : ' non-blocking'}`} on:click={dismiss}>
   {#each toasts as toast, i}
     <div class="container">
       {#if toast.title}
