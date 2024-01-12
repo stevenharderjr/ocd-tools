@@ -26,7 +26,7 @@
   .blur {
     backdrop-filter: blur(4px);
     position: absolute;
-    z-index: 4;
+    z-index: 5;
     top: 0;
     left: 0;
     right: 0;
@@ -46,6 +46,7 @@
     overflow: hidden;
   }
   .header-shadow {
+    z-index: 4;
     position: absolute;
     left: 0;
     top: 0;
@@ -57,14 +58,14 @@
   .footer {
     z-index: 6;
     position: absolute;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    margin-bottom: env(safe-area-inset-bottom, 2px);
+    /* padding-top: 2px; */
+    padding-bottom: 1px;
+    /* margin-bottom: env(safe-area-inset-bottom, 2px); */
     bottom: 0;
     left: 0;
     right: 0;
-    background-image: linear-gradient(#fff0, #ffff);
-    font-size: x-small;
+    /* background-image: linear-gradient(#fff0, #ffff); */
+    font-size: 0.25rem;
     text-align: center;
   }
 </style>

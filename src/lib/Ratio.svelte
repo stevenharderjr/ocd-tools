@@ -24,7 +24,7 @@
 
 <div
 	class="floating ratio"
-	on:click={use}
+	on:click|stopPropagation={use}
 	tabindex="0"
 	role="button"
 	on:keypress={handleKeyPress}
@@ -45,13 +45,14 @@
 			on:click|stopPropagation={edit}
 			title={'edit "' + ratio.name + '"'}
 		>
-			<img src="images/edit.svg" alt="pen on paper" />
+			<img src="edit.svg" alt="pen on paper" />
 		</button>
 	</div>
 </div>
 
 <style>
 	.ratio {
+    pointer-events: auto;
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -60,8 +61,7 @@
 		border-radius: 8px;
 		margin-bottom: 1rem;
 		background: #fff;
-		width: 20rem;
-		max-width: 100%;
+		width: 100%;
 		padding: 10px 14px;
 		cursor: pointer;
 	}

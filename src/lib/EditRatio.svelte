@@ -103,10 +103,10 @@
 	{#if ratio.factors.length > 1}
 		<div class="edit-actions">
 			<button class="edit-action" on:click|stopPropagation={selfDestruct} title="delete this ratio">
-				<img class="inverted-icon" src="images/trash-2.svg" alt="trashcan" />
+				<img class="inverted-icon" src="trash-2.svg" alt="trashcan" />
 			</button>
 			<button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
-				<img class="inverted-icon" src="images/rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
+				<img class="inverted-icon" src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
 			</button>
 			<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
 			<button
@@ -114,7 +114,7 @@
 				on:click|stopPropagation={saveChanges}
 				title="save updates and return to overview"
 			>
-				<img class="inverted-icon" src="images/check-circle.svg" alt="check-circle" />
+				<img class="inverted-icon" src="check-circle.svg" alt="check-circle" />
 				<span class="action-label">SAVE</span>
 			</button>
 		</div>
@@ -125,14 +125,25 @@
 			on:click|stopPropagation={handleClose}
 			title="discard all changes and return to overview"
 		>
-			<img src="images/x.svg" alt="x" />
+			<img src="x.svg" alt="x" />
 		</button>
 	</div>
 </div>
 
 <style>
+  input {
+		font-size: 1.25rem;
+		font-weight: 500;
+		flex: 1;
+		max-width: 14rem;
+	}
+	input:focus {
+		padding: 4px 8px;
+	}
+
 	.ratio {
-    z-index: 4;
+    z-index: 5;
+    pointer-events: auto;
     scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
@@ -142,26 +153,9 @@
 		border-radius: 8px;
 		margin-bottom: 1rem;
 		background: #fff;
-		width: 20rem;
-		max-width: 100%;
+		width: 100%;
 		padding: 0.25rem;
 	}
-	input {
-		font-size: 1.25rem;
-		font-weight: 500;
-		flex: 1;
-		max-width: 14rem;
-	}
-	input:focus {
-		padding: 4px 8px;
-	}
-	/* img {
-		height: 1.5rem;
-		width: 1.5rem;
-		display: flex;
-		opacity: 0.5;
-		border-radius: 6px;
-	} */
 	.option-button {
 		display: flex;
 		align-items: center;

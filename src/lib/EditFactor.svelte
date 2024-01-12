@@ -127,12 +127,12 @@
 	</div>
 	{#if factor.softDelete}
 		<button class="button-action" on:click={toggleSoftDelete} title={'restore this factor'}>
-			<img src="images/rotate-ccw.svg" alt="right to left u-turn arrow" />
+			<img src="rotate-ccw.svg" alt="right to left u-turn arrow" />
 		</button>
 		<div class="strikethrough"></div>
 	{:else}
 		<button class="button-action" on:click={toggleSoftDelete} title={'remove this factor'}>
-			<img src="images/trash-2.svg" alt="trash can" />
+			<img src="trash-2.svg" alt="trash can" />
 		</button>
 	{/if}
 </div>

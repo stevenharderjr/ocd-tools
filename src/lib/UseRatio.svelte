@@ -120,7 +120,7 @@
   onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
 </script>
 
-<div bind:this={container} class="floating container" on:click={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
+<div bind:this={container} class="floating container" on:click|self={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
 <!-- <div class="floating container"> -->
 	<div class="title-bar">
 		<h2>{ratio.label}</h2>
@@ -142,12 +142,12 @@
       />
     {/if}
 	</div>
-	<button class="shortcuts" on:click|stopPropagation aria-hidden={true}>
+	<button class="shortcuts" on:click|stopPropagation>
 		<button class="shortcut" on:click|stopPropagation={half} title="halve"> ½ </button>
 		<button class="shortcut" on:click|stopPropagation={resetValues} title="restore initial values">
 			<img
 				class="shortcut-icon"
-				src="images/rotate-ccw.svg"
+				src="rotate-ccw.svg"
 				alt="arrow indicating a counterclockwise circle"
 			/>
 		</button>
@@ -159,7 +159,7 @@
 			on:click={close}
 			title="stop using ratio and return to overview"
 		>
-			<img src="images/x.svg" alt="x" />
+			<img src="x.svg" alt="x" />
 		</button> -->
 		<button
 			class="option-button"
@@ -167,9 +167,9 @@
 			title={locked ? 'locked for precision' : 'unlocked for variability'}
 		>
 			{#if locked}
-				<img src="images/lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
+				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
 			{:else}
-				<img src="images/unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
+				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
 			{/if}
 		</button>
 	</div>
@@ -186,13 +186,13 @@
 		padding-left: 0.5rem;
 	}
 	.container {
-    z-index: 4;
+    z-index: 5;
+    pointer-events: auto;
     scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		width: 20rem;
-		max-width: 100%;
+		width: 100%;
 		background: #fff;
 		border-radius: 8px;
 		padding: 10px 14px;

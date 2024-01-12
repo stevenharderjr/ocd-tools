@@ -19,7 +19,7 @@
 	onDestroy(() => ($blur = false));
 </script>
 
-<div class="backdrop" on:click|self={reject} aria-hidden={true}>
+<div class="backdrop" on:click|self={reject}>
 	<div class="container">
 		{#if title}
 			<h2 class="title">{title}</h2>
@@ -35,11 +35,11 @@
 		{/if}
 		<div class="buttons">
 			<button class="reject" on:click={reject}>
-				<img src="images/x-circle.svg" alt="reject" />
+				<img src="x-circle.svg" alt="reject" />
 				Cancel
 			</button>
 			<button class="confirm" on:click={confirm}>
-				<img src="images/check-circle.svg" alt="confirm" />
+				<img src="check-circle.svg" alt="confirm" />
 				Confirm
 			</button>
 		</div>
@@ -48,7 +48,7 @@
 
 <style>
 	.backdrop {
-		z-index: 5;
+		z-index: 6;
 		position: absolute;
 		top: 0;
 		left: 0;
