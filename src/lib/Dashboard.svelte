@@ -252,7 +252,7 @@
     left: 0;
     bottom: 0;
     right:0;
-    background: #ddd;
+    background: #6663;
     pointer-events: none;
     backdrop-filter: blur(1px);
   }
