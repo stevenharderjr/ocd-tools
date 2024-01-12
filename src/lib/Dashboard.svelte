@@ -131,7 +131,6 @@
     copy = [...$ratios];
     if (use) use = { ...original };
     if (edit) edit = { ...original };
-    console.log('reset', resetRatio);
   }
 
 	function deleteRatio() {
@@ -160,7 +159,6 @@
   }
 
 	function cancel(callback?: any) {
-    console.log(callback.currentTarget);
     const accept = () => {
       copy = [...$ratios];
       initialize();
