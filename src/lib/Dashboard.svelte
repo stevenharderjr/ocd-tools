@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ToolCard from './ToolCard.svelte';
 	// import Confirm from '$lib/Confirm.svelte';
 	// import Toast from '../toast';
   // import { pinned } from '../stores';
@@ -6,14 +7,8 @@
 
 <div class="backdrop">
   <section class="tool-list">
-    <a class="floating card" href="/ratioizer">
-      <h2 class="title-bar">Ratioizer</h2>
-      <svg aria-hidden="true" viewBox="0 0 1 1" style="background: #f006;">
-        <polygon points="0,0 1,0 1,1 0,0" />
-      </svg>
-      <svg class="skewed-wedge" />
-    </a>
-    <a class="floating card" href="/layout-equalizer">Layout Equalizer</a>
+    <ToolCard title="Ratioizer" description="Keeps sets of values and allows dynamic adjustments without changing proportions between them." href="/ratioizer" />
+    <ToolCard title="Layout Equalizer" description="Plot equal spacing while accounting for padding and material width." href="layout-equalizer" />
   </section>
 
   <div class="button-container">
@@ -34,11 +29,6 @@
 </div>
 
 <style>
-  a, a:visited {
-    text-decoration: none;
-    user-select: none;
-  }
-
   .backdrop {
     display: flex;
     flex-direction: column;
@@ -54,34 +44,11 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 20rem;
+    max-width: 30rem;
     gap: 1rem;
     padding: 1rem 1.5rem;
   }
 
-  .card {
-    align-self: center;
-    width: 100%;
-    max-width: 20rem;
-    height: 6rem;
-    background: #fff;
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .title-bar {
-    width: 100%;
-    height: 2rem;
-    color: white;
-    background: #333;
-    padding: 0.5rem 1rem;
-  }
-
-  .askew {
-    width: 100%;
-    height: 1rem;
-    background: #f006;
-  }
 
   .button-container {
     pointer-events: none;

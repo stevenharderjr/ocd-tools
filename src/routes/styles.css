@@ -2,7 +2,17 @@
 	font-family: 'hind';
 	font-style: 'light';
 	font-weight: 300;
-	src: url('fonts/HindVadodara-Light.ttf');
+	src: url('HindVadodara-Light.ttf');
+}
+@font-face {
+	font-family: 'hind';
+	font-style: 'regular';
+	font-weight: 500;
+	src: url('HindVadodara-Regular.ttf');
+}
+
+* {
+	font-family: 'Hind';
 }
 
 h1 {
