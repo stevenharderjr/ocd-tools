@@ -5,16 +5,25 @@
 </script>
 
 <a class="floating card" {href}>
-  <div class="title-bar">
-    <h2>{title}</h2>
+  <section class="title-bar">
+    <div class="title">
+      <img src="sliders.svg" aria-hidden="true" alt="" />
+      <h4>{title}</h4>
+    </div>
     <svg class="askew" aria-hidden="true" viewBox="0 0 1 1" preserveAspectRatio="none">
       <polygon points="0,0 1,0 1,1 0,0" fill="#444" stroke="none" />
     </svg>
-  </div>
+  </section>
   <p>{description}</p>
 </a>
 
 <style>
+  img {
+    filter: invert(0.9);
+    height: 1rem;
+    width: 1rem;
+  }
+
   a, a:visited {
     text-decoration: none;
     user-select: none;
@@ -22,7 +31,7 @@
 
   p {
     margin: 0.5rem 0.75rem;
-    hyphens: auto;
+    /* hyphens: auto; */
     color: black;
     min-height: 0.5rem;
   }
@@ -50,14 +59,22 @@
   }
 
   .title-bar h2 {
+
+  }
+
+  .title {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
     font-size: medium;
     position: absolute;
-    top: 0.1rem;
-    left: 0.5rem;
+    top: 0.4rem;
+    left: 0.6rem;
     font-family: 'Hind';
     font-weight: 500;
     height: 2rem;
     text-transform: uppercase;
+    line-height: 1rem;
   }
 
   .askew {
