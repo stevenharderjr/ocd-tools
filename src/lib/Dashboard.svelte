@@ -43,6 +43,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    align-self: center;
     width: 100%;
     max-width: 30rem;
     gap: 1rem;
