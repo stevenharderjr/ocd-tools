@@ -1,6 +1,9 @@
-# Ratioizer
+# OCD Tools
 
-### Keep sets of values and allow dynamic adjustments without changing proportions between them.
+A collection of tools for straightforward tasks that take up lots of time and attention when engaged in by certifiable perfectionists.
+
+# Ratioizer
+Keeps sets of values and allows dynamic adjustments without changing proportions between them.
 
 For example, my nominal cup of coffee comprises 20g sugar, 200ml coffee, and 150ml half & half.
 Now let's say I want to modify the amount of an ingredient or target a total serving size without changing the flavor.
