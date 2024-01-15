@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
   import { fixes } from '$lib/utils/fixes';
-	import Toast from '../toast';
-	import { diff } from './utils/tester';
+	import Toast from '../../toast';
+	import { diff } from '$lib/utils/tester';
 	const dispatch = createEventDispatcher();
 	export let factor: App.Factor;
   let edits = { softDelete: false, ...factor }

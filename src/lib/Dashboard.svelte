@@ -1,240 +1,44 @@
 <script lang="ts">
-	import Confirm from '$lib/Confirm.svelte';
-	import Ratio from '$lib/Ratio.svelte';
-	import EditRatio from '$lib/EditRatio.svelte';
-	import UseRatio from '$lib/UseRatio.svelte';
-	import { ratios, newRatio, blur } from '../stores';
-  import { diff, invalidate } from '$lib/utils/tester';
-	import Toast from '../toast';
-
-  interface Confirmation {
-    prompt: string;
-    accept: () => void;
-    reject: () => void;
-  }
-
-	let use: App.RatioFlag = undefined;
-	let edit: App.RatioFlag = undefined;
-  let confirmation: Confirmation | undefined;
-  let copy = [...$ratios];
-
-  function initialize() {
-    use = undefined;
-    edit = undefined;
-    confirmation = undefined;
-  }
-
-  const reject = () => {
-    confirmation = undefined;
-  }
-
-	function addRatio() {
-		if (edit) cancel();
-
-    use = undefined;
-		edit = newRatio();
-		copy = [...copy, edit];
-	}
-
-	function useRatio({ detail: ratio }: { detail: App.Ratio }) {
-    const accept = () => {
-      initialize();
-      copy = [...$ratios];
-      use = { ...ratio };
-    }
-
-    if (!edit) return accept();
-
-    const editId = edit.id;
-    const original = copy.find(({ id }) => (id === editId));
-    if (!original || !diff(original, edit)) return accept();
-
-    confirmation = { prompt: `Discard changes${original?.label ? ` to "${original.label}"` : ''}?`, accept, reject };
-	}
-
-  function renameRatio({ detail: ratio }: { detail: App.Ratio }) {
-    edit = { ...edit, ...ratio };
-  }
-
-	function editRatio({ detail: ratio }: { detail: App.Ratio }) {
-    const accept = () => {
-      initialize();
-      copy = [...$ratios];
-      edit = { ...ratio };
-    }
-
-    if (!edit) return accept();
-
-    const factors = edit.factors.filter(factor => factor.label !== '');
-    const temp = { ...edit, factors };
-
-    const editId = temp.id;
-    const original = copy.find(({ id }) => (id === editId));
-    if (!original || !diff(original, temp)) return accept();
-
-    confirmation = { prompt: `Discard changes${original?.label ? ` to "${original.label}"` : ''}?`, accept, reject };
-	}
-
-  function updateFactor({ detail: update }: { detail: App.Factor }) {
-    if (!edit) return;
-    const updateId = update.id;
-    let factors: App.Factor[];
-    let original: App.FactorFlag = undefined;
-
-    if (update.softDelete && invalidate(update)) factors = edit.factors.filter(({ id }) => (id !== updateId));
-    else factors = edit?.factors.map(factor => {
-      if (factor.id === updateId) {
-        original = factor;
-        return update;
-      }
-      return factor;
-    });
-
-    if (!original && !update.softDelete) factors.push(update);
-
-    edit = { ...edit, factors };
-  }
-
-	function saveRatio() {
-    if (!edit) return;
-    const factors = edit?.factors.filter(({ label, softDelete }) => (!softDelete && label !== ''));
-    let temp = { ...edit, factors };
-
-    const reason = invalidate(temp);
-    if (reason) return Toast.add({ message: reason, blur: true });
-
-    const updateId = edit.id;
-    let original: App.RatioFlag;
-    const updatedRatios: App.Ratio[] = copy.map((ratio, i) => {
-      if (ratio.id === updateId) {
-        const name = temp.label?.toLowerCase();
-        original = ratio;
-        return { ...temp } as App.Ratio;
-      }
-      return ratio;
-    });
-
-    if (!original) updatedRatios.push(temp);
-
-    if (!diff(original, temp)) return initialize();
-
-    $ratios = updatedRatios;
-    copy = [...$ratios];
-    initialize();
-	}
-
-	function resetRatio() {
-    const resetRatio = use || edit;
-    if (!resetRatio) return;
-    const resetId = resetRatio.id;
-    const original = $ratios.find(({ id }) => (id === resetId));
-    copy = [...$ratios];
-    if (use) use = { ...original };
-    if (edit) edit = { ...original };
-  }
-
-	function deleteRatio() {
-    if (!edit) return;
-
-    const factors = edit.factors.filter(factor => factor.label !== '');
-    const temp = { ...edit, factors };
-
-    const deleteId = temp.id;
-    let original: App.RatioFlag = undefined;
-    const filteredRatios = $ratios.filter(ratio => {
-      if (ratio.id !== deleteId) return true;
-      original = { ...ratio };
-      return false;
-    });
-
-    const accept = () => {
-      $ratios = filteredRatios;
-      copy = [...$ratios];
-      initialize();
-    }
-
-    if (!temp?.factors?.length || 0 > 1) return accept();
-
-    confirmation = { prompt: temp?.label ? `Delete "${temp.label}"?` : 'Ratio will be discarded.', accept, reject };
-  }
-
-	function cancel(callback?: any) {
-    const accept = () => {
-      copy = [...$ratios];
-      initialize();
-      if (typeof callback === 'function') callback();
-    }
-
-    if (use || !edit) return accept();
-
-    const editingId = edit.id;
-    // is there a fallback for this ratio?
-    const original: App.RatioFlag = $ratios.find(({ id }) => (id === editingId));
-    // is this a new ratio that's not ready to be saved?
-    if (invalidate(original) && invalidate(edit)) return deleteRatio();
-
-    // have any changes been made?
-    if (!diff(original, edit)) return accept();
-
-    confirmation = { prompt: `Discard changes${original?.label ? ` to "${original.label}"` : ''}?`, accept, reject }
-	}
-
-  function handleKeyboardCancel({ key }: KeyboardEvent) {
-    if (key === 'esc') cancel({});
-  }
+	// import Confirm from '$lib/Confirm.svelte';
+	// import Toast from '../toast';
+  // import { pinned } from '../stores';
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel}>
-  <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(1px) opacity(1) brightness(0.9)'};`} />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="ratios" on:click={cancel}>
-    {#each copy as ratio}
-      {#if ratio.id === use?.id}
-        <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
-      {:else if ratio.id === edit?.id}
-        <EditRatio
-        ratio={edit}
-          on:close={cancel}
-          on:save={saveRatio}
-          on:reset={resetRatio}
-          on:delete={deleteRatio}
-          on:rename={renameRatio}
-          on:update={updateFactor}
-        />
-      {:else}
-        <Ratio {ratio} on:use={useRatio} on:edit={editRatio} on:reset={resetRatio} />
-      {/if}
-    {/each}
-  </div>
+<div class="backdrop">
+  <section class="tool-list">
+    <a class="floating card" href="/ratioizer">
+      <h2 class="title-bar">Ratioizer</h2>
+      <svg aria-hidden="true" viewBox="0 0 1 1" style="background: #f006;">
+        <polygon points="0,0 1,0 1,1 0,0" />
+      </svg>
+      <svg class="skewed-wedge" />
+    </a>
+    <a class="floating card" href="/layout-equalizer">Layout Equalizer</a>
+  </section>
+
   <div class="button-container">
-    <button on:click={addRatio} title="open user profile" disabled={!!(edit)}>
+    <button on:click title="open user profile">
       <!-- svelte-ignore a11y-missing-attribute -->
       <img src="user.svg" aria-hidden={true}/>
     </button>
-    <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
+    <!-- <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
       <svg aria-hidden="true" viewBox="0 0 1 1">
         <path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
       </svg>
-    </button>
-    <button on:click={addRatio} title="download for offline use" disabled={!!(edit)}>
+    </button> -->
+    <button on:click title="download for offline use">
       <!-- svelte-ignore a11y-missing-attribute -->
       <img src="download.svg" aria-hidden={true}/>
     </button>
   </div>
-  {#if confirmation}
-    <Confirm
-      question={confirmation.prompt}
-      on:confirm={confirmation.accept}
-      on:reject={confirmation.reject}
-    />
-  {/if}
 </div>
 
-
-
 <style>
+  a, a:visited {
+    text-decoration: none;
+    user-select: none;
+  }
+
   .backdrop {
     display: flex;
     flex-direction: column;
@@ -245,31 +49,41 @@
     overflow-y: scroll;
   }
 
-  .background-tint {
-    z-index: 3;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: #eee3;
-    pointer-events: none;
-    transition: 0.1s opacity ease-out;
-    transition: 1s backdrop-filter ease-out;
+  .tool-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 20rem;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
   }
 
-	.ratios {
-    width: var(--column-width);
-		max-width: 100%;
-		display: flex;
-		flex-direction: column;
-		pointer-events: auto;
+  .card {
     align-self: center;
-    padding: 1.25rem 0.75rem 40vh 0.75rem;
-    pointer-events: none;
-	}
+    width: 100%;
+    max-width: 20rem;
+    height: 6rem;
+    background: #fff;
+    border-radius: 2px;
+    overflow: hidden;
+  }
 
-	.button-container {
+  .title-bar {
+    width: 100%;
+    height: 2rem;
+    color: white;
+    background: #333;
+    padding: 0.5rem 1rem;
+  }
+
+  .askew {
+    width: 100%;
+    height: 1rem;
+    background: #f006;
+  }
+
+  .button-container {
     pointer-events: none;
     z-index: 4;
 		position: absolute;

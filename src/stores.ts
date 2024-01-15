@@ -79,4 +79,6 @@ export const editing = writable<App.RatioFlag>();
 
 export const using = writable<App.RatioFlag>();
 
+export const pinned = writable([]);
+
 // export const use = writable(false);

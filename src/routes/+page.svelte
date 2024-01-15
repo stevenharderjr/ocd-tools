@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>Ratioizer</title>
+  <title>OCD Tools</title>
 </svelte:head>
 
 <!-- {#if !using} -->

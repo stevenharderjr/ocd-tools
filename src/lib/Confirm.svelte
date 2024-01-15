@@ -19,7 +19,7 @@
 	onDestroy(() => ($blur = false));
 </script>
 
-<div class="backdrop" on:click|self={reject}>
+<div class="backdrop" on:click|self={reject} aria-hidden="true">
 	<div class="container">
 		{#if title}
 			<h2 class="title">{title}</h2>
