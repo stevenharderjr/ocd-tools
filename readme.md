@@ -1,6 +1,6 @@
 # OCD Tools
 
-A collection of tools for straightforward tasks that take up lots of time and attention when engaged in by certifiable perfectionists.
+A collection of tools for straightforward tasks that demand inordinate time and attention from certifiable perfectionists.
 
 # Layout Equalizer
 Plot equal spacing while accounting for padding and material width.
