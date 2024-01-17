@@ -186,7 +186,8 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel}>
-  <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(1px) opacity(1) brightness(0.9)'};`} />
+  <!-- <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(4px) opacity(1) brightness(0.95)'};`} /> -->
+  <div class="background-tint" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="ratios" on:click={cancel}>
@@ -242,16 +243,18 @@
   }
 
   .background-tint {
-    z-index: 3;
+    /* z-index: 3; */
     position: absolute;
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
-    background: #eee3;
+    background: #ccc9;
     pointer-events: none;
-    transition: 0.1s opacity ease-out;
-    transition: 1s backdrop-filter ease-out;
+    /* backdrop-filter: blur(1px); */
+
+    /* transition: 0.1s opacity ease-out; */
+    /* transition: 1s backdrop-filter ease-out; */
   }
 
 	.ratios {

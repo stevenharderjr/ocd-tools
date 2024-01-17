@@ -38,8 +38,8 @@
 
   .card {
     align-self: center;
-    /* width: 100%; */
-    min-width: 20rem;
+    width: 100%;
+    max-width: 20rem;
 
     width: fit-content;
     height: fit-content;
