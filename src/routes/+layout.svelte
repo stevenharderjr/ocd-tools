@@ -46,7 +46,7 @@
     overflow: hidden;
   }
   .header-shadow {
-    z-index: 4;
+    z-index: 8;
     position: absolute;
     left: 0;
     top: 0;

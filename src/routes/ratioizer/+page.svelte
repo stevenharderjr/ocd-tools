@@ -264,7 +264,7 @@
 		flex-direction: column;
 		pointer-events: auto;
     align-self: center;
-    padding: 1.25rem 0.75rem 40vh 0.75rem;
+    padding: 1rem 0.75rem 40vh 0.75rem;
     pointer-events: none;
 	}
 
