@@ -1,29 +1,15 @@
-<script lang="ts">
-  import ToolCard from './ToolCard.svelte';
-	// import Confirm from '$lib/Confirm.svelte';
-	// import Toast from '../toast';
-  // import { pinned } from '../stores';
-</script>
 
 <div class="backdrop">
-  <section class="tool-list">
-    <ToolCard title="Ratioizer" description="Keeps sets of values and allows dynamic adjustments without changing proportions between them." href="/ratioizer" />
-    <ToolCard title="Layout Equalizer" description="Plot equal spacing while accounting for padding and material width." href="layout-equalizer" />
-  </section>
-
+  <h1>Layout Equalizer</h1>
   <div class="button-container">
-    <button on:click title="open user profile">
+    <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="user.svg" aria-hidden={true}/>
-    </button>
-    <!-- <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
+      <img src="arrow-left.svg" aria-hidden={true}/>
+    </a>
+    <button on:click title="add new layout" disabled>
       <svg aria-hidden="true" viewBox="0 0 1 1">
         <path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
       </svg>
-    </button> -->
-    <button on:click title="download for offline use">
-      <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="download.svg" aria-hidden={true}/>
     </button>
   </div>
 </div>
@@ -38,18 +24,6 @@
     overflow-x: hidden;
     overflow-y: scroll;
   }
-
-  .tool-list {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    align-self: center;
-    width: 100%;
-    max-width: 30rem;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-  }
-
 
   .button-container {
     pointer-events: none;
@@ -73,7 +47,7 @@
     width: 1.25rem;
   }
 
-	button {
+	button, a {
     pointer-events: auto;
 		border-radius: 9999px;
 		background: #fffc;

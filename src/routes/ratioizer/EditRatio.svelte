@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import EditFactor from '$lib/EditFactor.svelte';
-	import { newFactor } from '../stores';
+	import EditFactor from './EditFactor.svelte';
+	import { newFactor } from '../../stores';
   import { invalidate } from '$lib/utils/tester';
-	import Toast from '../toast';
+	import Toast from '../../toast';
 	const dispatch = createEventDispatcher();
 
 	export let ratio: App.Ratio;

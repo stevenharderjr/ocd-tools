@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Factor from '$lib/Factor.svelte';
+	import Factor from './Factor.svelte';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 

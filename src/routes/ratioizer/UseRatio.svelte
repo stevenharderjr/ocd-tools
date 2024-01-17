@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import Slider from '$lib/Slider.svelte';
+	import Slider from './Slider.svelte';
 	import Factor from './Factor.svelte';
 	const dispatch = createEventDispatcher();
 
