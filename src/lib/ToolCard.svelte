@@ -7,7 +7,7 @@
 <a class="floating card" {href}>
   <section class="title-bar">
     <div class="title">
-      <img src="sliders.svg" aria-hidden="true" alt="" />
+      <img src="arrow-right-circle.svg" aria-hidden="true" alt="" />
       <h3>{title}</h3>
     </div>
     <svg class="askew" aria-hidden="true" viewBox="0 0 1 1" preserveAspectRatio="none">
@@ -20,8 +20,8 @@
 <style>
   img {
     filter: invert(1);
-    height: 1rem;
-    width: 1rem;
+    height: 1.2rem;
+    width: 1.2rem;
   }
 
   a, a:visited {
@@ -71,7 +71,7 @@
     font-weight: 500;
     /* height: 2rem; */
     text-transform: uppercase;
-    padding: 0.25rem 0.5rem;
+    padding: 0.4rem 0.5rem;
     margin-bottom: -0.1rem;
     /* background: #f006; */
   }

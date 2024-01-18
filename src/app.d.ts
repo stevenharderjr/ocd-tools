@@ -21,10 +21,25 @@ declare global {
 			name?: string;
 			label?: string;
 			factors: Factor[] | [];
-			useConversionRate: number;
+			conversionRate: 1 | number;
 			inputRange: [number, number];
 			derivedPrefix: string;
 			derivedSuffix: string;
+		}
+
+		interface Layout {
+			id: string;
+			name?: string;
+			label: string;
+			divisions: 1 | number;
+			padding: [0 | number, 0 | number];
+		}
+
+		interface Division {
+			id: string;
+			name?: string;
+			label?: string;
+			width: 0 | number;
 		}
 
 		type RatioFlag = Ratio | undefined;
