@@ -45,7 +45,7 @@
     align-items: center;
     align-self: center;
     width: 100%;
-    max-width: 30rem;
+    max-width: var(--column-width);
     gap: 1rem;
     padding: 1rem 1.5rem;
   }

@@ -160,7 +160,7 @@
 
 	.title {
 		width: 100%;
-		max-width: 20rem;
+		max-width: var(--column-width);
 		flex-grow: 2;
 	}
 

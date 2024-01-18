@@ -8,7 +8,7 @@
   <section class="title-bar">
     <div class="title">
       <img src="sliders.svg" aria-hidden="true" alt="" />
-      <h4>{title}</h4>
+      <h3>{title}</h3>
     </div>
     <svg class="askew" aria-hidden="true" viewBox="0 0 1 1" preserveAspectRatio="none">
       <polygon points="0,0 1,0 1,1 0,0" fill="#444" stroke="none" />
@@ -19,7 +19,7 @@
 
 <style>
   img {
-    filter: invert(0.9);
+    filter: invert(1);
     height: 1rem;
     width: 1rem;
   }
@@ -30,16 +30,19 @@
   }
 
   p {
-    margin: 0.5rem 0.75rem;
+    margin: 0 1rem 1rem;
     /* hyphens: auto; */
     color: black;
     min-height: 0.5rem;
   }
 
+  h3 {
+    letter-spacing: 0.05rem;
+  }
+
   .card {
     align-self: center;
     width: 100%;
-    max-width: 20rem;
 
     width: fit-content;
     height: fit-content;
@@ -53,34 +56,30 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 1.75rem;
+    /* height: fit-content; */
     color: white;
     background: #444;
-  }
-
-  .title-bar h2 {
-
+    margin-bottom: 0.75rem;
   }
 
   .title {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.5rem;
     font-size: medium;
-    position: absolute;
-    top: 0.4rem;
-    left: 0.6rem;
     font-family: 'Hind';
     font-weight: 500;
-    height: 2rem;
+    /* height: 2rem; */
     text-transform: uppercase;
-    line-height: 1rem;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: -0.1rem;
+    /* background: #f006; */
   }
 
   .askew {
     width: 100%;
     height: 0.5rem;
-    position: relative;
+    position: absolute;
     top: 100%;
   }
 </style>
