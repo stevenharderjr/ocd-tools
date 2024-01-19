@@ -17,17 +17,14 @@
 <style>
   .factor {
     pointer-events: none;
-    /* position: relative; */
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    /* padding-left: 8px; */
     flex-wrap: nowrap;
-    /* width: 90%; */
-    /* margin-left: -1rem; */
     pointer-events: none;
     min-width: 100%;
+    height: 1.4rem;
   }
 
   .components {

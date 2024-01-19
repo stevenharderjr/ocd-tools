@@ -14,11 +14,15 @@
 		floorValue: number,
 		maxId: string,
 		maxValue: number;
+	const firstFactor = ratio.factors[0];
+	let { prefix, suffix } = firstFactor || {};
 	let total = 0;
 	let locked = true;
 	let valueMap: Map<string, number> = new Map(
 		ratio.factors.map((factor) => {
-			const { id, name, value } = factor;
+			const { id, name, value, prefix: factorPrefix, suffix: factorSuffix } = factor;
+			if (!prefix || (prefix !== factorPrefix)) prefix = '';
+			if (!suffix || (suffix !== factorSuffix)) suffix = '';
 			factors.push(factor);
 			total += +value;
 			if (!maxValue || value > maxValue) {
@@ -124,7 +128,7 @@
 <!-- <div class="floating container"> -->
 	<div class="title-bar">
 		<h2>{ratio.label}</h2>
-		<span>({Math.round(total)} g)</span>
+		<span>({prefix + Math.round(total) + suffix})</span>
 	</div>
 	<div class="factors">
 		{#each factors as factor}

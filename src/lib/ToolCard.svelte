@@ -4,7 +4,7 @@
   export let href="/";
 </script>
 
-<a class="floating card" {href}>
+<a class="floating container" {href}>
   <section class="title-bar">
     <div class="title">
       <img src="arrow-right-circle.svg" aria-hidden="true" alt="" />
@@ -40,7 +40,7 @@
     letter-spacing: 0.05rem;
   }
 
-  .card {
+  .container {
     align-self: center;
     width: 100%;
 

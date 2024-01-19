@@ -23,7 +23,7 @@
 </script>
 
 <div
-	class="floating ratio"
+	class="floating card"
 	on:click|stopPropagation={use}
 	tabindex="0"
 	role="button"
@@ -51,20 +51,6 @@
 </div>
 
 <style>
-	.ratio {
-    pointer-events: auto;
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		align-items: center;
-		border-radius: 8px;
-		margin-bottom: 1rem;
-		background: #fff;
-		width: 100%;
-		padding: 10px 14px;
-		cursor: pointer;
-	}
 	img {
 		height: 1.5rem;
 		width: 1.5rem;
