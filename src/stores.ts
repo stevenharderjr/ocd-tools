@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { uuid } from '$lib/utils/uuid';
 
 export const ratios = writable<App.Ratio[]>([
 	{
@@ -57,18 +58,40 @@ export const ratios = writable<App.Ratio[]>([
 	}
 ]);
 
+export const layouts = writable([
+	{
+		id: 0,
+		name: 'gutter hangers',
+		label: 'Gutter Hangers',
+		points: ['6"', '22"', '38"', '54"', '72"'],
+		spacing: '16"',
+		padding: ['6"', '6"'],
+		measurement: '78"'
+	}
+]);
+
 export const newRatio = () => ({
-	id: crypto.randomUUID(),
+	id: uuid(),
 	label: '',
 	factors: []
 });
 
 export const newFactor = () => ({
-	id: crypto.randomUUID(),
+	id: uuid(),
 	label: '',
 	prefix: '',
 	value: 1,
 	suffix: ''
+});
+
+export const newLayout = () => ({
+	id: uuid(),
+	label: '',
+	name: '',
+	points: [],
+	spacing: '',
+	padding: ['', ''],
+	measurement: ''
 });
 
 export const toasts = writable([]);

@@ -93,7 +93,7 @@
 			name="value"
 			class="numeric input"
 			type="text"
-			inputmode="numeric"
+			inputmode="search"
 			placeholder={factor.prefix + factor.value + factor.suffix}
 			value={edits.prefix + edits.value + edits.suffix}
 			on:focus={handleFocus}

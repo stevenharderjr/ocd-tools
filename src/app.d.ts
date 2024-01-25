@@ -11,10 +11,10 @@ declare global {
 			name?: string;
 			label?: string;
 			factors: Factor[] | [];
-			conversionRate: 1 | number;
-			inputRange: [number, number];
-			derivedPrefix: string;
-			derivedSuffix: string;
+			// conversionRate: 1 | number;
+			// inputRange: [number, number];
+			// derivedPrefix: string;
+			// derivedSuffix: string;
 		}
 
 		interface Factor {
@@ -31,9 +31,12 @@ declare global {
 			id: string;
 			name?: string;
 			label: string;
-			type: 'arrange' | 'fill';
-			value: 1 | number;
-			padding: [0 | number, 0 | number];
+			layoutType: 'arrange' | 'fill';
+			pointCount: number;
+			spacing: number;
+			spacingMode: 'even' | 'center' | 'start' | 'end';
+			padding: [number, number];
+			measurements: string[];
 		}
 
 		type RatioFlag = Ratio | undefined;
