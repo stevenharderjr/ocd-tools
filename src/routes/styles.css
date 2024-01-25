@@ -3,16 +3,19 @@
 	font-style: 'light';
 	font-weight: 300;
 	src: url('HindVadodara-Light.ttf');
+	size-adjust: 105%;
 }
 @font-face {
 	font-family: 'hind';
 	font-style: 'regular';
 	font-weight: 500;
 	src: url('HindVadodara-Regular.ttf');
+	size-adjust: 105%;
 }
 
 * {
 	font-family: 'Hind';
+	line-height: 1.4rem;
 }
 
 h1 {
@@ -62,4 +65,29 @@ input:focus {
 
 .floating {
 	box-shadow: 0 8px 8px 0 #0003;
+}
+
+.card-stack {
+	width: var(--column-width);
+	max-width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-self: center;
+	padding: 1rem 0.75rem 40vh 0.75rem;
+	pointer-events: none;
+}
+
+.card {
+	pointer-events: auto;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+	border-radius: 8px;
+	margin-bottom: 1rem;
+	background: #fff;
+	width: 100%;
+	padding: 10px 14px;
+	cursor: pointer;
 }

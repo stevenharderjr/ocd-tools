@@ -1,6 +1,10 @@
 
 <div class="backdrop">
-  <h1>Layout Equalizer</h1>
+  <ul class="card-stack">
+    <li class="floating card">
+      <h1>Layout Equalizer</h1>
+    </li>
+  </ul>
   <div class="button-container">
     <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->

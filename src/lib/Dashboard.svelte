@@ -8,7 +8,7 @@
 <div class="backdrop">
   <section class="tool-list">
     <ToolCard title="Ratioizer" description="Keeps sets of values and allows dynamic adjustments without changing proportions between them." href="/ratioizer" />
-    <ToolCard title="Layout Equalizer" description="Plot equal spacing while accounting for padding and material width." href="layout-equalizer" />
+    <ToolCard title="Layout Equalizer" description="Plot padding and equal spacing while accounting for material width." href="layout" />
   </section>
 
   <div class="button-container">
@@ -45,9 +45,9 @@
     align-items: center;
     align-self: center;
     width: 100%;
-    max-width: 30rem;
+    max-width: var(--column-width);
     gap: 1rem;
-    padding: 1rem 1.5rem;
+    padding: 1rem 0.75rem 40vh 0.75rem;
   }
 
 

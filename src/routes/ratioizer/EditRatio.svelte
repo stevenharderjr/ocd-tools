@@ -73,7 +73,7 @@
   });
 </script>
 
-<div bind:this={container} class="floating ratio">
+<div bind:this={container} class="floating ratio" on:click|stopPropagation aria-hidden="true">
 	<div class="label-bar">
 		<input
 			bind:this={labelInput}
