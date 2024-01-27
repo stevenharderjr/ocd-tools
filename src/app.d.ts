@@ -31,12 +31,13 @@ declare global {
 			id: string;
 			name?: string;
 			label: string;
-			layoutType: 'arrange' | 'fill';
-			pointCount: number;
-			spacing: number;
-			spacingMode: 'even' | 'center' | 'start' | 'end';
+			type: 'arrange' | 'fill';
+			points: string[];
+			spacing: string;
+			spacingTarget: string;
+			alignment: 'even' | 'center' | 'start' | 'end';
 			padding: [number, number];
-			measurements: string[];
+			measurement: string;
 		}
 
 		type RatioFlag = Ratio | undefined;
