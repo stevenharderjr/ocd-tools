@@ -62,11 +62,22 @@ export const layouts = writable([
 	{
 		id: 0,
 		name: 'gutter hangers',
-		label: 'Gutter Hangers',
+		type: 'fill',
+		label: 'Gutter Hanger Layout',
 		points: ['6"', '22"', '38"', '54"', '72"'],
-		spacing: '16"',
+		spacing: '30"',
 		padding: ['6"', '6"'],
-		measurement: '78"'
+		span: '78"'
+	},
+	{
+		id: 0,
+		name: 'eclipse rail drilling',
+		type: 'arrange',
+		label: 'Eclipse Rail Drilling',
+		points: ['6"', '22"', '38"', '54"', '72"'],
+		spacing: '18"',
+		padding: ['4"', '4"'],
+		span: '78"'
 	}
 ]);
 

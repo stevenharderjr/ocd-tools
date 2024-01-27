@@ -8,17 +8,6 @@
   let container: HTMLLIElement;
 	let factors: App.Factor[] = [];
 	let relativeRange = [0.125, 1.875];
-	const decreaseRate = 0.75;
-	const increaseRate = 1.25;
-	// let stepCount = 0;
-	// const replaySteps = (stepCount) => {
-	// 	let conversion = 1;
-	// 	if (stepCount < 0) {
-	// 		for (let i = 0; i > stepCount; i--) {
-	// 			conversion = conversion *
-	// 		}
-	// 	}
-	// }
 	let lowFactor,
 		floorId: string,
     floorName: string,
@@ -54,7 +43,6 @@
 	function updateRange(floor?: number) {
 		const staticFloor = valueMap.get(floorId) as number;
 		const conversion = (floor || staticFloor) / staticFloor;
-		// console.log({ floor, staticFloor, conversion });
 		relativeRange = [+(conversion * 0.125).toPrecision(3), +(conversion * 1.875).toPrecision(3)];
 	}
 
@@ -92,9 +80,9 @@
 		updateRange(floorValue);
 	}
 
-	function decrease() {
-		let value = floorValue * decreaseRate;
-		if (value < 1) value = 1;
+	function half() {
+		let value = floorValue * 0.5;
+		if (value < 1) return;
 
 		updateRange(value);
 
@@ -104,8 +92,8 @@
 		updateValues({ id: floorId, value });
 	}
 
-	function increase() {
-		let value = floorValue * increaseRate;
+	function double() {
+		let value = floorValue * 2;
 
 		updateRange(value);
 		value = Math.round(value);
@@ -120,7 +108,6 @@
 
 	function close() {
 		// restore stored values
-		console.log('close');
 		dispatch('close');
 	}
 
@@ -160,12 +147,12 @@
 			{/if}
 		</div>
 
-		<button class="modal-actions" on:click|stopPropagation>
-			<button on:click|stopPropagation={decrease} title="halve"> ½ </button>
+		<button class="touchable modal-actions" on:click|stopPropagation>
+			<button on:click|stopPropagation={half} title="halve"> ½ </button>
 			<button on:click|stopPropagation={resetValues} title="restore initial values">
 				<img src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
 			</button>
-			<button on:click|stopPropagation={increase} style="font-size:small;" title="double"> ×2 </button>
+			<button on:click|stopPropagation={double} style="font-size:small;" title="double"> ×2 </button>
 		</button>
 
 		<div class="modal-options">
@@ -195,6 +182,7 @@
 	}
 	.inline-modal {
     z-index: 5;
+    pointer-events: auto;
     scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
@@ -219,5 +207,36 @@
 		align-items: baseline;
     border: none;
     background: none;
+	}
+
+	.modal-actions {
+		display: flex;
+		flex-direction: row;
+		gap: 0.75rem;
+		padding: 0.25rem 0;
+    border: none;
+    background: none;
+	}
+
+	.modal-actions button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 10mm;
+		width: 10mm;
+		background: #666;
+		color: #fff;
+		font-size: 1rem;
+		border: none;
+		border-radius: 4px;
+		flex: 1;
+	}
+
+	.modal-actions img {
+		filter: invert(1);
+		opacity: 0.95;
+		height: 5mm;
+		width: 5mm;
+		padding-left: 3px;
 	}
 </style>

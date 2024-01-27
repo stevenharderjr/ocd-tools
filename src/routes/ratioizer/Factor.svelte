@@ -5,7 +5,7 @@
 </script>
 
 <div class="factor">
-  <span class="label">{factor.label}</span>
+  <h2>{factor.label}</h2>
   <div class="components">
     {#if delta}
       <span class="delta">({delta > 0 ? '+' : ''}{delta})</span>
@@ -27,6 +27,13 @@
     height: 1.4rem;
   }
 
+  h2 {
+    font-weight: 300;
+    font-size: 1rem;
+    min-width: 50%;
+    max-width: 8rem;
+  }
+
   .components {
     display: flex;
     flex-direction: row;
@@ -38,11 +45,6 @@
 
   .value {
     white-space: nowrap;
-  }
-
-  .label {
-    min-width: 50%;
-    max-width: 8rem;
   }
 
   .delta {

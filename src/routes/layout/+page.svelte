@@ -1,9 +1,14 @@
+<script lang="ts">
+  import LayoutSummary from './LayoutSummary.svelte';
+  import { layouts } from '../../stores';
+
+</script>
 
 <div class="backdrop">
   <ul class="card-stack">
-    <li class="floating card">
-      <h1>Layout Equalizer</h1>
-    </li>
+    {#each $layouts as layout}
+      <LayoutSummary {layout}/>
+    {/each}
   </ul>
   <div class="button-container">
     <a href="/" title="return to dashboard">

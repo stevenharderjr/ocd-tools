@@ -6,9 +6,16 @@
   export let relativeRange = [0.25, 1.75];
 
   const baseline = factor.value;
-  $: delta = Math.round(factor.value - baseline);
-  $: min = Math.max(1, Math.round(baseline * relativeRange[0]));
-  $: max = Math.round(baseline * relativeRange[1]);
+  let delta = 0, min = 1, max = 2;
+
+  $: {
+    const [relativeMin, relativeMax] = relativeRange;
+    delta = Math.round(factor.value - baseline);
+    min = Math.max(1, Math.round(baseline * relativeMin));
+    max = Math.max(3, baseline * relativeMax);
+  }
+
+
 
   function handleChange({ currentTarget: { value }}) {
     const { name, id } = factor;
@@ -17,7 +24,7 @@
 </script>
 
 {#if factor?.label }
-  <div class="factor">
+  <div class="independent-factor">
     <span class="label">{factor.label}</span>
     <div class='dynamics'>
       {#if delta}
@@ -29,11 +36,11 @@
   </div>
 {/if}
 <button class="slider-base" on:click|stopPropagation tabindex={-1}>
-  <input class="slider" type="range" {min} {max} value={factor.value} on:input={handleChange} />
+  <input class="slider" type="range" {min} {max} value={Math.round(factor.value)} on:input={handleChange} />
 </button>
 
 <style>
-  .factor {
+  .independent-factor {
     position: relative;
     display: flex;
     flex-direction: row;

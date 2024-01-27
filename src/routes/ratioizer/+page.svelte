@@ -159,6 +159,7 @@
   }
 
 	function cancel(callback?: any) {
+    console.log('cancel')
     const accept = () => {
       copy = [...$ratios];
       initialize();
@@ -209,7 +210,7 @@
       {/if}
     {/each}
   </div>
-  <div class="button-container">
+  <div class="nav-container">
     <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->
       <img src="arrow-left.svg" aria-hidden={true}/>
@@ -252,7 +253,7 @@
     pointer-events: none;
   }
 
-	.button-container {
+	.nav-container {
     pointer-events: none;
     z-index: 4;
 		position: absolute;
