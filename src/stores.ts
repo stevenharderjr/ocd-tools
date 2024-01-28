@@ -70,7 +70,7 @@ export const layouts = writable([
 		span: '78"'
 	},
 	{
-		id: 0,
+		id: 1,
 		name: 'eclipse rail drilling',
 		type: 'arrange',
 		label: 'Eclipse Rail Drilling',

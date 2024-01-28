@@ -1,13 +1,30 @@
 <script lang="ts">
   import LayoutSummary from './LayoutSummary.svelte';
+  import UseLayout from './UseLayout.svelte';
   import { layouts } from '../../stores';
 
+  let use: App.LayoutFlag = undefined;
+  let edit: App.LayoutFlag = undefined;
+
+  function useLayout({ detail: layout }) {
+    edit = undefined;
+    use = { ...layout };
+  }
+
+  function cancel() {
+    use = undefined;
+    edit = undefined;
+  }
 </script>
 
 <div class="backdrop">
   <ul class="card-stack">
     {#each $layouts as layout}
-      <LayoutSummary {layout}/>
+      {#if layout.id === use?.id}
+        <UseLayout layout={use} on:close={cancel}/>
+      {:else}
+        <LayoutSummary {layout} on:select={useLayout}/>
+      {/if}
     {/each}
   </ul>
   <div class="button-container">

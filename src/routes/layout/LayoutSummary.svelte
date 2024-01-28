@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+
   export let layout: App.LayoutFlag;
   const spacing = layout?.spacing;
   const [start, end] = layout?.padding || [];
@@ -8,10 +11,14 @@
       ? start + ' padding'
       : 'Padding: ' + start + ', ' + end
   ];
+
+  function use() {
+    dispatch('select', layout);
+  }
 </script>
 
 <li class="floating card">
-  <button class="touchable" on:click>
+  <button class="touchable" on:click={use}>
     <div class="content">
       <section class="card-top">
         <h2>{layout?.label}</h2>

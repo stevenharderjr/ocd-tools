@@ -6,7 +6,7 @@
 </script>
 
 <div class="container">
-    <slot />
+  <slot />
 
   <div class="header-shadow"></div>
   <!-- <Header /> -->
@@ -59,13 +59,10 @@
   .footer {
     z-index: 6;
     position: absolute;
-    /* padding-top: 2px; */
     padding-bottom: 1px;
-    /* margin-bottom: env(safe-area-inset-bottom, 2px); */
     bottom: 0;
     left: 0;
     right: 0;
-    /* background-image: linear-gradient(#fff0, #ffff); */
     font-size: 0.25rem;
     text-align: center;
   }
