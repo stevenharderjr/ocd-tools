@@ -25,6 +25,9 @@ declare global {
 			prefix: string;
 			suffix: string;
 			softDelete?: boolean;
+			min?: number;
+			max?: number;
+			baseline?: number;
 		}
 
 		interface Layout {

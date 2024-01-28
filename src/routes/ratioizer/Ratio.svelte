@@ -5,7 +5,7 @@
 
 	export let ratio: App.Ratio;
 	let factors: App.Factor[] = ratio.factors.sort(({ value: a }, { value: b }) =>
-		+a > +b ? -1 : +a < +b ? 1 : 0
+		+a > +b ? -1 : +a < +b ? +1 : 0
 	);
 
 	function use() {

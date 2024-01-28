@@ -45,13 +45,14 @@
     align-items: space-between;
     overflow: hidden;
   }
+
   .header-shadow {
     z-index: 8;
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
-    height: 0.5rem;
+    height: 0.25rem;
     background-image: linear-gradient(#0006, #0000);
   }
 

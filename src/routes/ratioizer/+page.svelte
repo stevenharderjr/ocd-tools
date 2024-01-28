@@ -159,7 +159,6 @@
   }
 
 	function cancel(callback?: any) {
-    console.log('cancel')
     const accept = () => {
       copy = [...$ratios];
       initialize();

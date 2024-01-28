@@ -174,6 +174,10 @@
     max-width: 85%;
 	}
 
+	.edit-header input:focus {
+		padding-left: 6px;
+	}
+
 	.edit-actions {
 		display: flex;
 		flex-direction: row;

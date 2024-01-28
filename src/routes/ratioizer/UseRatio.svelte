@@ -7,120 +7,95 @@
 	export let ratio: App.Ratio;
   let container: HTMLLIElement;
 	let factors: App.Factor[] = [];
-	let relativeRange = [0.125, 1.875];
-	const decreaseRate = 0.75;
-	const increaseRate = 1.25;
-	// let stepCount = 0;
-	// const replaySteps = (stepCount) => {
-	// 	let conversion = 1;
-	// 	if (stepCount < 0) {
-	// 		for (let i = 0; i > stepCount; i--) {
-	// 			conversion = conversion *
-	// 		}
-	// 	}
-	// }
-	let lowFactor,
-		floorId: string,
-    floorName: string,
-		floorValue: number,
-		maxId: string,
-		maxValue: number;
-	const firstFactor = ratio.factors[0];
-	let { prefix, suffix } = firstFactor || {};
+	const initial = ratio.factors;
+	const baselineIndex = initial.length - 1;
+	const initialBaseline = initial[baselineIndex];
+	let { prefix, suffix } = initialBaseline;
 	let total = 0;
 	let locked = true;
-	let valueMap: Map<string, number> = new Map(
-		ratio.factors.map((factor) => {
-			const { id, name, value, prefix: factorPrefix, suffix: factorSuffix } = factor;
-			if (!prefix || (prefix !== factorPrefix)) prefix = '';
-			if (!suffix || (suffix !== factorSuffix)) suffix = '';
-			factors.push(factor);
-			total += +value;
-			if (!maxValue || value > maxValue) {
-				maxValue = value;
-				maxId = id;
-			}
-			if (!floorValue || value < floorValue) {
-				lowFactor = { ...factor };
-				floorId = id;
-				floorValue = value;
-        floorName = name || '';
-			}
-			return [id, value];
-		})
-	);
-	updateRange(floorValue!);
+	let valueMap: Map<string, number> = new Map();
 
-	function updateRange(floor?: number) {
-		const staticFloor = valueMap.get(floorId) as number;
-		const conversion = (floor || staticFloor) / staticFloor;
-		// console.log({ floor, staticFloor, conversion });
-		relativeRange = [+(conversion * 0.125).toPrecision(3), +(conversion * 1.875).toPrecision(3)];
+	initialize();
+
+	$: currentBaseline = { ...(factors[baselineIndex]), label: '' };
+
+	const decreaseRate = 0.75;
+	const increaseRate = 1.25;
+
+	function getUsableRangeFromValue(value: number) {
+		return [
+			Math.max(1, Math.round(value * 0.125)),
+			Math.max(3, Math.round(value * 1.875))
+		];
 	}
 
-	function updateValues({ id, value: targetValue }: { id: string; value: number }) {
+	function initialize() {
+		valueMap = new Map(
+			initial.map((factor) => {
+				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix } = factor;
+
+				if (!prefix || (prefix !== factorPrefix)) prefix = '';
+				if (!suffix || (suffix !== factorSuffix)) suffix = '';
+
+				const [min, max] = getUsableRangeFromValue(value);
+
+				factors.push({ ...factor, min, max, value, baseline: value });
+				total += +value;
+
+				return [id, value];
+			})
+		);
+	}
+
+	function updateValues({ id, value: targetValue }: { id: string; value: number }, updateRanges = false) {
 		const conversionRate = targetValue / (valueMap.get(id) as number);
-		let min: number,
-			max: number,
-			sum = 0;
-		const refactor = factors.map((factor, i) => {
-			const staticFactor: App.Factor = ratio.factors[i];
+		let sum = 0, factorIndex = 0;
+		const update = [];
+		for (const factor of factors) {
+			const staticFactor = initial[factorIndex++];
 			const value = Math.round(staticFactor.value * conversionRate);
+			if (value < 1) return;
 			sum += value;
-			if (!min || value < min) min = value;
-			if (!max || value > max) max = value;
-			return { ...staticFactor, value };
-		});
-		if (min! < 1) return;
-		factors = refactor;
-		floorValue = Math.round(min!);
-		maxValue = max!;
+
+			if (updateRanges) {
+				const [min, max] = getUsableRangeFromValue(value);
+				update.push({ ...factor, value, min, max });
+			}
+			else update.push({ ...factor, value });
+		}
+		factors = update;
 		total = sum;
 	}
+
 
 	function resetValues() {
-    // return dispatch('reset');
-		let sum = 0;
-		factors = factors.map((factor, i) => {
-			const value = ratio.factors[i].value;
-			sum += value;
-			return { ...factor, value };
-		});
-		floorValue = valueMap.get(floorId) as number;
-		maxValue = valueMap.get(maxId) as number;
-		total = sum;
-		updateRange(floorValue);
+		updateValues(initialBaseline, true);
 	}
 
 	function decrease() {
-		let value = floorValue * decreaseRate;
-		if (value < 1) value = 1;
-
-		updateRange(value);
+		const { value: baselineValue, id } = currentBaseline;
+		let value = Math.max(1, baselineValue * decreaseRate);
 
 		value = Math.round(value);
-		floorValue = value;
 
-		updateValues({ id: floorId, value });
+		updateValues({ id, value }, true);
 	}
 
 	function increase() {
-		let value = floorValue * increaseRate;
+		const { value: baselineValue, id } = currentBaseline;
+		let value = Math.max(2, baselineValue * increaseRate);
 
-		updateRange(value);
 		value = Math.round(value);
-		floorValue = value;
 
-		updateValues({ id: floorId, value });
+		updateValues({ id, value }, true);
 	}
 
-	function handleSliderInput({ detail }) {
+	function handleSliderInput({ detail }: { detail: { id: string, value: number }}) {
 		updateValues(detail);
 	}
 
 	function close() {
 		// restore stored values
-		console.log('close');
 		dispatch('close');
 	}
 
@@ -130,8 +105,7 @@
 
 	function toggleLock() {
 		locked = !locked;
-		if (locked) updateValues({ id: floorId, value: floorValue });
-    // updateRange(floorValue);
+		if (locked) updateValues(currentBaseline);
 	}
 
   onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
@@ -148,24 +122,25 @@
 				{#if locked}
 					<Factor {factor} />
 				{:else}
-					<Slider {factor} {relativeRange} on:update={handleSliderInput} />
+					<Slider {factor} on:update={handleSliderInput} />
 				{/if}
 			{/each}
 			{#if locked}
-				<Slider
-					factor={{ id: floorId, value: floorValue }}
-					{relativeRange}
-					on:update={handleSliderInput}
-				/>
+				<Slider	factor={currentBaseline} on:update={handleSliderInput} />
 			{/if}
 		</div>
 
 		<button class="modal-actions" on:click|stopPropagation>
-			<button on:click|stopPropagation={decrease} title="halve"> ½ </button>
+			<!-- <button on:click|stopPropagation={decrease} title="halve"> ½ </button> -->
+			<button on:click|stopPropagation={decrease} title="halve">
+				<img src="minus.svg" alt="subtraction symbol" />
+			</button>
 			<button on:click|stopPropagation={resetValues} title="restore initial values">
 				<img src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
 			</button>
-			<button on:click|stopPropagation={increase} style="font-size:small;" title="double"> ×2 </button>
+			<button on:click|stopPropagation={increase} style="font-size:small;" title="double">
+				<img src="plus.svg" alt="addition symbol" />
+			</button>
 		</button>
 
 		<div class="modal-options">

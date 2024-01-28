@@ -1,7 +1,7 @@
 <script lang="ts">
   export let factor: App.Factor = { label: '', value: 0, unit: '' };
   const initial = { ...factor };
-  $: delta = factor.value - initial.value;
+  $: delta = factor?.baseline ? factor.value - factor.baseline : 0;
 </script>
 
 <div class="factor">
