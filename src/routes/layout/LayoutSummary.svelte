@@ -16,7 +16,7 @@
       <section class="card-top">
         <h2>{layout?.label}</h2>
       </section>
-      <section class="datapoints">
+      <section class="factors">
         {#each details as detail}
           <span>{detail}</span>
         {/each}

@@ -17,6 +17,15 @@
 	let edit: App.RatioFlag = undefined;
   let confirmation: Confirmation | undefined;
   let copy = [...$ratios];
+  let drag = {
+    start: 0,
+    stop: Date.now(),
+    enabled: false,
+    origin: [0, 0],
+    end: [0, 0],
+    boundary: 20,
+    time: 200
+  };
 
   function initialize() {
     use = undefined;
@@ -159,6 +168,7 @@
   }
 
 	function cancel(callback?: any) {
+    if (dragDetected()) return;
     const accept = () => {
       copy = [...$ratios];
       initialize();
@@ -182,10 +192,49 @@
   function handleKeyboardCancel({ key }: KeyboardEvent) {
     if (key === 'esc') cancel({});
   }
+
+  function handleDragStart(event: MouseEvent) {
+    const { screenX, screenY } = event;
+    drag = {
+      ...drag,
+      start: Date.now(),
+      enabled: true,
+      origin: [screenX, screenY]
+    };
+  }
+
+  function handleDragEnd(event: MouseEvent) {
+    const now = Date.now();
+    const { screenX, screenY } = event;
+    drag = {
+      ...drag,
+      enabled: false,
+      end: [screenX, screenY],
+      stop: now
+    };
+    // if (dragDetected()) event.stopPropagation();
+  }
+
+  function dragDetected() {
+    if (!(use || edit)) return false;
+
+    const { start, stop, origin, end, time, boundary, enabled } = drag;
+    if (enabled) return true;
+
+    const duration = stop - start;
+    if (duration && duration > time) return true;
+
+    const [x1, y1] = origin;
+    const [x2, y2] = end;
+    const distance = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+    if (distance > boundary) return true;
+
+    return false;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel}>
+<div class="backdrop" on:click|self={cancel} on:mousedown={handleDragStart} on:mouseup={handleDragEnd} on:keypress={handleKeyboardCancel}>
   <!-- <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(4px) opacity(1) brightness(0.95)'};`} /> -->
   <div class="background-haze" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
