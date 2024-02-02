@@ -45,7 +45,7 @@
 				on:click|stopPropagation={edit}
 				title={'edit "' + ratio.name + '"'}
 			>
-				<img src="edit.svg" alt="pen on paper" />
+				<img height="16px" width="16px"src="edit.svg" alt="pen on paper" />
 			</button>
 		</div>
 	</button>

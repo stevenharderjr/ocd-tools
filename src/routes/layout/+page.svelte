@@ -30,7 +30,7 @@
   <div class="button-container">
     <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="arrow-left.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="arrow-left.svg" aria-hidden={true}/>
     </a>
     <button on:click title="add new layout" disabled>
       <svg aria-hidden="true" viewBox="0 0 1 1">

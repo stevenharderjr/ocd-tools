@@ -7,6 +7,7 @@
 	export let ratio: App.Ratio;
   let container: HTMLLIElement;
 	let factors: App.Factor[] = [];
+	let precision = 1;
 	const initial = ratio.factors;
 	const baselineIndex = initial.length - 1;
 	const initialBaseline = initial[baselineIndex];
@@ -32,7 +33,8 @@
 	function initialize() {
 		valueMap = new Map(
 			initial.map((factor) => {
-				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix } = factor;
+				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix, precision: factorPrecision } = factor;
+				if (precision < factorPrecision) precision = factorPrecision;
 
 				if (!prefix || (prefix !== factorPrefix)) prefix = '';
 				if (!suffix || (suffix !== factorSuffix)) suffix = '';
@@ -112,7 +114,7 @@
 </script>
 
 <li bind:this={container} class="floating inline-modal">
-	<button class="touchable" on:click|self={close} on:keypress={handleKeyboardCancel}>
+	<button class="touchable" on:click={close} on:keypress={handleKeyboardCancel}>
 		<div class="modal-header">
 			<h2>{ratio.label}</h2>
 			<span>({prefix + Math.round(total) + suffix})</span>
@@ -133,13 +135,13 @@
 		<button class="modal-actions" on:click|stopPropagation>
 			<!-- <button on:click|stopPropagation={decrease} title="halve"> ½ </button> -->
 			<button on:click|stopPropagation={decrease} title="halve">
-				<img src="minus.svg" alt="subtraction symbol" />
+				<img height="16px" width="16px"src="minus.svg" alt="subtraction symbol" />
 			</button>
 			<button on:click|stopPropagation={resetValues} title="restore initial values">
-				<img src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
+				<img height="16px" width="16px"src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
 			</button>
 			<button on:click|stopPropagation={increase} style="font-size:small;" title="double">
-				<img src="plus.svg" alt="addition symbol" />
+				<img height="16px" width="16px"src="plus.svg" alt="addition symbol" />
 			</button>
 		</button>
 
@@ -149,9 +151,9 @@
 				title={locked ? 'locked for precision' : 'unlocked for variability'}
 			>
 				{#if locked}
-					<img src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
+					<img height="16px" width="16px"src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
 				{:else}
-					<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
+					<img height="16px" width="16px"src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
 				{/if}
 			</button>
 		</div>

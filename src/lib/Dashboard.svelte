@@ -14,7 +14,7 @@
   <div class="button-container">
     <button on:click title="open user profile">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="user.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="user.svg" aria-hidden={true}/>
     </button>
     <!-- <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
       <svg aria-hidden="true" viewBox="0 0 1 1">
@@ -23,7 +23,7 @@
     </button> -->
     <button on:click title="download for offline use">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="download.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="download.svg" aria-hidden={true}/>
     </button>
   </div>
 </div>

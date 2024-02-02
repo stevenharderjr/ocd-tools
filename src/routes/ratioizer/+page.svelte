@@ -239,29 +239,29 @@
   <div class="background-haze" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="card-stack" on:click={cancel}>
-    {#each copy as ratio}
-      {#if ratio.id === use?.id}
-        <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
-      {:else if ratio.id === edit?.id}
-        <EditRatio
-        ratio={edit}
-          on:close={cancel}
-          on:save={saveRatio}
-          on:reset={resetRatio}
-          on:delete={deleteRatio}
-          on:rename={renameRatio}
-          on:update={updateFactor}
-        />
-      {:else}
-        <Ratio {ratio} on:use={useRatio} on:edit={editRatio} on:reset={resetRatio} />
-      {/if}
-    {/each}
-  </div>
+  <ul class="card-stack">
+      {#each copy as ratio}
+        {#if ratio.id === use?.id}
+          <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
+        {:else if ratio.id === edit?.id}
+          <EditRatio
+          ratio={edit}
+            on:close={cancel}
+            on:save={saveRatio}
+            on:reset={resetRatio}
+            on:delete={deleteRatio}
+            on:rename={renameRatio}
+            on:update={updateFactor}
+          />
+        {:else}
+          <Ratio {ratio} on:use={useRatio} on:edit={editRatio} on:reset={resetRatio} />
+        {/if}
+      {/each}
+    </ul>
   <div class="nav-container">
     <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="arrow-left.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="arrow-left.svg" aria-hidden={true}/>
     </a>
     <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
       <svg aria-hidden="true" viewBox="0 0 1 1">

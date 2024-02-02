@@ -1,14 +1,15 @@
-<script>
+<script lang="ts">
   // import Header from '$lib/Header.svelte';
   import Toast from '$lib/Toast.svelte';
   import { toasts, blur } from '../stores'
   import './styles.css';
+
 </script>
 
 <div class="container">
   <slot />
 
-  <div class="header-shadow"></div>
+  <div class="header-shadow" />
   <!-- <Header /> -->
 
   {#if $blur}
@@ -52,8 +53,13 @@
     left: 0;
     top: 0;
     right: 0;
-    height: 0.25rem;
+    height: 4px;
+    width: 100vw;
     background-image: linear-gradient(#0006, #0000);
+    padding: none;
+    margin: none;
+    border: none;
+
   }
 
   .footer {

@@ -69,7 +69,7 @@ function invalidateRatio(ratio: App.Ratio) {
 function invalidateFactor(factor: App.Factor) {
 	const { label, value = 0 } = factor;
 	if (!label) return 'Factor name is required.';
-	if (Math.round(value) !== value) return 'Factor value must be an integers (whole number).';
+	// if (Math.round(value) !== value) return 'Factor value must be integers (whole numbers).';
 	if (value < 1) return 'Factor value must be positive';
 	return '';
 }

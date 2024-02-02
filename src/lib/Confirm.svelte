@@ -35,11 +35,11 @@
 		{/if}
 		<div class="buttons">
 			<button class="reject" on:click={reject}>
-				<img src="x-circle.svg" alt="reject" />
+				<img height="16px" width="16px"src="x-circle.svg" alt="reject" />
 				Cancel
 			</button>
 			<button class="confirm" on:click={confirm}>
-				<img src="check-circle.svg" alt="confirm" />
+				<img height="16px" width="16px"src="check-circle.svg" alt="confirm" />
 				Confirm
 			</button>
 		</div>

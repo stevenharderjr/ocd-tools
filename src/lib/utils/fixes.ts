@@ -1,14 +1,16 @@
 // sorts non-numeric 'fixes (prefixes and suffixes) out of factor values
 
 interface Fix {
-	value: string;
+	value: number;
 	prefix: string;
 	suffix: string;
+	precision: number;
 }
 
-const blank: Fix = { value: '', prefix: '', suffix: '' };
+const blank: Fix = { value: 0, prefix: '', suffix: '', precision: 0 };
 
 export function fixes(stringOrNumber: string | number) {
+	if (!stringOrNumber) return blank;
 	const string = stringOrNumber + '';
 	const charCount = string.length;
 	if (!charCount) return blank;
@@ -16,15 +18,22 @@ export function fixes(stringOrNumber: string | number) {
 	let value = '';
 	let prefix = '';
 	let suffix = '';
+	let precision = 0;
 
 	for (const char of string) {
-		if ((suffix || char === ' ' || isNaN(+char)) && char !== '.') {
-			if (!value) prefix += char;
-			else suffix += char;
+		if (char === ',' && value && !suffix) continue;
+		const numeric = !isNaN(+char);
+		if ((suffix || char === ' ' || !numeric) && (precision || char !== '.')) {
+			if (!value) {
+				prefix += char;
+			} else suffix += char;
+			continue;
 		} else {
+			if (precision) precision *= 10;
+			else if (char === '.') precision = 1;
 			value += char;
 		}
 	}
 
-	return { value: +value as number, prefix, suffix };
+	return { value: +value as number, prefix, suffix, precision: precision || 1 };
 }

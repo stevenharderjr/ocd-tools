@@ -4,7 +4,7 @@
   $: delta = factor?.baseline ? factor.value - factor.baseline : 0;
 </script>
 
-<div class="factor">
+<li class="factor">
   <h2>{factor.label}</h2>
   <div class="components">
     {#if delta}
@@ -12,7 +12,7 @@
     {/if}
     <span class="value">{factor.prefix + factor.value + factor.suffix}</span>
   </div>
-</div>
+</li>
 
 <style>
   .factor {

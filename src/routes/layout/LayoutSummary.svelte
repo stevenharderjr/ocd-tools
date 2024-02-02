@@ -33,7 +33,7 @@
 
   <div class="card-options">
     <button class="option-icon" title={'edit ' + layout?.name || 'ratio'}>
-      <img src="edit.svg" alt="edit" />
+      <img height="16px" width="16px"src="edit.svg" alt="edit" />
     </button>
   </div>
 </li>
