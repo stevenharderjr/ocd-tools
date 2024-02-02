@@ -3,11 +3,13 @@
   const dispatch = createEventDispatcher();
 
   export let factor: App.Factor;
+  export let precision = '1';
   let input: HTMLInputElement;
 
-  $: delta = Math.round(factor.value - factor.baseline!);
+  $: decimals = precision.length - 1;
+  $: delta = (factor.value - factor.baseline!).toFixed(decimals);
 
-  function handleChange({ currentTarget: { value }}: { currentTarget: HTMLInputElement }) {
+  function handleChange({ currentTarget: { value } }: { currentTarget: HTMLInputElement }) {
     const { id } = factor;
     dispatch('update', { id, value });
   }
@@ -24,15 +26,15 @@
     <span class="label">{factor.label}</span>
     <div class='dynamics'>
       {#if delta}
-        <span class="delta">({delta > 0 ? '+' : ''}{delta})</span>
+        <span class="delta">({+delta > 0 ? '+' : ''}{delta})</span>
       {/if}
-      <span class="value">{factor.prefix + Math.round(factor.value) + factor.suffix}</span>
+      <span class="value">{factor.prefix + factor.value.toFixed(decimals) + factor.suffix}</span>
       <!-- <span class="unit">{factor.unit}</span> -->
     </div>
   </button>
 {/if}
 <button class="slider-base" on:click|stopPropagation tabindex={-1}>
-  <input bind:this={input} class="slider" type="range" value={factor.value} min={factor.min} max={factor.max} on:input={handleChange} />
+  <input bind:this={input} class="slider" type="range" value={factor.value} min={factor.min} max={factor.max} step={1 / +precision} on:input={handleChange} />
 </button>
 
 <style>

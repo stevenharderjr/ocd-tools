@@ -8,7 +8,7 @@ test('empty argument returns neutral values', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(0);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(0);
+	expect(result.precision).toEqual('');
 });
 
 test('dollar value returns a prefix', () => {
@@ -18,7 +18,7 @@ test('dollar value returns a prefix', () => {
 	expect(result.prefix).toEqual('$');
 	expect(result.value).toEqual(12);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(1);
+	expect(result.precision).toEqual('1');
 });
 
 test('numeric value is separated from suffix', () => {
@@ -28,7 +28,7 @@ test('numeric value is separated from suffix', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12);
 	expect(result.suffix).toEqual('M');
-	expect(result.precision).toEqual(1);
+	expect(result.precision).toEqual('1');
 });
 
 test('10ths precision is accurately recorded', () => {
@@ -38,7 +38,7 @@ test('10ths precision is accurately recorded', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(10);
+	expect(result.precision).toEqual('10');
 });
 
 test('10ths precision is accurately recorded', () => {
@@ -48,7 +48,7 @@ test('10ths precision is accurately recorded', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12.5);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(10);
+	expect(result.precision).toEqual('10');
 });
 
 test('100ths precision is accurately recorded', () => {
@@ -58,7 +58,7 @@ test('100ths precision is accurately recorded', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(100);
+	expect(result.precision).toEqual('100');
 });
 
 test('100ths precision is accurately recorded', () => {
@@ -68,7 +68,7 @@ test('100ths precision is accurately recorded', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12.05);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(100);
+	expect(result.precision).toEqual('100');
 });
 
 test('1000ths precision is accurately recorded', () => {
@@ -78,7 +78,7 @@ test('1000ths precision is accurately recorded', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(1000);
+	expect(result.precision).toEqual('1000');
 });
 
 test('1000ths precision is accurately recorded', () => {
@@ -89,7 +89,7 @@ test('1000ths precision is accurately recorded', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12.005);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(1000);
+	expect(result.precision).toEqual('1000');
 });
 
 test('strips commas from numbers', () => {
@@ -99,7 +99,7 @@ test('strips commas from numbers', () => {
 	expect(result.prefix).toEqual('');
 	expect(result.value).toEqual(12000);
 	expect(result.suffix).toEqual('');
-	expect(result.precision).toEqual(1);
+	expect(result.precision).toEqual('1');
 });
 
 test('allows commas in prefix and suffix', () => {
@@ -109,5 +109,5 @@ test('allows commas in prefix and suffix', () => {
 	expect(result.prefix).toEqual('a, b: ');
 	expect(result.value).toEqual(12000);
 	expect(result.suffix).toEqual(' (c, d)');
-	expect(result.precision).toEqual(1);
+	expect(result.precision).toEqual('1');
 });

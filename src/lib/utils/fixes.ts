@@ -4,10 +4,10 @@ interface Fix {
 	value: number;
 	prefix: string;
 	suffix: string;
-	precision: number;
+	precision: string;
 }
 
-const blank: Fix = { value: 0, prefix: '', suffix: '', precision: 0 };
+const blank: Fix = { value: 0, prefix: '', suffix: '', precision: '' };
 
 export function fixes(stringOrNumber: string | number) {
 	if (!stringOrNumber) return blank;
@@ -35,5 +35,5 @@ export function fixes(stringOrNumber: string | number) {
 		}
 	}
 
-	return { value: +value as number, prefix, suffix, precision: precision || 1 };
+	return { value: +value as number, prefix, suffix, precision: (precision || 1) + '' };
 }

@@ -8,26 +8,29 @@ declare global {
 		// interface Platform {}
 		interface Ratio {
 			id: string;
-			name?: string;
 			label?: string;
 			factors: Factor[] | [];
-			// conversionRate: 1 | number;
-			// inputRange: [number, number];
-			// derivedPrefix: string;
-			// derivedSuffix: string;
+			// overload properties (derived and used by client only)
+			name?: string;
+			latestConversionRate?: 1 | number;
+			inputRange?: [number, number];
+			derivedPrefix?: string;
+			derivedSuffix?: string;
 		}
 
 		interface Factor {
 			id: string;
-			name?: string;
 			label: string;
 			value: number;
 			prefix: string;
 			suffix: string;
+			// overload properties (derived and used by client only)
+			name?: string;
 			softDelete?: boolean;
 			min?: number;
 			max?: number;
 			baseline?: number;
+			precision?: string;
 		}
 
 		interface Layout {

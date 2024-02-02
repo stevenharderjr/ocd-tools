@@ -32,8 +32,8 @@
 
   function handleValueInput({ currentTarget }: { currentTarget: HTMLInputElement }) {
     const inputValue = currentTarget.value;
-    const { value, prefix, suffix } = fixes(inputValue);
-    dispatch('update', { ...factor, prefix, value, suffix });
+    const { value, prefix, suffix, precision } = fixes(inputValue);
+    dispatch('update', { ...factor, prefix, value, suffix, precision });
     const string = prefix + value + suffix;
     if (string !== inputValue) currentTarget.value = string;
   }

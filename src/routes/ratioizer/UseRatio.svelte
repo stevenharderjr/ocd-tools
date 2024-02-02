@@ -7,7 +7,7 @@
 	export let ratio: App.Ratio;
   let container: HTMLLIElement;
 	let factors: App.Factor[] = [];
-	let precision = 1;
+	let precision = '1';
 	const initial = ratio.factors;
 	const baselineIndex = initial.length - 1;
 	const initialBaseline = initial[baselineIndex];
@@ -18,6 +18,7 @@
 
 	initialize();
 
+	$: decimals = precision.length - 1;
 	$: currentBaseline = { ...(factors[baselineIndex]), label: '' };
 
 	const decreaseRate = 0.75;
@@ -34,7 +35,8 @@
 		valueMap = new Map(
 			initial.map((factor) => {
 				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix, precision: factorPrecision } = factor;
-				if (precision < factorPrecision) precision = factorPrecision;
+				console.log({ factorPrecision })
+				if (factorPrecision && +precision < +factorPrecision) precision = factorPrecision;
 
 				if (!prefix || (prefix !== factorPrefix)) prefix = '';
 				if (!suffix || (suffix !== factorSuffix)) suffix = '';
@@ -47,6 +49,7 @@
 				return [id, value];
 			})
 		);
+		console.log({ precision })
 	}
 
 	function updateValues({ id, value: targetValue }: { id: string; value: number }, updateRanges = false) {
@@ -87,7 +90,7 @@
 		const { value: baselineValue, id } = currentBaseline;
 		let value = Math.max(2, baselineValue * increaseRate);
 
-		value = Math.round(value);
+		value = +value.toFixed(decimals);
 
 		updateValues({ id, value }, true);
 	}
@@ -122,13 +125,13 @@
 		<div class="factors">
 			{#each factors as factor}
 				{#if locked}
-					<Factor {factor} />
+					<Factor {factor} {precision} />
 				{:else}
-					<Slider {factor} on:update={handleSliderInput} />
+					<Slider {factor} {precision} on:update={handleSliderInput} />
 				{/if}
 			{/each}
 			{#if locked}
-				<Slider	factor={currentBaseline} on:update={handleSliderInput} />
+				<Slider	factor={currentBaseline} {precision} on:update={handleSliderInput} />
 			{/if}
 		</div>
 
