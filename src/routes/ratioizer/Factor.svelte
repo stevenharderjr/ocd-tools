@@ -1,16 +1,16 @@
 <script lang="ts">
   export let factor: App.Factor = { id: '', label: '', value: 0, prefix: '', suffix: '' };
-  export let precision = '1';
+  export let precision;
   const initial = { ...factor };
   $: decimals = precision.length - 1;
-  $: delta = factor?.baseline ? (factor.value - factor.baseline!).toFixed(decimals) : 0;
+  $: delta = factor?.baseline ? (factor.value - factor.baseline!) : 0;
 </script>
 
 <li class="factor">
   <h2>{factor.label}</h2>
   <div class="components">
     {#if delta}
-      <span class="delta">({+delta > 0 ? '+' : ''}{delta})</span>
+      <span class="delta">({delta > 0 ? '+' : ''}{delta.toFixed(decimals)})</span>
     {/if}
     <span class="value">{factor.prefix + factor.value.toFixed(decimals) + factor.suffix}</span>
   </div>

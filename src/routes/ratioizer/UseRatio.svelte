@@ -12,7 +12,7 @@
 	const baselineIndex = initial.length - 1;
 	const initialBaseline = initial[baselineIndex];
 	let { prefix, suffix } = initialBaseline;
-	let total = 0;
+	let total = '';
 	let locked = true;
 	let valueMap: Map<string, number> = new Map();
 
@@ -32,6 +32,7 @@
 	}
 
 	function initialize() {
+		let sum = 0;
 		valueMap = new Map(
 			initial.map((factor) => {
 				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix, precision: factorPrecision } = factor;
@@ -44,11 +45,12 @@
 				const [min, max] = getUsableRangeFromValue(value);
 
 				factors.push({ ...factor, min, max, value, baseline: value });
-				total += +value;
+				sum += +value;
 
 				return [id, value];
 			})
 		);
+		total = sum.toFixed(decimals);
 		console.log({ precision })
 	}
 
@@ -58,8 +60,8 @@
 		const update = [];
 		for (const factor of factors) {
 			const staticFactor = initial[factorIndex++];
-			const value = Math.round(staticFactor.value * conversionRate);
-			if (value < 1) return;
+			const value = +(staticFactor.value * conversionRate).toFixed(decimals);
+			if (value < 1 / +precision) return;
 			sum += value;
 
 			if (updateRanges) {
@@ -69,7 +71,7 @@
 			else update.push({ ...factor, value });
 		}
 		factors = update;
-		total = sum;
+		total = sum.toFixed(decimals);
 	}
 
 
@@ -120,7 +122,7 @@
 	<button class="touchable" on:click={close} on:keypress={handleKeyboardCancel}>
 		<div class="modal-header">
 			<h2>{ratio.label}</h2>
-			<span>({prefix + Math.round(total) + suffix})</span>
+			<span>({prefix + total + suffix})</span>
 		</div>
 		<div class="factors">
 			{#each factors as factor}

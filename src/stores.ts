@@ -55,6 +55,37 @@ export const ratios = writable<App.Ratio[]>([
 				suffix: ' g'
 			}
 		]
+	},
+	{
+		id: '2',
+		name: 'pot of tea',
+		label: 'Pot of Tea',
+		factors: [
+			{
+				id: '0',
+				name: 'water',
+				label: 'Water',
+				prefix: '',
+				value: 830,
+				suffix: ' g'
+			},
+			{
+				id: '1',
+				name: 'sugar',
+				label: 'Sugar',
+				prefix: '',
+				value: 75,
+				suffix: ' g'
+			},
+			{
+				id: '2',
+				name: 'tea',
+				label: 'Tea',
+				prefix: '',
+				value: 3.5,
+				suffix: ' g'
+			}
+		]
 	}
 ]);
 
