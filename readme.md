@@ -12,7 +12,7 @@ Subtracting the endpoint measurements involves converting the length to inches: 
 
 This needs to be divided by 9 (one less than the number of screws): **`140" / 9 = ~15.5_"`**
 
-This doesn't divide evenly. My tape measure shows 1/8" intervals, so let's approximate 1/16" precision: **`140 / 9 * 16 = ~248 8/16"`**
+This doesn't divide evenly. My tape measure shows 1/8" intervals, so let's approximate 1/16" precision: **`140 / 9 * 16 = ~248.8_ / 16"`**
 
 After reducing to feet and inches, my measurement intervals are as follows: `2"`, `1' 5 9/16"`, `2' 9 1/8"`, `4' 11/16"`, `5' 4 1/4"`, `6' 7 3/4"`, `7' 9 5/16"`, `9' 2 7/8"`, `10' 6 7/16"`, `11' 10"`
 
