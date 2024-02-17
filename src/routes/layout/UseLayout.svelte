@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { freedomFractions } from '$lib/utils/freedomFractions';
+  import { measurement } from '$lib/utils/freedomFractions';
   const dispatch = createEventDispatcher();
 
   export let layout: App.LayoutFlag;
@@ -8,7 +8,7 @@
   const [start, end] = layout?.padding || [];
   const details = [
     span + ' span',
-    'Points: ' + points?.map(point => freedomFractions.parse(point)).join(', '),
+    'Points: ' + points?.map(point => measurement.fromDecimalInches(point)).join(', '),
     spacing + ' spacing',
     (start === end)
       ? start + ' padding'

@@ -1,9 +1,21 @@
 import { fixes } from './fixes';
 
 class Overloader {
-	constructor() {}
+	constructor() {
+		this.factor = this.factor.bind(this);
+		this.ratio = this.ratio.bind(this);
+	}
 
-	ratio(ratio: App.Ratio) {
+	factor(factor: App.Factor | App.FactorBaseline) {
+		const { label, value } = factor;
+		return {
+			...factor,
+			...fixes(value),
+			name: label.toLowerCase()
+		};
+	}
+
+	ratio(ratio: App.RatioBaseline) {
 		const { factor: overloaded } = this;
 		const { label, factors: underloadedFactors } = ratio;
 		const factors: App.Factor[] = [];
@@ -39,43 +51,42 @@ class Overloader {
 		return {
 			...ratio,
 			name: label?.toLowerCase(),
+			precision,
 			prefix,
 			suffix,
 			factors
 		};
 	}
-
-	factor(factor: App.FactorBaseline) {
-		const { label, value } = factor;
-		return {
-			...fixes(value),
-			...factor,
-			name: label.toLowerCase()
-		} as unknown as App.Factor;
-	}
 }
 
-class Underloader {
-	constructor() {}
-
-	ratio(ratio: App.Ratio) {
-		const { factor: underloaded } = this;
-		const { id, label, factors: overloadedFactors } = ratio;
-		const factors: App.FactorBaseline[] = [];
-
-		for (const factor in overloadedFactors) factors.push(underloaded(factor));
-		return { id, label, factors };
+class Unloader {
+	constructor() {
+		this.factor = this.factor.bind(this);
+		this.ratio = this.ratio.bind(this);
 	}
 
-	factor(factor: App.Factor) {
-		const { label, value, prefix, suffix } = factor;
+	factor(factor: App.Factor | App.FactorBaseline) {
+		// @ts-expect-error: undefined prefix/suffix is no problem
+		const { id, label, value, prefix = '', suffix = '' } = factor;
+
 		return {
+			id,
 			label,
 			value: prefix + value + suffix
-		} as App.FactorBaseline;
+		};
+	}
+
+	ratio(ratio: App.Ratio | App.RatioBaseline) {
+		const { factor: unload } = this;
+		const { id, label, factors } = ratio;
+		const unloadedFactors: App.FactorBaseline[] = [];
+
+		if (factors.length) for (const factor of factors) unloadedFactors.push(unload(factor));
+
+		return { id, label, factors: unloadedFactors };
 	}
 }
 
 export const overload = new Overloader();
 
-export const underload = new Underloader();
+export const unload = new Unloader();

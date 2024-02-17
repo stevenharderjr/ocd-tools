@@ -6,44 +6,54 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
-		interface Ratio {
-			id: string;
-			label?: string;
-			factors: Factor[] | [];
-			// overload properties (derived and used by client only)
-			name?: string;
-			latestConversionRate?: 1 | number;
-			inputRange?: [number, number];
-			derivedPrefix?: string;
-			derivedSuffix?: string;
-		}
-
-		interface Factor {
+		interface RatioBaseline {
 			id: string;
 			label: string;
-			value: number;
+			factors: FactorBaseline[] | [];
+			userConversionRate?: string;
+		}
+
+		interface Ratio extends RatioBaseline {
+			// these should be derivable from baseline properties
+			name: string;
 			prefix: string;
 			suffix: string;
-			// overload properties (derived and used by client only)
-			name?: string;
+			precision: string;
+			factors: Factor[];
+		}
+
+		interface FactorBaseline {
+			id: string;
+			label: string;
+			value: string;
+		}
+
+		interface Factor extends FactorBaseline {
+			// these should be derivable from baseline properties
+			name: string;
 			softDelete?: boolean;
+			prefix: string;
+			value: number;
+			suffix: string;
 			min?: number;
 			max?: number;
 			baseline?: number;
-			precision?: string;
+			precision: string;
 		}
 
-		interface Layout {
+		interface LayoutBaseline {
 			id: string;
-			name?: string;
 			label: string;
 			span: string;
-			type: 'arrange' | 'fill';
+			padding: [string, string];
+			interval: string;
+			alignment: 'even' | 'center' | 'none';
+		}
+
+		interface Layout extends LayoutBaseline {
+			name?: string;
 			points: string[];
 			spacing: string;
-			spacingTarget: string;
-			alignment: 'even' | 'center' | 'start' | 'end';
-			padding: [number, number];
 		}
 
 		type RatioFlag = Ratio | undefined;

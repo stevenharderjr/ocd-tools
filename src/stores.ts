@@ -1,98 +1,73 @@
 import { writable } from 'svelte/store';
 import { uuid } from '$lib/utils/uuid';
+import { overload } from '$lib/utils/loaders';
 
-export const ratios = writable<App.Ratio[]>([
-	{
-		id: '0',
-		name: 'cup of coffee',
-		label: 'Cup of Coffee',
-		factors: [
-			{
-				id: '0',
-				name: 'coffee',
-				label: 'Coffee',
-				prefix: '',
-				value: 200,
-				suffix: ' g'
-			},
-			{
-				id: '1',
-				name: 'half & half',
-				label: 'Half & Half',
-				prefix: '',
-				value: 150,
-				suffix: ' g'
-			},
-			{
-				id: '2',
-				name: 'sugar',
-				label: 'Sugar',
-				prefix: '',
-				value: 20,
-				suffix: ' g'
-			}
-		]
-	},
-	{
-		id: '1',
-		name: 'pot of coffee',
-		label: 'Pot of Coffee',
-		factors: [
-			{
-				id: '0',
-				name: 'coffee grounds',
-				label: 'Coffee Grounds',
-				prefix: '',
-				value: 36,
-				suffix: ' g'
-			},
-			{
-				id: '1',
-				name: 'water',
-				label: 'Water',
-				prefix: '',
-				value: 1140,
-				suffix: ' g'
-			}
-		]
-	},
-	{
-		id: '2',
-		name: 'pot of tea',
-		label: 'Pot of Tea',
-		factors: [
-			{
-				id: '0',
-				name: 'water',
-				label: 'Water',
-				prefix: '',
-				value: 830,
-				suffix: ' g'
-			},
-			{
-				id: '1',
-				name: 'sugar',
-				label: 'Sugar',
-				prefix: '',
-				value: 75,
-				suffix: ' g'
-			},
-			{
-				id: '2',
-				name: 'tea',
-				label: 'Tea',
-				prefix: '',
-				value: 3.5,
-				suffix: ' g'
-			}
-		]
-	}
-]);
+export const ratios = writable<App.Ratio[]>(
+	[
+		{
+			id: '0',
+			label: 'Cup of Coffee',
+			factors: [
+				{
+					id: '0',
+					label: 'Coffee',
+					value: '200 g'
+				},
+				{
+					id: '1',
+					label: 'Half & Half',
+					value: '150 g'
+				},
+				{
+					id: '2',
+					label: 'Sugar',
+					value: '20 g'
+				}
+			]
+		},
+		{
+			id: '1',
+			label: 'Pot of Coffee',
+			factors: [
+				{
+					id: '0',
+					label: 'Coffee Grounds',
+					value: '36 g'
+				},
+				{
+					id: '1',
+					label: 'Water',
+					value: '1140 g'
+				}
+			]
+		},
+		{
+			id: '2',
+			label: 'Pot of Tea',
+			factors: [
+				{
+					id: '0',
+					label: 'Water',
+					value: '830 g'
+				},
+				{
+					id: '1',
+					label: 'Sugar',
+					value: '75 g'
+				},
+				{
+					id: '2',
+					label: 'Tea',
+					value: '3.5 g'
+				}
+			]
+		}
+	].map(overload.ratio)
+);
 
 export const layouts = writable([
 	{
 		id: 0,
-		name: 'gutter hangers',
 		type: 'fill',
 		label: 'Gutter Hanger Layout',
 		points: ['6"', '22"', '38"', '54"', '72"'],
@@ -102,7 +77,6 @@ export const layouts = writable([
 	},
 	{
 		id: 1,
-		name: 'eclipse rail drilling',
 		type: 'arrange',
 		label: 'Eclipse Rail Drilling',
 		points: ['6"', '22"', '38"', '54"', '72"'],

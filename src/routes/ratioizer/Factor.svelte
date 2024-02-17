@@ -1,8 +1,8 @@
 <script lang="ts">
-  export let factor: App.Factor = { id: '', label: '', value: 0, prefix: '', suffix: '' };
+  export let factor: App.Factor;
   export let precision;
   const initial = { ...factor };
-  $: decimals = precision.length - 1;
+  $: decimals = precision?.length ? precision.length - 1 : 0;
   $: delta = factor?.baseline ? (factor.value - factor.baseline!) : 0;
 </script>
 
