@@ -13,6 +13,24 @@
   <span class="label">Spacing</span>
   <span class="target">{readable(target)}</span>
   {#if target !== actual}
-    <span class="actual">{readable(actual)}</span>
+    <span class="actual"> ({readable(actual)} actual)</span>
   {/if}
 </div>
+
+<style>
+  .box {
+    font-size: 0.9rem;
+    align-items: center;
+  }
+  .label {
+    font-size: 0.9rem;
+    min-width: 4rem;
+  }
+  .target {
+    padding: 0 0.5rem;
+  }
+  .actual {
+    font-size: small;
+    padding: 0 0.5rem;
+  }
+</style>

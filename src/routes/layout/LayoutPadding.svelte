@@ -7,7 +7,7 @@
   const readable = formatter({ feet: false });
 </script>
 
-<div class="grid">
+<div class="row">
   <span class="label">Padding</span>
   <div class="measurement">
     <span>&#8677;</span>
@@ -21,12 +21,11 @@
 </div>
 
 <style>
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+  .row {
+    display: flex;
+    flex-wrap: nowrap;
   }
   .measurement {
-    grid-column: 2/4;
     display: flex;
     width: 100%;
     max-width: 10rem;
@@ -42,10 +41,13 @@
   }
   li {
     font-size: 0.9rem;
-    padding: 0 0.75rem;
+    padding: 0 0.5rem;
     white-space: nowrap;
+    min-width: 3rem;
+    text-align: center;
   }
   .label {
+    min-width: 4rem;
     font-size: 0.9rem;
     padding-right: 2rem;
   }

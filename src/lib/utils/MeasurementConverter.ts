@@ -9,7 +9,7 @@ export interface Measurement {
 	readable?: string;
 }
 
-type MeasurementPrecision = 1 | 2 | 4 | 8 | 16 | 32 | 64;
+type MeasurementPrecision = 0 | 1 | 2 | 4 | 8 | 16 | 32 | 64;
 type MeasurementDecimals = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 interface MeasurementOptions {
@@ -22,6 +22,7 @@ interface MeasurementOptions {
 }
 
 const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
+	1: 0,
 	2: 1,
 	4: 2,
 	8: 3,
@@ -124,7 +125,7 @@ export class MeasurementConverter {
 			reset = { ...this._options };
 			options(optionOverrides);
 		}
-		const { decimals, feet: measureFeet } = this._options;
+		const { decimals, feet: measureFeet, precision } = this._options;
 
 		const result = {
 			numeric: 0,
@@ -227,6 +228,15 @@ export class MeasurementConverter {
 			const numeric = feet * 12 + inches;
 			result.numeric = numeric;
 			result.fixed = numeric + '';
+		}
+
+		if (precision === 1) {
+			result.fraction = '';
+			result.inches = Math.round(result.numeric);
+			if (measureFeet && inches > 12) {
+				feet++;
+				inches -= 12;
+			}
 		}
 
 		result.feet = feet;

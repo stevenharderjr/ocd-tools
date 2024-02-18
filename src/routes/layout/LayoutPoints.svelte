@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { formatter } from '$lib/utils/MeasurementConverter';
-  import { points } from '$lib/utils/deriveLayoutPoints';
+  import { formatter, measurement } from '$lib/utils/MeasurementConverter';
 
-  export let layout: App.Layout;
-  const displayOptions = { feet: layout.span > 144 };
+  export let points: number[];
+  const span = points[points.length - 1] - points[0];
+  const displayOptions = { feet: span > 144 };
   const readable = formatter(displayOptions);
-  $: measurements = points(layout);
 </script>
 
 <ul on:click|stopPropagation>
-  {#each measurements as measurement}
-    <li>&#8729; <span>{readable(measurement) || '0"'}</span></li>
+  {#each points as point, i}
+    <li><label for={`point ${i}`}><input id={`point ${i}`} type="checkbox" />{readable(point) || '0"'}</label></li>
   {/each}
 </ul>
 
@@ -18,14 +17,17 @@
   ul {
     pointer-events: auto;
     list-style: none;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    width: max-content;
+    display: grid;
+    column-gap: 1rem;
+    grid-template-columns: 1fr 1fr;
   }
-  li {
+  label {
+    display: flex;
+    align-items: center;
     white-space: nowrap;
-    padding-right: 2rem;
+    height: 42px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-indent: 6px;
   }
 </style>

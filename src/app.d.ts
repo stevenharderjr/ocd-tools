@@ -47,8 +47,10 @@ declare global {
 			span: number;
 			padding: [number, number];
 			targetSpacing: number;
+			precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
+			decimals: 0 | 1 | 2 | 3 | 4 | 5 | 6;
 			offset: 'leading' | 'center' | 'trailing';
-			alignment: 'even' | 'center' | 'simple';
+			alignment: 'even' | 'fill' | 'simple';
 		}
 
 		interface Layout extends LayoutBaseline {

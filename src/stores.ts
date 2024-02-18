@@ -71,8 +71,9 @@ export const layouts = writable([
 		alignment: 'fill',
 		label: 'Gutter Hanger Layout',
 		span: 40 * 12,
-		targetSpacing: 30,
-		padding: [6, 6]
+		targetSpacing: 32,
+		padding: [6, 6],
+		precision: 1
 	},
 	{
 		id: 1,
@@ -85,10 +86,10 @@ export const layouts = writable([
 	{
 		id: 2,
 		alignment: 'simple',
-		label: '4x8 Rafter Layout',
+		label: 'Truss Layout',
 		span: 144,
 		targetSpacing: 24,
-		padding: [0, 3.5]
+		padding: [0, 1.5]
 	}
 ]);
 

@@ -3,6 +3,18 @@ import { measurement } from './MeasurementConverter';
 
 measurement.options({ feet: false, caching: false });
 
+test('parser respects 1" precision option', () => {
+	const options = { precision: 1 };
+	const { fraction } = measurement.parse('1 1/4"', options);
+	expect(fraction).toEqual('');
+});
+
+test('measurement respects 1" precision option', () => {
+	const options = { precision: 1 };
+	const { fraction } = measurement.fromDecimalInches(1.25, options);
+	expect(fraction).toEqual('');
+});
+
 test('parser respects feet option', () => {
 	const { inches, feet, readable } = measurement.parse('54"', { feet: false });
 	expect(feet).toEqual(0);

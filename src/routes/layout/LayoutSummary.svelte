@@ -7,7 +7,7 @@
   const dispatch = createEventDispatcher();
 
   export let layout: App.Layout;
-  const displayOptions = { feet: false };
+  const displayOptions = { feet: false, precision: layout.precision };
   const readable = formatter(displayOptions);
   const span = readable(layout.span);
 

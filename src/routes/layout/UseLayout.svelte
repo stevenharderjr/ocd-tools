@@ -1,11 +1,13 @@
 <script lang="ts">
   import LayoutSpan from './LayoutSpan.svelte'
   import LayoutPadding from './LayoutPadding.svelte'
+  import LayoutSpacing from './LayoutSpacing.svelte';
   import LayoutPoints from './LayoutPoints.svelte';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { formatter } from '$lib/utils/MeasurementConverter';
-  import { points } from '$lib/utils/deriveLayoutPoints';
+  import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
   const dispatch = createEventDispatcher();
+  let container: HTMLLIElement;
 
   export let layout: App.Layout;
   const { targetSpacing: spacing } = layout || {};
@@ -13,22 +15,16 @@
   const [start, end] = layout?.padding || [];
   const measurementDisplayOptions = { feet: false };
   const readable = formatter(measurementDisplayOptions);
-
-  const details = [
-    readable(span) + ' span',
-    (start === end)
-      ? readable(start) + ' padding'
-      : 'Padding: ' + readable(start) + ', ' + readable(end),
-    readable(spacing) + ' spacing',
-      points(layout!).map(readable).join(' | '),
-  ];
+  const points = deriveLayoutPoints(layout);
 
   function cancel() {
     dispatch('close');
   }
+
+  onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
 </script>
 
-<li class="floating inline-modal">
+<li bind:this={container} class="floating inline-modal">
   <button class="touchable" on:click={cancel}>
     <div class="content">
       <section class="card-top">
@@ -37,9 +33,8 @@
       <section class="factors">
         <LayoutSpan span={layout.span} />
         <LayoutPadding padding={layout.padding} />
-        <section class="horizontal-scroll">
-          <LayoutPoints {layout} />
-        </section>
+        <LayoutSpacing spacing={[layout.targetSpacing, points[1] - points[0]]} />
+        <LayoutPoints {points} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>
@@ -53,7 +48,7 @@
 </li>
 
 <style>
-  	.inline-modal {
+  .inline-modal {
     z-index: 5;
     scroll-margin-top: 20vh;
 		position: relative;
@@ -64,7 +59,6 @@
     min-width: 100%;
 		background: #fff;
 		border-radius: 8px;
-		padding: 10px 14px;
 		margin: 0 4rem 1rem 4rem;
     align-self: center;
 	}

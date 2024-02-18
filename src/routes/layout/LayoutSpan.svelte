@@ -5,7 +5,6 @@
   export let span: number;
   let displayOptions = { feet: span > 144 };
   let readable = formatter(displayOptions);
-  console.log({ span });
 
   onMount(() => {
     const changeThreshold = span > 144;
@@ -16,7 +15,7 @@
   });
 </script>
 
-<div class="grid">
+<div class="row">
   <span class="label">Span</span>
   <div class="measurement">
     <span>&#8676;</span>
@@ -26,12 +25,11 @@
 </div>
 
 <style>
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+  .row {
+    display: flex;
+    flex-wrap: nowrap;
   }
   .measurement {
-    grid-column: 2/4;
     display: flex;
     width: 100%;
     max-width: 10rem;
@@ -42,5 +40,6 @@
   .label {
     font-size: 0.9rem;
     padding-right: 2rem;
+    min-width: 4rem;
   }
 </style>
