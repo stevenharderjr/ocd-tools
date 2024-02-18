@@ -1,3 +1,5 @@
+import { prettyBigNumber } from './prettyBigNumber';
+
 interface FF {
 	fixed: string;
 	numeric: number;
@@ -8,44 +10,65 @@ interface FF {
 }
 
 type FFPrecision = 1 | 2 | 4 | 8 | 16 | 32 | 64;
+type FFDecimals = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 interface FFOptions {
-	decimals?: number;
+	decimals?: FFDecimals;
+	commas?: boolean;
 	precision?: FFPrecision;
-	feet?: true;
-	yards?: true;
-	miles?: true;
-	zeros?: true;
+	feet?: boolean;
+	zeros?: boolean;
 }
 
-const defaultDecimals = 6;
-const defaultPrecision = 16;
+const decimalsByPrecision: { [K in FFPrecision]?: number } = {
+	2: 1,
+	4: 2,
+	8: 3,
+	16: 4,
+	32: 5,
+	64: 6
+};
 
-class MeasurementConverter {
+const precisionByDecimals = [0, 2, 4, 8, 16, 32, 64];
+
+const defaultOptions: FFOptions = {
+	precision: 16,
+	decimals: 4,
+	commas: true,
+	feet: true
+};
+
+export class MeasurementConverter {
 	_options: FFOptions;
 
-	constructor(
-		_options: FFOptions = { precision: defaultPrecision, feet: true, decimals: defaultDecimals }
-	) {
-		this._options = _options;
+	constructor(_options: FFOptions = defaultOptions) {
+		this._options = { ...defaultOptions, ..._options };
 
+		this.options = this.options.bind(this);
 		this.fromDecimalInches = this.fromDecimalInches.bind(this);
 		this.parse = this.parse.bind(this);
 		this.stringify = this.stringify.bind(this);
+		this._cycleFractions = this._cycleFractions.bind(this);
 	}
 
 	options(options: FFOptions) {
-		this._options = options;
+		const { precision, decimals } = options;
+		if (precision) options.decimals = decimalsByPrecision[precision] as FFDecimals;
+		else if (decimals) options.precision = precisionByDecimals[decimals] as FFPrecision;
+		this._options = { ...defaultOptions, ...options };
 	}
 
-	fromDecimalInches(inputValue: string, options?: FFOptions): FF | undefined {
+	fromDecimalInches(inputValue: string, optionOverrides?: FFOptions): FF | void {
 		if (!inputValue) return undefined;
 		if (isNaN(+inputValue)) return this.parse(inputValue);
-		const {
-			decimals = defaultDecimals,
-			precision = defaultPrecision,
-			feet: measureFeet
-		} = options || this._options;
+		const { options, _cycleFractions, stringify } = this;
+
+		let reset: FFOptions = {};
+		if (optionOverrides) {
+			reset = { ...this._options };
+			options(optionOverrides);
+		}
+		const { feet: measureFeet, decimals } = this._options;
 
 		const string = inputValue + '';
 		const fixed = Number(string).toFixed(decimals);
@@ -53,16 +76,25 @@ class MeasurementConverter {
 		const inchesOnly = measureFeet ? numeric % 12 : numeric;
 		const inches = Math.floor(inchesOnly);
 		const feet = (numeric - inchesOnly) / 12;
-		const fraction = cycleFractions(inchesOnly % 1, precision);
+		const fraction = _cycleFractions(inchesOnly % 1);
 		const result: FF = { numeric, fixed, feet, inches, fraction };
-		result.readable = this.stringify(result, options);
+		result.readable = stringify(result);
+
+		if (reset) options(reset);
 
 		return result;
 	}
 
-	parse(inputValue: string, options?: FFOptions): FF | undefined {
+	parse(inputValue: string, optionOverrides?: FFOptions): FF | void {
 		if (!isNaN(+inputValue)) return this.fromDecimalInches(inputValue);
-		const { decimals = defaultDecimals, feet: measureFeet } = options || this._options;
+		const { options, stringify } = this;
+
+		let reset: FFOptions = {};
+		if (optionOverrides) {
+			reset = { ...this._options };
+			options(optionOverrides);
+		}
+		const { decimals, feet: measureFeet } = this._options;
 
 		const result = {
 			numeric: 0,
@@ -77,56 +109,78 @@ class MeasurementConverter {
 		if (i < 1) return;
 
 		let digits = '';
-		let segment = '';
-		let numerator = '';
-		let denominator = '';
+		let segment = 'inches';
+		let numerator = 0;
+		let denominator = 0;
+		let spaceCount = 0;
+		let prevChar = '';
 
 		while (i--) {
+			// work backward through input string
 			const char = inputValue[i];
 
 			if (isNaN(+char)) {
-				if (char === '/') {
-					if (!digits) return undefined; // invalid input (fraction indicated without denominator)
-					denominator = digits;
-					segment = 'numerator';
-				} else if (char === "'") {
-					if (segment) result[segment] = digits;
-					segment = 'feet';
-				} else if (char === '"') {
-					result[segment] = digits;
-					segment = 'inches';
+				// segment changes are indicated by non-numeric characters (', ", /) or spaces
+				switch (char) {
+					case '/':
+						// current segment should have been a denominator
+						if (!digits)
+							return console.error('invalid input: fraction indicated by "/" with no denominator');
+						denominator = +digits;
+						// next segment should be a numerator
+						segment = 'numerator';
+						break;
+					case "'":
+						if (!result[segment]) result[segment] = +digits;
+						segment = 'feet';
+						break;
+					case '"':
+						if (denominator || numerator || result.inches)
+							return console.error(
+								'invalid input: inches (and fractions of inches) should come before the inch symbol (")'
+							);
+						break;
+					case ',':
+						continue;
+					default:
+						return console.error('invalid input (valid characters are \', ", /, 0-9');
 				}
 
 				digits = '';
 				continue;
-			}
+			} else if (char === ' ') {
+				// a space should indicate that "digits" now represents a complete value
+				if (++spaceCount > 2 || prevChar === ' ')
+					return console.error(
+						'invalid input ' + prevChar === ' '
+							? 'no double spaces'
+							: 'there should be spaces only between feet, inches and/or fractions'
+					);
 
-			if (char === ' ') {
-				if (!segment) segment = 'inches';
-				else if (segment === 'numerator') numerator = digits;
-				else result[segment] = digits;
-				digits = '';
+				if (segment === 'numerator') numerator = +digits;
+				else result[segment] = +digits;
+
 				segment = 'inches';
+				digits = '';
 				continue;
 			}
 
 			digits = char + digits;
+			prevChar = char;
 		}
 
-		if (segment) {
-			if (segment === 'numerator') numerator = digits;
-			else result[segment] = digits;
-		}
+		if (segment === 'numerator') numerator = +digits;
+		else if (!result[segment]) result[segment] = +digits;
 
 		let feet = +result.feet;
 		let inches = +result.inches;
 
-		if (measureFeet) {
-			if (inches > 12) {
-				feet = Math.floor(inches / 12);
-				inches = inches % 12;
-			}
-		} else {
+		if (inches > 11) {
+			feet += Math.floor(inches / 12);
+			inches = inches % 12;
+		}
+
+		if (!measureFeet) {
 			inches += feet * 12;
 			feet = 0;
 		}
@@ -147,19 +201,33 @@ class MeasurementConverter {
 
 		result.feet = feet;
 		result.inches = inches;
-		result.readable = this.stringify(result, options);
+		result.readable = stringify(result);
 
-		console.log({ numerator, denominator }, options);
-		console.log(result);
+		if (reset) options(reset);
+
+		console.log({ inputValue, ...result });
 
 		return result;
 	}
 
-	stringify(freedomFraction: FF, options?: FFOptions) {
-		const { feet: measureFeet, zeros } = options || this._options;
-		const { feet, inches, fraction } = freedomFraction;
+	stringify(freedomFraction: FF, optionOverrides?: FFOptions) {
+		const { options } = this;
 
-		console.log({ feet, inches, fraction });
+		let reset: FFOptions = {};
+		if (optionOverrides) {
+			reset = { ...this._options };
+			options(optionOverrides);
+		}
+		const { feet: measureFeet, zeros, commas } = this._options;
+
+		// eslint-disable-next-line prefer-const
+		let { feet, inches, fraction } = freedomFraction;
+
+		if (commas) {
+			if (feet > 1000) feet = prettyBigNumber(feet);
+			if (inches > 1000) inches = prettyBigNumber(inches);
+			if (!(inches || fraction || feet)) return '';
+		}
 
 		let f = measureFeet && (feet || zeros) ? feet + "'" : '';
 		let i = inches ? inches + '' : '';
@@ -168,22 +236,21 @@ class MeasurementConverter {
 		if (i) i += '"';
 		if (i && f) f += ' ';
 
-		console.log({ f, i });
+		if (reset) options(reset);
 
 		return f + i;
 	}
-}
 
-export const measurement = new MeasurementConverter({ precision: 16, feet: true });
+	_cycleFractions(decimal: number) {
+		let denominator = this._options.precision || 16;
+		let numerator = Math.round(decimal * denominator);
+		while (numerator % 2 === 0 && denominator % 2 === 0) {
+			numerator /= 2;
+			denominator /= 2;
+		}
 
-export function cycleFractions(decimal: number, precision?: FFPrecision) {
-	console.log({ decimal, precision });
-	let denominator = precision || 16;
-	let numerator = Math.round(decimal * denominator);
-	while (numerator % 2 === 0 && denominator % 2 === 0) {
-		numerator /= 2;
-		denominator /= 2;
+		return denominator > 1 ? numerator + '/' + denominator : '';
 	}
-
-	return denominator > 1 ? numerator + '/' + denominator : '';
 }
+
+export const measurement = new MeasurementConverter();
