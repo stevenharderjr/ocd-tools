@@ -188,3 +188,13 @@ input:focus {
 	width: 5mm;
 	padding-left: 3px;
 }
+
+.background-haze {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	background: #ccc9;
+	pointer-events: none;
+}

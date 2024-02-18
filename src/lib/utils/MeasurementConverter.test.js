@@ -1,7 +1,23 @@
 import { expect, test } from 'vitest';
-import { measurement } from '$lib/utils/freedomFractions';
+import { measurement } from './MeasurementConverter';
 
-test('parser should handle feet and inches greater than 12', () => {
+measurement.options({ feet: false });
+
+test('parser respects feet option', () => {
+	const { inches, feet, readable } = measurement.parse('54"', { feet: false });
+	expect(feet).toEqual(0);
+	expect(inches).toEqual(54);
+	expect(readable).toEqual('54"');
+});
+
+test('conversion respects feet option', () => {
+	const { inches, feet, readable } = measurement.fromDecimalInches(54);
+	expect(feet).toEqual(0);
+	expect(inches).toEqual(54);
+	expect(readable).toEqual('54"');
+});
+
+test('parser should handle combinations of feet and inches greater than 12', () => {
 	const { feet, inches, readable } = measurement.parse('12\' 28 1/2"');
 	expect(feet).toEqual(14);
 	expect(inches).toEqual(4);

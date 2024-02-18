@@ -68,21 +68,19 @@ export const ratios = writable<App.Ratio[]>(
 export const layouts = writable([
 	{
 		id: 0,
-		type: 'fill',
+		alignment: 'fill',
 		label: 'Gutter Hanger Layout',
-		points: ['6"', '22"', '38"', '54"', '72"'],
-		spacing: '30"',
-		padding: ['6"', '6"'],
-		span: '78"'
+		span: 40 * 12,
+		spacing: 30,
+		padding: [6, 6]
 	},
 	{
 		id: 1,
-		type: 'arrange',
+		alignment: 'fill',
 		label: 'Eclipse Rail Drilling',
-		points: ['6"', '22"', '38"', '54"', '72"'],
-		spacing: '18"',
-		padding: ['4"', '4"'],
-		span: '78"'
+		span: 78,
+		targetSpacing: 18,
+		padding: [4, 4]
 	}
 ]);
 

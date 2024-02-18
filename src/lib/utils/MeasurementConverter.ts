@@ -18,6 +18,7 @@ interface FFOptions {
 	precision?: FFPrecision;
 	feet?: boolean;
 	zeros?: boolean;
+	caching?: boolean;
 }
 
 const decimalsByPrecision: { [K in FFPrecision]?: number } = {
@@ -35,14 +36,19 @@ const defaultOptions: FFOptions = {
 	precision: 16,
 	decimals: 4,
 	commas: true,
-	feet: true
+	feet: true,
+	caching: true
 };
 
 export class MeasurementConverter {
 	_options: FFOptions;
+	_cachedResults: Map<string | FF, FF | string>;
+	_cachedOverrides: Map<string | FF, FFOptions | undefined>;
 
 	constructor(_options: FFOptions = defaultOptions) {
 		this._options = { ...defaultOptions, ..._options };
+		this._cachedResults = new Map();
+		this._cachedOverrides = new Map();
 
 		this.options = this.options.bind(this);
 		this.fromDecimalInches = this.fromDecimalInches.bind(this);
@@ -61,7 +67,12 @@ export class MeasurementConverter {
 	fromDecimalInches(inputValue: string, optionOverrides?: FFOptions): FF | void {
 		if (!inputValue) return undefined;
 		if (isNaN(+inputValue)) return this.parse(inputValue);
-		const { options, _cycleFractions, stringify } = this;
+		const { options, _cachedResults, _cachedOverrides, _cycleFractions, stringify } = this;
+
+		if (this._options.caching) {
+			const cachedResult = _cachedResults.get(inputValue);
+			if (cachedResult && _cachedOverrides.get(inputValue) === optionOverrides) return cachedResult;
+		} else console.warn('cache busted');
 
 		let reset: FFOptions = {};
 		if (optionOverrides) {
@@ -75,19 +86,27 @@ export class MeasurementConverter {
 		const numeric = +fixed;
 		const inchesOnly = measureFeet ? numeric % 12 : numeric;
 		const inches = Math.floor(inchesOnly);
-		const feet = (numeric - inchesOnly) / 12;
+		const feet = measureFeet ? (numeric - inchesOnly) / 12 : 0;
 		const fraction = _cycleFractions(inchesOnly % 1);
 		const result: FF = { numeric, fixed, feet, inches, fraction };
 		result.readable = stringify(result);
 
 		if (reset) options(reset);
 
+		_cachedResults.set(inputValue, result);
+		_cachedOverrides.set(inputValue, optionOverrides);
+
 		return result;
 	}
 
 	parse(inputValue: string, optionOverrides?: FFOptions): FF | void {
 		if (!isNaN(+inputValue)) return this.fromDecimalInches(inputValue);
-		const { options, stringify } = this;
+		const { options, stringify, _cachedResults, _cachedOverrides } = this;
+
+		if (this._options.caching) {
+			const cachedResult = _cachedResults.get(inputValue);
+			if (cachedResult && _cachedOverrides.get(inputValue) === optionOverrides) return cachedResult;
+		} else console.warn('cache busted');
 
 		let reset: FFOptions = {};
 		if (optionOverrides) {
@@ -205,13 +224,22 @@ export class MeasurementConverter {
 
 		if (reset) options(reset);
 
-		console.log({ inputValue, ...result });
+		_cachedResults.set(inputValue, result);
+		_cachedOverrides.set(inputValue, optionOverrides);
 
 		return result;
 	}
 
 	stringify(freedomFraction: FF, optionOverrides?: FFOptions) {
-		const { options } = this;
+		const { options, _cachedResults, _cachedOverrides } = this;
+
+		if (this._options.caching) {
+			const cachedResult = _cachedResults.get(freedomFraction);
+			if (cachedResult && _cachedOverrides.get(freedomFraction) === optionOverrides) {
+				console.log('cached readable');
+				return cachedResult;
+			}
+		} else console.warn('cache busted');
 
 		let reset: FFOptions = {};
 		if (optionOverrides) {
@@ -222,6 +250,10 @@ export class MeasurementConverter {
 
 		// eslint-disable-next-line prefer-const
 		let { feet, inches, fraction } = freedomFraction;
+		if (feet && !measureFeet) {
+			inches += feet * 12;
+			feet = 0;
+		}
 
 		if (commas) {
 			if (feet > 1000) feet = prettyBigNumber(feet);
@@ -238,7 +270,12 @@ export class MeasurementConverter {
 
 		if (reset) options(reset);
 
-		return f + i;
+		const result = f + i;
+
+		_cachedResults.set(freedomFraction, result);
+		_cachedOverrides.set(freedomFraction, optionOverrides);
+
+		return result;
 	}
 
 	_cycleFractions(decimal: number) {

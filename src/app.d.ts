@@ -44,16 +44,17 @@ declare global {
 		interface LayoutBaseline {
 			id: string;
 			label: string;
-			span: string;
-			padding: [string, string];
-			interval: string;
-			alignment: 'even' | 'center' | 'none';
+			span: number;
+			padding: [number, number];
+			targetSpacing: number;
+			offset: 'leading' | 'center' | 'trailing';
+			alignment: 'even' | 'center' | 'simple';
 		}
 
 		interface Layout extends LayoutBaseline {
 			name?: string;
-			points: string[];
-			spacing: string;
+			points: number[];
+			spacing: number;
 		}
 
 		type RatioFlag = Ratio | undefined;

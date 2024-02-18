@@ -18,6 +18,7 @@
 </script>
 
 <div class="backdrop">
+  <div class="background-haze" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
   <ul class="card-stack">
     {#each $layouts as layout}
       {#if layout.id === use?.id}
