@@ -1,16 +1,17 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import LayoutSpan from './LayoutSpan.svelte';
+  import LayoutPadding from './LayoutPadding.svelte';
+  import LayoutSpacing from './LayoutSpacing.svelte';
+  import { formatter } from '$lib/utils/MeasurementConverter';
   const dispatch = createEventDispatcher();
 
-  export let layout: App.LayoutFlag;
-  const spacing = layout?.spacing;
-  const [start, end] = layout?.padding || [];
-  const details = [
-    spacing + ' spacing',
-    (start === end)
-      ? start + ' padding'
-      : 'Padding: ' + start + ', ' + end
-  ];
+  export let layout: App.Layout;
+  const displayOptions = { feet: false };
+  const readable = formatter(displayOptions);
+  const span = readable(layout.span);
+
+  const spacing = readable(layout.targetSpacing);
 
   function use() {
     dispatch('select', layout);
@@ -24,9 +25,9 @@
         <h2>{layout?.label}</h2>
       </section>
       <section class="factors">
-        {#each details as detail}
-          <span>{detail}</span>
-        {/each}
+        <LayoutSpan span={layout.span} />
+        <LayoutPadding padding={layout.padding} />
+        <LayoutSpacing spacing={layout.targetSpacing} />
       </section>
     </div>
   </button>

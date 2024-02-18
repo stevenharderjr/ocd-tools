@@ -237,8 +237,6 @@
 <div class="backdrop" on:click|self={cancel} on:mousedown={handleDragStart} on:mouseup={handleDragEnd} on:keypress={handleKeyboardCancel}>
   <!-- <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(4px) opacity(1) brightness(0.95)'};`} /> -->
   <div class="background-haze" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <ul class="card-stack">
       {#each copy as ratio}
         {#if ratio.id === use?.id}

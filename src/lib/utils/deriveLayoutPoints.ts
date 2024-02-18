@@ -4,7 +4,7 @@ export function points(layout: App.Layout) {
 
 	const usableSpan = span - start - end;
 	const pointCount = Math.ceil(usableSpan / targetSpacing);
-	const spacing = usableSpan / pointCount;
+	const spacing = alignment === 'fill' ? usableSpan / pointCount : targetSpacing;
 
 	// let offset = 0;
 	// switch (alignment) {

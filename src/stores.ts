@@ -79,8 +79,16 @@ export const layouts = writable([
 		alignment: 'fill',
 		label: 'Eclipse Rail Drilling',
 		span: 78,
-		targetSpacing: 18,
+		targetSpacing: 16,
 		padding: [4, 4]
+	},
+	{
+		id: 2,
+		alignment: 'simple',
+		label: '4x8 Rafter Layout',
+		span: 144,
+		targetSpacing: 24,
+		padding: [0, 3.5]
 	}
 ]);
 

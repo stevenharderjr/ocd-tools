@@ -58,5 +58,5 @@ test('returns correct number of points', () => {
 test('actual spacing does not exceed target spacing', () => {
 	const [p1, p2] = points(layout);
 	const diff = p2 - p1;
-	expect(diff).toBeLessThan(layout.targetSpacing);
+	expect(diff).not.toBeGreaterThan(layout.targetSpacing);
 });

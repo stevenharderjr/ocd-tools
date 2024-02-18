@@ -1,25 +1,27 @@
 <script lang="ts">
+  import LayoutSpan from './LayoutSpan.svelte'
+  import LayoutPadding from './LayoutPadding.svelte'
+  import LayoutPoints from './LayoutPoints.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { measurement } from '$lib/utils/MeasurementConverter';
+  import { formatter } from '$lib/utils/MeasurementConverter';
   import { points } from '$lib/utils/deriveLayoutPoints';
   const dispatch = createEventDispatcher();
 
-  export let layout: App.LayoutFlag;
-  const {spacing, span } = layout || {};
+  export let layout: App.Layout;
+  const { targetSpacing: spacing } = layout || {};
+  let span = layout.span;
   const [start, end] = layout?.padding || [];
+  const measurementDisplayOptions = { feet: false };
+  const readable = formatter(measurementDisplayOptions);
 
-  const details = (start && end && span && spacing) ? [
+  const details = [
     readable(span) + ' span',
-    'Points: ' + layout ? points(layout).map(readable).join(', ') : 'Oops!',
-    readable(spacing) + ' spacing',
     (start === end)
       ? readable(start) + ' padding'
-      : 'Padding: ' + readable(start) + ', ' + readable(end)
-  ] : [];
-
-  function readable(inches: number) {
-    if (inches) return measurement.fromDecimalInches(inches).readable;
-  }
+      : 'Padding: ' + readable(start) + ', ' + readable(end),
+    readable(spacing) + ' spacing',
+      points(layout!).map(readable).join(' | '),
+  ];
 
   function cancel() {
     dispatch('close');
@@ -33,9 +35,11 @@
         <h2>{layout?.label}</h2>
       </section>
       <section class="factors">
-        {#each details as detail}
-          <span>{detail}</span>
-        {/each}
+        <LayoutSpan span={layout.span} />
+        <LayoutPadding padding={layout.padding} />
+        <section class="horizontal-scroll">
+          <LayoutPoints {layout} />
+        </section>
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>
@@ -55,10 +59,16 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		width: 100%;
+    width: fit-content;
+		max-width: calc(100vw - 1.5rem);
+    min-width: 100%;
 		background: #fff;
 		border-radius: 8px;
 		padding: 10px 14px;
-		margin-bottom: 1rem;
+		margin: 0 4rem 1rem 4rem;
+    align-self: center;
 	}
+  .horizontal-scroll {
+    overflow-x: auto;
+  }
 </style>

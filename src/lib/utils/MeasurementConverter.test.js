@@ -18,14 +18,16 @@ test('conversion respects feet option', () => {
 });
 
 test('parser should handle combinations of feet and inches greater than 12', () => {
-	const { feet, inches, readable } = measurement.parse('12\' 28 1/2"');
+	const { feet, inches, readable } = measurement.parse('12\' 28 1/2"', { feet: true });
 	expect(feet).toEqual(14);
 	expect(inches).toEqual(4);
 	expect(readable).toEqual('14\' 4 1/2"');
 });
 
 test('parser should ignore commas', () => {
-	const { feet, inches, fraction, readable } = measurement.parse('5,000\', 0, 1/2"');
+	const { feet, inches, fraction, readable } = measurement.parse('5,000\', 0, 1/2"', {
+		feet: true
+	});
 	expect(feet).toEqual(5000);
 	expect(inches).toEqual(0);
 	expect(fraction).toEqual('1/2');
@@ -46,12 +48,16 @@ test('parser respects feet option', () => {
 });
 
 test('conversion respects commas option', () => {
-	const options = { commas: false };
+	const options = { feet: true, commas: false };
 	expect(measurement.fromDecimalInches(5000 * 12 + 8, options).readable).toEqual('5000\' 8"');
 });
 
 test('conversion handles high numbers', () => {
-	expect(measurement.fromDecimalInches(5000 * 12 + 8).readable).toEqual('5,000\' 8"');
+	expect(
+		measurement.fromDecimalInches(5000 * 12 + 8, {
+			feet: true
+		}).readable
+	).toEqual('5,000\' 8"');
 });
 
 test('conversion respects higher precision option', () => {
@@ -100,7 +106,7 @@ test('should correctly parse feet, inches and a fraction string', () => {
 
 test('should convert decimal inches to feet and inches', () => {
 	const options = { feet: true, zeros: true };
-	const { feet, inches } = measurement.parse(13, options);
+	const { feet, inches } = measurement.fromDecimalInches(13, options);
 	expect(feet).toEqual(1);
 	expect(inches).toEqual(1);
 });
@@ -136,7 +142,7 @@ test('fixed value respects decimals option', () => {
 });
 
 test('numeric value trimmed to feet and inches', () => {
-	const { feet, inches } = measurement.fromDecimalInches(106.6250983);
+	const { feet, inches } = measurement.fromDecimalInches(106.6250983, { feet: true });
 	expect(feet).toEqual(8);
 	expect(inches).toEqual(10);
 });
