@@ -42,7 +42,7 @@ const defaultOptions: FFOptions = {
 
 export class MeasurementConverter {
 	_options: FFOptions;
-	_cachedResults: Map<string | FF, FF | string>;
+	_cachedResults: Map<string | number | FF, FF | string>;
 	_cachedOverrides: Map<string | FF, FFOptions | undefined>;
 
 	constructor(_options: FFOptions = defaultOptions) {
@@ -64,9 +64,9 @@ export class MeasurementConverter {
 		this._options = { ...defaultOptions, ...options };
 	}
 
-	fromDecimalInches(inputValue: string, optionOverrides?: FFOptions): FF | void {
+	fromDecimalInches(inputValue: number, optionOverrides?: FFOptions): FF | void {
 		if (!inputValue) return undefined;
-		if (isNaN(+inputValue)) return this.parse(inputValue);
+		if (isNaN(+inputValue)) return this.parse(inputValue + '');
 		const { options, _cachedResults, _cachedOverrides, _cycleFractions, stringify } = this;
 
 		if (this._options.caching) {
@@ -83,11 +83,15 @@ export class MeasurementConverter {
 
 		const string = inputValue + '';
 		const fixed = Number(string).toFixed(decimals);
-		const numeric = +fixed;
-		const inchesOnly = measureFeet ? numeric % 12 : numeric;
-		const inches = Math.floor(inchesOnly);
-		const feet = measureFeet ? (numeric - inchesOnly) / 12 : 0;
-		const fraction = _cycleFractions(inchesOnly % 1);
+		const numeric = +inputValue;
+		const remainder = numeric % 12;
+		let inches = Math.floor(remainder);
+		let feet = Math.floor(numeric / 12);
+		if (!measureFeet) {
+			inches += feet * 12;
+			feet = 0;
+		}
+		const fraction = _cycleFractions(numeric % 1);
 		const result: FF = { numeric, fixed, feet, inches, fraction };
 		result.readable = stringify(result);
 
@@ -221,6 +225,7 @@ export class MeasurementConverter {
 		result.feet = feet;
 		result.inches = inches;
 		result.readable = stringify(result);
+		console.log(this._options, optionOverrides);
 
 		if (reset) options(reset);
 

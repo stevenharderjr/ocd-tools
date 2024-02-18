@@ -1,25 +1,25 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { measurement } from '$lib/utils/MeasurementConverter';
-  import { deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
+  import { points } from '$lib/utils/deriveLayoutPoints';
   const dispatch = createEventDispatcher();
 
   export let layout: App.LayoutFlag;
   const {spacing, span } = layout || {};
   const [start, end] = layout?.padding || [];
 
-  const details = [
-    span + ' span',
-    'Points: ' + points?.map(point => {
-      const { readable } = measurement.parse(point, { feet: false });
-      console.log(point, readable);
-      return readable;
-    }).join(', '),
-    spacing + ' spacing',
+  const details = (start && end && span && spacing) ? [
+    readable(span) + ' span',
+    'Points: ' + layout ? points(layout).map(readable).join(', ') : 'Oops!',
+    readable(spacing) + ' spacing',
     (start === end)
-      ? start + ' padding'
-      : 'Padding: ' + start + ', ' + end
-  ];
+      ? readable(start) + ' padding'
+      : 'Padding: ' + readable(start) + ', ' + readable(end)
+  ] : [];
+
+  function readable(inches: number) {
+    if (inches) return measurement.fromDecimalInches(inches).readable;
+  }
 
   function cancel() {
     dispatch('close');

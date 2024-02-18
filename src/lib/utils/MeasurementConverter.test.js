@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { measurement } from './MeasurementConverter';
 
-measurement.options({ feet: false });
+measurement.options({ feet: false, caching: false });
 
 test('parser respects feet option', () => {
 	const { inches, feet, readable } = measurement.parse('54"', { feet: false });
@@ -116,17 +116,23 @@ test('should return undefined when called without arguments', () => {
 
 test('numeric value respects decimals option', () => {
 	const options = { decimals: 4 };
-	expect(measurement.fromDecimalInches(1.25000087, options).numeric).toEqual(1.25);
+	const { fixed, numeric } = measurement.fromDecimalInches(1.25000087, options);
+	expect(numeric).toEqual(1.25000087);
+	expect(fixed).toEqual('1.2500');
 });
 
 test('numeric value respects decimals option', () => {
 	const options = { decimals: 4 };
-	expect(measurement.fromDecimalInches(1.0625087676, options).numeric).toEqual(1.0625);
+	const { fixed, numeric } = measurement.fromDecimalInches(1.0625087676, options);
+	expect(numeric).toEqual(1.0625087676);
+	expect(fixed).toEqual('1.0625');
 });
 
 test('fixed value respects decimals option', () => {
 	const options = { decimals: 4 };
-	expect(measurement.fromDecimalInches(106.06250983, options).fixed).toEqual('106.0625');
+	const { fixed, numeric } = measurement.fromDecimalInches(106.06250983, options);
+	expect(fixed).toEqual('106.0625');
+	expect(numeric).toEqual(106.06250983);
 });
 
 test('numeric value trimmed to feet and inches', () => {

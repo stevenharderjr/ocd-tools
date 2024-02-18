@@ -71,7 +71,7 @@ export const layouts = writable([
 		alignment: 'fill',
 		label: 'Gutter Hanger Layout',
 		span: 40 * 12,
-		spacing: 30,
+		targetSpacing: 30,
 		padding: [6, 6]
 	},
 	{
