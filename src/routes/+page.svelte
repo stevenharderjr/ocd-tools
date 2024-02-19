@@ -2,10 +2,6 @@
   import Dashboard from '$lib/Dashboard.svelte';
 </script>
 
-<svelte:head>
-  <title>OCD Tools</title>
-</svelte:head>
-
 <!-- {#if !using} -->
   <Dashboard />
 <!-- {:else if !editing}

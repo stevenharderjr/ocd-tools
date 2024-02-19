@@ -1,14 +1,15 @@
-<script>
+<script lang="ts">
   // import Header from '$lib/Header.svelte';
   import Toast from '$lib/Toast.svelte';
   import { toasts, blur } from '../stores'
   import './styles.css';
+
 </script>
 
 <div class="container">
-    <slot />
+  <slot />
 
-  <div class="header-shadow"></div>
+  <div class="header-shadow" />
   <!-- <Header /> -->
 
   {#if $blur}
@@ -45,26 +46,29 @@
     align-items: space-between;
     overflow: hidden;
   }
+
   .header-shadow {
     z-index: 8;
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
-    height: 0.5rem;
+    height: 4px;
+    width: 100vw;
     background-image: linear-gradient(#0006, #0000);
+    padding: none;
+    margin: none;
+    border: none;
+
   }
 
   .footer {
     z-index: 6;
     position: absolute;
-    /* padding-top: 2px; */
     padding-bottom: 1px;
-    /* margin-bottom: env(safe-area-inset-bottom, 2px); */
     bottom: 0;
     left: 0;
     right: 0;
-    /* background-image: linear-gradient(#fff0, #ffff); */
     font-size: 0.25rem;
     text-align: center;
   }

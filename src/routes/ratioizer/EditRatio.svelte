@@ -8,7 +8,7 @@
 
 	export let ratio: App.Ratio;
   const defaultLabel = ratio.label || '';
-  let container: HTMLDivElement;
+  let container: HTMLLIElement;
 	let labelInput: HTMLInputElement;
   $: partialFactor = ratio.factors.find(factor => (factor.label === ''));
 
@@ -73,62 +73,65 @@
   });
 </script>
 
-<div bind:this={container} class="floating ratio" on:click|stopPropagation aria-hidden="true">
-	<div class="label-bar">
-		<input
-			bind:this={labelInput}
-			class="label"
-			name="label"
-			type="text"
-			value={ratio.label}
-			placeholder={ratio.label || 'Ratio Name'}
-			title="edit ratio name"
-      autocomplete="off"
-      on:change={handleRename}
-			on:focus={handleFocus}
-			on:blur={handleBlur}
-			on:keypress={handleKeyPress}
-		/>
-	</div>
-	<div class="factors">
-		{#each ratio.factors as factor}
-			<EditFactor {factor} on:update on:add={addFactor} on:save={saveChanges} />
-		{/each}
-		{#if !partialFactor}
-			<button class="add-factor" on:click|stopPropagation={addFactor} title={'add factor to "' + name + '"'}>
-				+ New Factor
-			</button>
+<li bind:this={container} class="floating inline-modal">
+	<button class="touchable" on:click|stopPropagation>
+		<section class="edit-header">
+			<input
+				bind:this={labelInput}
+				name="label"
+				type="text"
+				value={ratio.label}
+				placeholder={ratio.label || 'Ratio Name'}
+				title="edit ratio name"
+				autocomplete="off"
+				on:change={handleRename}
+				on:focus={handleFocus}
+				on:blur={handleBlur}
+				on:keypress={handleKeyPress}
+			/>
+		</section>
+
+		<section class="edit factors">
+			{#each ratio.factors as factor}
+				<EditFactor {factor} on:update on:add={addFactor} on:save={saveChanges} />
+			{/each}
+			{#if !partialFactor}
+				<button class="add-factor" on:click|stopPropagation={addFactor} title={'add factor to "' + name + '"'}>
+					+ New Factor
+				</button>
+			{/if}
+		</section>
+
+		{#if ratio.factors.length > 1}
+			<div class="edit-actions">
+				<button on:click|stopPropagation={selfDestruct} title="delete this ratio">
+					<img height="16px" width="16px"src="trash-2.svg" alt="trashcan" />
+				</button>
+				<button on:click|stopPropagation={handleReset} title="reset changes">
+					<img height="16px" width="16px"src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
+				</button>
+				<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
+				<button
+					class="save-action"
+					on:click|stopPropagation={saveChanges}
+					title="save updates and return to overview"
+				>
+					<img height="16px" width="16px"src="check-circle.svg" alt="check-circle" />
+					<span class="action-label">SAVE</span>
+				</button>
+			</div>
 		{/if}
-	</div>
-	{#if ratio.factors.length > 1}
-		<div class="edit-actions">
-			<button class="edit-action" on:click|stopPropagation={selfDestruct} title="delete this ratio">
-				<img class="inverted-icon" src="trash-2.svg" alt="trashcan" />
-			</button>
-			<button class="edit-action" on:click|stopPropagation={handleReset} title="reset changes">
-				<img class="inverted-icon" src="rotate-ccw.svg" alt="arrow rotating counter-clockwise" style="margin-left:2px;" />
-			</button>
-			<!-- <button class="edit-action" on:click|stopPropagation={toggleEdit}> CANCEL </button> -->
-			<button
-				class="save-action"
-				on:click|stopPropagation={saveChanges}
-				title="save updates and return to overview"
-			>
-				<img class="inverted-icon" src="check-circle.svg" alt="check-circle" />
-				<span class="action-label">SAVE</span>
-			</button>
-		</div>
-	{/if}
-	<div class="options">
+	</button>
+
+	<div class="modal-options">
 		<button
-			class="option-button"
 			on:click|stopPropagation={handleClose}
 			title="discard all changes and return to overview"
 		>
-			<img src="x.svg" alt="x" />
+			<img height="16px" width="16px"src="x.svg" alt="x" />
 		</button>
 	</div>
-</div>
+</li>
 
 <style>
   input {
@@ -141,7 +144,7 @@
 		padding: 4px 8px;
 	}
 
-	.ratio {
+	.inline-modal {
     z-index: 5;
     pointer-events: auto;
     scroll-margin-top: 20vh;
@@ -156,24 +159,8 @@
 		width: 100%;
 		padding: 0.25rem;
 	}
-	.option-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 42px;
-		width: 42px;
-		border: none;
-		background: transparent;
-		cursor: pointer;
-		opacity: 0.5;
-	}
-	.factors {
-		margin: 0 1rem 1rem 0;
-		padding-left: 1rem;
-		width: 100%;
-		/* background: #f006; */
-	}
-	.label-bar {
+
+	.edit-header {
 		position: relative;
 		width: 100%;
 		display: flex;
@@ -181,18 +168,14 @@
 		align-items: center;
     align-self: flex-start;
 	}
-	.options {
-		position: absolute;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		top: 0;
-		right: 0;
-		pointer-events: auto;
-	}
-	.label {
+
+	.edit-header input {
 		max-height: 2rem;
     max-width: 85%;
+	}
+
+	.edit-header input:focus {
+		padding-left: 6px;
 	}
 
 	.edit-actions {
@@ -222,7 +205,7 @@
 		font-weight: 300;
 	}
 
-	.inverted-icon {
+	.edit-actions img {
 		filter: invert(1);
 		opacity: 0.95;
 		height: 4.5mm;
@@ -230,7 +213,7 @@
 		/* padding-left: 3px; */
 	}
 
-	.edit-action {
+	.edit-actions button {
 		display: flex;
 		justify-content: center;
 		align-items: center;

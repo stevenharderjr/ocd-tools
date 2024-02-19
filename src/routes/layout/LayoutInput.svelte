@@ -2,39 +2,28 @@
   import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let factor: App.Factor;
-  export let precision = '1';
-  let input: HTMLInputElement;
+  export let label: string;
+  export let value: number;
+  export let decimals: number;
+  // const changeMultiplier = 10 ** decimals;
 
-  $: decimals = precision.length - 1;
-  $: delta = (factor.value - factor.baseline!).toFixed(decimals);
+  // let [min, max] = [Math.round(value * 0.185), Math.round(value * 1.925)];
+
+  let textInput: HTMLInputElement;
+  let sliderInput: HTMLInputElement;
 
   function handleChange({ currentTarget: { value } }: { currentTarget: HTMLInputElement }) {
-    const { id } = factor;
-    dispatch('update', { id, value });
+    dispatch('update', { value });
   }
 
-  onMount(() => {
-    input.value = factor.value + '';
-    input.min = factor.min + '';
-    input.max = factor.max + '';
-  });
 </script>
 
-{#if factor?.label }
-  <button class="independent-factor" on:click|stopPropagation>
-    <span class="label">{factor.label}</span>
-    <div class='dynamics'>
-      {#if delta}
-        <span class="delta">({+delta > 0 ? '+' : ''}{delta})</span>
-      {/if}
-      <span class="value">{factor.prefix + factor.value.toFixed(decimals) + factor.suffix}</span>
-      <!-- <span class="unit">{factor.unit}</span> -->
-    </div>
-  </button>
+{#if label }
+<span class="label">{label}</span>
 {/if}
-<button class="slider-base" on:click|stopPropagation tabindex={-1}>
-  <input bind:this={input} class="slider" type="range" value={factor.value} min={factor.min} max={factor.max} step={1 / +precision} on:input={handleChange} />
+<button class="input-base" on:click|stopPropagation tabindex={-1}>
+  <input bind:this={textInput} class="text-input" type="text" value={value + ''} on:change={handleChange} />
+  <!-- <input bind:this={sliderInput} class="slider" type="range" value={value + ''} {min} {max} step={changeMultiplier} on:input={handleChange} /> -->
 </button>
 
 <style>
@@ -71,7 +60,7 @@
     color: #999;
   }
 
-  .slider-base {
+  .input-base {
     position: relative;
     left: 0;
     /* background: #f006; */

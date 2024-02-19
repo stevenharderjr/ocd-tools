@@ -1,72 +1,95 @@
 import { writable } from 'svelte/store';
 import { uuid } from '$lib/utils/uuid';
+import { overload } from '$lib/utils/loaders';
 
-export const ratios = writable<App.Ratio[]>([
-	{
-		id: '0',
-		name: 'cup of coffee',
-		label: 'Cup of Coffee',
-		factors: [
-			{
-				id: '0',
-				name: 'coffee',
-				label: 'Coffee',
-				prefix: '',
-				value: 200,
-				suffix: ' g'
-			},
-			{
-				id: '1',
-				name: 'half & half',
-				label: 'Half & Half',
-				prefix: '',
-				value: 150,
-				suffix: ' g'
-			},
-			{
-				id: '2',
-				name: 'sugar',
-				label: 'Sugar',
-				prefix: '',
-				value: 20,
-				suffix: ' g'
-			}
-		]
-	},
-	{
-		id: '1',
-		name: 'pot of coffee',
-		label: 'Pot of Coffee',
-		factors: [
-			{
-				id: '0',
-				name: 'coffee grounds',
-				label: 'Coffee Grounds',
-				prefix: '',
-				value: 36,
-				suffix: ' g'
-			},
-			{
-				id: '1',
-				name: 'water',
-				label: 'Water',
-				prefix: '',
-				value: 1140,
-				suffix: ' g'
-			}
-		]
-	}
-]);
+export const ratios = writable<App.Ratio[]>(
+	[
+		{
+			id: '0',
+			label: 'Cup of Coffee',
+			factors: [
+				{
+					id: '0',
+					label: 'Coffee',
+					value: '200 g'
+				},
+				{
+					id: '1',
+					label: 'Half & Half',
+					value: '150 g'
+				},
+				{
+					id: '2',
+					label: 'Sugar',
+					value: '20 g'
+				}
+			]
+		},
+		{
+			id: '1',
+			label: 'Pot of Coffee',
+			factors: [
+				{
+					id: '0',
+					label: 'Coffee Grounds',
+					value: '36 g'
+				},
+				{
+					id: '1',
+					label: 'Water',
+					value: '1140 g'
+				}
+			]
+		},
+		{
+			id: '2',
+			label: 'Pot of Tea',
+			factors: [
+				{
+					id: '0',
+					label: 'Water',
+					value: '830 g'
+				},
+				{
+					id: '1',
+					label: 'Sugar',
+					value: '75 g'
+				},
+				{
+					id: '2',
+					label: 'Tea',
+					value: '3.5 g'
+				}
+			]
+		}
+	].map(overload.ratio)
+);
 
 export const layouts = writable([
 	{
 		id: 0,
-		name: 'gutter hangers',
-		label: 'Gutter Hangers',
-		points: ['6"', '22"', '38"', '54"', '72"'],
-		spacing: '16"',
-		padding: ['6"', '6"'],
-		measurement: '78"'
+		alignment: 'fill',
+		label: 'Gutter Hanger Layout',
+		span: 40 * 12,
+		targetSpacing: 32,
+		padding: [6, 6],
+		precision: 1
+	},
+	{
+		id: 1,
+		alignment: 'fill',
+		label: 'Eclipse Rail Drilling',
+		span: 78,
+		targetSpacing: 16,
+		padding: [4, 4]
+	},
+	{
+		id: 2,
+		alignment: 'simple',
+		label: 'Truss Layout',
+		span: 144,
+		targetSpacing: 24,
+		padding: [0, 1.5]
 	}
 ]);
 

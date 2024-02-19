@@ -6,37 +6,57 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
-		interface Ratio {
+		interface RatioBaseline {
 			id: string;
-			name?: string;
-			label?: string;
-			factors: Factor[] | [];
-			// conversionRate: 1 | number;
-			// inputRange: [number, number];
-			// derivedPrefix: string;
-			// derivedSuffix: string;
+			label: string;
+			factors: FactorBaseline[] | [];
+			userConversionRate?: string;
 		}
 
-		interface Factor {
-			id: string;
-			name?: string;
-			label: string;
-			value: number;
+		interface Ratio extends RatioBaseline {
+			// these should be derivable from baseline properties
+			name: string;
 			prefix: string;
 			suffix: string;
-			softDelete?: boolean;
+			precision: string;
+			factors: Factor[];
 		}
 
-		interface Layout {
+		interface FactorBaseline {
 			id: string;
-			name?: string;
 			label: string;
-			layoutType: 'arrange' | 'fill';
-			pointCount: number;
-			spacing: number;
-			spacingMode: 'even' | 'center' | 'start' | 'end';
+			value: string;
+		}
+
+		interface Factor extends FactorBaseline {
+			// these should be derivable from baseline properties
+			name: string;
+			softDelete?: boolean;
+			prefix: string;
+			value: number;
+			suffix: string;
+			min?: number;
+			max?: number;
+			baseline?: number;
+			precision: string;
+		}
+
+		interface LayoutBaseline {
+			id: string;
+			label: string;
+			span: number;
 			padding: [number, number];
-			measurements: string[];
+			targetSpacing: number;
+			precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
+			decimals: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+			offset: 'leading' | 'center' | 'trailing';
+			alignment: 'even' | 'fill' | 'simple';
+		}
+
+		interface Layout extends LayoutBaseline {
+			name?: string;
+			points: number[];
+			spacing: number;
 		}
 
 		type RatioFlag = Ratio | undefined;

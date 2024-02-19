@@ -7,7 +7,7 @@
 <a class="floating container" {href}>
   <section class="title-bar">
     <div class="title">
-      <img src="arrow-right-circle.svg" aria-hidden="true" alt="" />
+      <img height="16px" width="16px"src="arrow-right-circle.svg" aria-hidden="true" alt="" />
       <h3>{title}</h3>
     </div>
     <svg class="askew" aria-hidden="true" viewBox="0 0 1 1" preserveAspectRatio="none">

@@ -17,6 +17,15 @@
 	let edit: App.RatioFlag = undefined;
   let confirmation: Confirmation | undefined;
   let copy = [...$ratios];
+  let drag = {
+    start: 0,
+    stop: Date.now(),
+    enabled: false,
+    origin: [0, 0],
+    end: [0, 0],
+    boundary: 20,
+    time: 200
+  };
 
   function initialize() {
     use = undefined;
@@ -159,6 +168,7 @@
   }
 
 	function cancel(callback?: any) {
+    if (dragDetected()) return;
     const accept = () => {
       copy = [...$ratios];
       initialize();
@@ -182,37 +192,74 @@
   function handleKeyboardCancel({ key }: KeyboardEvent) {
     if (key === 'esc') cancel({});
   }
+
+  function handleDragStart(event: MouseEvent) {
+    const { screenX, screenY } = event;
+    drag = {
+      ...drag,
+      start: Date.now(),
+      enabled: true,
+      origin: [screenX, screenY]
+    };
+  }
+
+  function handleDragEnd(event: MouseEvent) {
+    const now = Date.now();
+    const { screenX, screenY } = event;
+    drag = {
+      ...drag,
+      enabled: false,
+      end: [screenX, screenY],
+      stop: now
+    };
+    // if (dragDetected()) event.stopPropagation();
+  }
+
+  function dragDetected() {
+    if (!(use || edit)) return false;
+
+    const { start, stop, origin, end, time, boundary, enabled } = drag;
+    if (enabled) return true;
+
+    const duration = stop - start;
+    if (duration && duration > time) return true;
+
+    const [x1, y1] = origin;
+    const [x2, y2] = end;
+    const distance = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+    if (distance > boundary) return true;
+
+    return false;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="backdrop" on:click|self={cancel} on:keypress={handleKeyboardCancel}>
+<div class="backdrop" on:click|self={cancel} on:mousedown={handleDragStart} on:mouseup={handleDragEnd} on:keypress={handleKeyboardCancel}>
   <!-- <div class="background-tint" style={`opacity:${!(use || edit) ? 0 : 1}; backdrop-filter: ${!(use || edit) ? 'blur(0) opacity(0) brightness(1)' : 'blur(4px) opacity(1) brightness(0.95)'};`} /> -->
   <div class="background-haze" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="card-stack" on:click={cancel}>
-    {#each copy as ratio}
-      {#if ratio.id === use?.id}
-        <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
-      {:else if ratio.id === edit?.id}
-        <EditRatio
-        ratio={edit}
-          on:close={cancel}
-          on:save={saveRatio}
-          on:reset={resetRatio}
-          on:delete={deleteRatio}
-          on:rename={renameRatio}
-          on:update={updateFactor}
-        />
-      {:else}
-        <Ratio {ratio} on:use={useRatio} on:edit={editRatio} on:reset={resetRatio} />
-      {/if}
-    {/each}
-  </div>
-  <div class="button-container">
+  <ul class="card-stack">
+      {#each copy as ratio}
+        {#if ratio.id === use?.id}
+          <UseRatio ratio={use} on:close={cancel} on:reset={resetRatio} />
+        {:else if ratio.id === edit?.id}
+          <EditRatio
+          ratio={edit}
+            on:close={cancel}
+            on:save={saveRatio}
+            on:reset={resetRatio}
+            on:delete={deleteRatio}
+            on:rename={renameRatio}
+            on:update={updateFactor}
+          />
+        {:else}
+          <Ratio {ratio} on:use={useRatio} on:edit={editRatio} on:reset={resetRatio} />
+        {/if}
+      {/each}
+    </ul>
+  <div class="nav-container">
     <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="arrow-left.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="arrow-left.svg" aria-hidden={true}/>
     </a>
     <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
       <svg aria-hidden="true" viewBox="0 0 1 1">
@@ -242,17 +289,7 @@
     overflow-y: scroll;
   }
 
-  .background-haze {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: #ccc9;
-    pointer-events: none;
-  }
-
-	.button-container {
+	.nav-container {
     pointer-events: none;
     z-index: 4;
 		position: absolute;

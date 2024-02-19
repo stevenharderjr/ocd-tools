@@ -1,14 +1,37 @@
+<script lang="ts">
+  import LayoutSummary from './LayoutSummary.svelte';
+  import UseLayout from './UseLayout.svelte';
+  import { layouts } from '../../stores';
+
+  let use: App.LayoutFlag = undefined;
+  let edit: App.LayoutFlag = undefined;
+
+  function useLayout({ detail: layout }) {
+    edit = undefined;
+    use = { ...layout };
+  }
+
+  function cancel() {
+    use = undefined;
+    edit = undefined;
+  }
+</script>
 
 <div class="backdrop">
+  <div class="background-haze" style={(use || edit) ? `z-index:4; backdrop-filter:blur(1px);` : ''} />
   <ul class="card-stack">
-    <li class="floating card">
-      <h1>Layout Equalizer</h1>
-    </li>
+    {#each $layouts as layout}
+      {#if layout.id === use?.id}
+        <UseLayout layout={use} on:close={cancel}/>
+      {:else}
+        <LayoutSummary {layout} on:select={useLayout}/>
+      {/if}
+    {/each}
   </ul>
   <div class="button-container">
     <a href="/" title="return to dashboard">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="arrow-left.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="arrow-left.svg" aria-hidden={true}/>
     </a>
     <button on:click title="add new layout" disabled>
       <svg aria-hidden="true" viewBox="0 0 1 1">

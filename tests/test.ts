@@ -1,6 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-test('index page has expected h1', async ({ page }) => {
+test('footer visible on main screen', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'Welcome to SvelteKit' })).toBeVisible();
+	await expect(page.getByText('Steven Harder 2023')).toBeVisible();
+});
+
+test('footer visible on layout screen', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByText('Steven Harder 2023')).toBeVisible();
+});
+
+test('footer visible on ratioizer screen', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByText('Steven Harder 2023')).toBeVisible();
 });

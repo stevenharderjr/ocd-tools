@@ -5,104 +5,99 @@
 	const dispatch = createEventDispatcher();
 
 	export let ratio: App.Ratio;
-  let container: HTMLDivElement;
+  let container: HTMLLIElement;
 	let factors: App.Factor[] = [];
-	let relativeRange = [0.125, 1.875];
-	let lowFactor,
-		floorId: string,
-    floorName: string,
-		floorValue: number,
-		maxId: string,
-		maxValue: number;
-	const firstFactor = ratio.factors[0];
-	let { prefix, suffix } = firstFactor || {};
-	let total = 0;
+	let precision = '1';
+	const initial = ratio.factors;
+	const baselineIndex = initial.length - 1;
+	const initialBaseline = initial[baselineIndex];
+	let { prefix, suffix } = initialBaseline;
+	let total = '';
 	let locked = true;
-	let valueMap: Map<string, number> = new Map(
-		ratio.factors.map((factor) => {
-			const { id, name, value, prefix: factorPrefix, suffix: factorSuffix } = factor;
-			if (!prefix || (prefix !== factorPrefix)) prefix = '';
-			if (!suffix || (suffix !== factorSuffix)) suffix = '';
-			factors.push(factor);
-			total += +value;
-			if (!maxValue || value > maxValue) {
-				maxValue = value;
-				maxId = id;
-			}
-			if (!floorValue || value < floorValue) {
-				lowFactor = { ...factor };
-				floorId = id;
-				floorValue = value;
-        floorName = name || '';
-			}
-			return [id, value];
-		})
-	);
-	updateRange(floorValue!);
+	let valueMap: Map<string, number> = new Map();
 
-	function updateRange(floor?: number) {
-		const staticFloor = valueMap.get(floorId) as number;
-		const conversion = (floor || staticFloor) / staticFloor;
-		relativeRange = [+(conversion * 0.125).toPrecision(3), +(conversion * 1.875).toPrecision(3)];
+	initialize();
+
+	$: decimals = precision.length - 1;
+	$: currentBaseline = { ...(factors[baselineIndex]), label: '' };
+
+	const decreaseRate = 0.75;
+	const increaseRate = 1.25;
+
+	function getUsableRangeFromValue(value: number) {
+		return [
+			Math.max(1, Math.round(value * 0.125)),
+			Math.max(3, Math.round(value * 1.875))
+		];
 	}
 
-	function updateValues({ id, value: targetValue }: { id: string; value: number }) {
+	function initialize() {
+		let sum = 0;
+		valueMap = new Map(
+			initial.map((factor) => {
+				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix, precision: factorPrecision } = factor;
+				console.log({ factorPrecision })
+				if (factorPrecision && +precision < +factorPrecision) precision = factorPrecision;
+
+				if (!prefix || (prefix !== factorPrefix)) prefix = '';
+				if (!suffix || (suffix !== factorSuffix)) suffix = '';
+
+				const [min, max] = getUsableRangeFromValue(value);
+
+				factors.push({ ...factor, min, max, value, baseline: value });
+				sum += +value;
+
+				return [id, value];
+			})
+		);
+		total = sum.toFixed(decimals);
+		console.log({ precision })
+	}
+
+	function updateValues({ id, value: targetValue }: { id: string; value: number }, updateRanges = false) {
 		const conversionRate = targetValue / (valueMap.get(id) as number);
-		let min: number,
-			max: number,
-			sum = 0;
-		const refactor = factors.map((factor, i) => {
-			const staticFactor: App.Factor = ratio.factors[i];
-			const value = Math.round(staticFactor.value * conversionRate);
+		let sum = 0, factorIndex = 0;
+		const update = [];
+		for (const factor of factors) {
+			const staticFactor = initial[factorIndex++];
+			const value = +(staticFactor.value * conversionRate).toFixed(decimals);
+			if (value < 1 / +precision) return;
 			sum += value;
-			if (!min || value < min) min = value;
-			if (!max || value > max) max = value;
-			return { ...staticFactor, value };
-		});
-		if (min! < 1) return;
-		factors = refactor;
-		floorValue = Math.round(min!);
-		maxValue = max!;
-		total = sum;
+
+			if (updateRanges) {
+				const [min, max] = getUsableRangeFromValue(value);
+				update.push({ ...factor, value, min, max });
+			}
+			else update.push({ ...factor, value });
+		}
+		factors = update;
+		total = sum.toFixed(decimals);
 	}
+
 
 	function resetValues() {
-    // return dispatch('reset');
-		let sum = 0;
-		factors = factors.map((factor, i) => {
-			const value = ratio.factors[i].value;
-			sum += value;
-			return { ...factor, value };
-		});
-		floorValue = valueMap.get(floorId) as number;
-		maxValue = valueMap.get(maxId) as number;
-		total = sum;
-		updateRange(floorValue);
+		updateValues(initialBaseline, true);
 	}
 
-	function half() {
-		let value = floorValue * 0.5;
-		if (value < 1) return;
-
-		updateRange(value);
+	function decrease() {
+		const { value: baselineValue, id } = currentBaseline;
+		let value = Math.max(1, baselineValue * decreaseRate);
 
 		value = Math.round(value);
-		floorValue = value;
 
-		updateValues({ id: floorId, value });
+		updateValues({ id, value }, true);
 	}
 
-	function double() {
-		let value = floorValue * 2;
+	function increase() {
+		const { value: baselineValue, id } = currentBaseline;
+		let value = Math.max(2, baselineValue * increaseRate);
 
-		updateRange(value);
-		value = Math.round(value);
-		floorValue = value;
+		value = +value.toFixed(decimals);
 
-		updateValues({ id: floorId, value });
+		updateValues({ id, value }, true);
 	}
 
-	function handleSliderInput({ detail }) {
+	function handleSliderInput({ detail }: { detail: { id: string, value: number }}) {
 		updateValues(detail);
 	}
 
@@ -117,67 +112,58 @@
 
 	function toggleLock() {
 		locked = !locked;
-		if (locked) updateValues({ id: floorId, value: floorValue });
-    // updateRange(floorValue);
+		if (locked) updateValues(currentBaseline);
 	}
 
   onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
 </script>
 
-<div bind:this={container} class="floating container" on:click|self={close} on:keypress={handleKeyboardCancel} role="combobox" aria-expanded={true} tabindex={-1}>
-<!-- <div class="floating container"> -->
-	<div class="title-bar">
-		<h2>{ratio.label}</h2>
-		<span>({prefix + Math.round(total) + suffix})</span>
-	</div>
-	<div class="factors">
-		{#each factors as factor}
+<li bind:this={container} class="floating inline-modal">
+	<button class="touchable" on:click={close} on:keypress={handleKeyboardCancel}>
+		<div class="modal-header">
+			<h2>{ratio.label}</h2>
+			<span>({prefix + total + suffix})</span>
+		</div>
+		<div class="factors">
+			{#each factors as factor}
+				{#if locked}
+					<Factor {factor} {precision} />
+				{:else}
+					<Slider {factor} {precision} on:update={handleSliderInput} />
+				{/if}
+			{/each}
 			{#if locked}
-				<Factor {factor} />
-			{:else}
-				<Slider {factor} {relativeRange} on:update={handleSliderInput} />
+				<Slider	factor={currentBaseline} {precision} on:update={handleSliderInput} />
 			{/if}
-		{/each}
-    {#if locked}
-      <Slider
-        factor={{ id: floorId, value: floorValue }}
-        {relativeRange}
-        on:update={handleSliderInput}
-      />
-    {/if}
-	</div>
-	<button class="shortcuts" on:click|stopPropagation>
-		<button class="shortcut" on:click|stopPropagation={half} title="halve"> ½ </button>
-		<button class="shortcut" on:click|stopPropagation={resetValues} title="restore initial values">
-			<img
-				class="shortcut-icon"
-				src="rotate-ccw.svg"
-				alt="arrow indicating a counterclockwise circle"
-			/>
+		</div>
+
+		<button class="modal-actions" on:click|stopPropagation>
+			<!-- <button on:click|stopPropagation={decrease} title="halve"> ½ </button> -->
+			<button on:click|stopPropagation={decrease} title="halve">
+				<img height="16px" width="16px"src="minus.svg" alt="subtraction symbol" />
+			</button>
+			<button on:click|stopPropagation={resetValues} title="restore initial values">
+				<img height="16px" width="16px"src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
+			</button>
+			<button on:click|stopPropagation={increase} style="font-size:small;" title="double">
+				<img height="16px" width="16px"src="plus.svg" alt="addition symbol" />
+			</button>
 		</button>
-		<button class="shortcut" on:click|stopPropagation={double} style="font-size:small;" title="double"> ×2 </button>
+
+		<div class="modal-options">
+			<button
+				on:click|stopPropagation={toggleLock}
+				title={locked ? 'locked for precision' : 'unlocked for variability'}
+			>
+				{#if locked}
+					<img height="16px" width="16px"src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
+				{:else}
+					<img height="16px" width="16px"src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
+				{/if}
+			</button>
+		</div>
 	</button>
-	<div class="options">
-		<!-- <button
-			class="option-button"
-			on:click={close}
-			title="stop using ratio and return to overview"
-		>
-			<img src="x.svg" alt="x" />
-		</button> -->
-		<button
-			class="option-button"
-			on:click|stopPropagation={toggleLock}
-			title={locked ? 'locked for precision' : 'unlocked for variability'}
-		>
-			{#if locked}
-				<img src="lock.svg" alt="locked padlock" style="position:relative;top:-1px;" />
-			{:else}
-				<img src="unlock.svg" alt="unlocked padlock" style="position:relative;top:-1px;" />
-			{/if}
-		</button>
-	</div>
-</div>
+</li>
 
 <style>
 	h2 {
@@ -189,9 +175,8 @@
 		font-size: 1rem;
 		padding-left: 0.5rem;
 	}
-	.container {
+	.inline-modal {
     z-index: 5;
-    pointer-events: auto;
     scroll-margin-top: 20vh;
 		position: relative;
 		display: flex;
@@ -216,55 +201,5 @@
 		align-items: baseline;
     border: none;
     background: none;
-	}
-	.option-button {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 42px;
-		width: 42px;
-		border: none;
-		background: transparent;
-		cursor: pointer;
-		opacity: 0.5;
-	}
-	.options {
-		position: absolute;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		top: 0;
-		right: 0;
-		pointer-events: auto;
-    margin: 1px;
-	}
-	.shortcuts {
-		display: flex;
-		flex-direction: row;
-		gap: 0.75rem;
-		padding: 0.25rem 0;
-    border: none;
-    background: none;
-	}
-	.shortcut {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: 10mm;
-		width: 10mm;
-		background: #666;
-		color: #fff;
-		font-size: 1rem;
-		border: none;
-		border-radius: 4px;
-		flex: 1;
-	}
-	.shortcut-icon {
-		filter: invert(1);
-		opacity: 0.95;
-		height: 5mm;
-		width: 5mm;
-		padding-left: 3px;
 	}
 </style>

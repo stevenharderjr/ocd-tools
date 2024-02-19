@@ -9,12 +9,13 @@
   <section class="tool-list">
     <ToolCard title="Ratioizer" description="Keeps sets of values and allows dynamic adjustments without changing proportions between them." href="/ratioizer" />
     <ToolCard title="Layout Equalizer" description="Plot padding and equal spacing while accounting for material width." href="layout" />
+    <ToolCard title="Feature Testing" description="Try out experimental features and UI components." href="test" />
   </section>
 
   <div class="button-container">
     <button on:click title="open user profile">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="user.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="user.svg" aria-hidden={true}/>
     </button>
     <!-- <button on:click={addRatio} title="add new ratio" disabled={!!(edit)}>
       <svg aria-hidden="true" viewBox="0 0 1 1">
@@ -23,7 +24,7 @@
     </button> -->
     <button on:click title="download for offline use">
       <!-- svelte-ignore a11y-missing-attribute -->
-      <img src="download.svg" aria-hidden={true}/>
+      <img height="16px" width="16px"src="download.svg" aria-hidden={true}/>
     </button>
   </div>
 </div>
