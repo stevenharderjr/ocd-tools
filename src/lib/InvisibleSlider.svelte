@@ -114,7 +114,6 @@
     border: none;
     height: 42px;
     display: flex;
-    justify-content: space-between;
   }
   .base {
     display: grid;
@@ -122,9 +121,11 @@
     background: #eee;
     border-radius: 24px;
     background: linear-gradient(to right, #ddd, #eee, #eee, #ddd);
+    width: 100%;
+    max-width: 20rem;
+    justify-content: space-between;
   }
   .plus, .minus {
-    position: relative;
     line-height: 42px;
     opacity: 0.5;
     width: 42px;
@@ -133,19 +134,22 @@
     align-items: center;
   }
   .minus {
-    top: -1px;
+    justify-self: flex-start;
+    padding-bottom: 1px;
     font-size: 1.5rem;
     /* font-weight: 50; */
     border-radius: 50% 0 0 50%;
   }
   .plus {
-    top: -2px;
+    padding-bottom: 2px;
     font-size: 1.7rem;
     font-weight: 300;
     border-radius: 0 50% 50% 0;
+    justify-self: flex-end;
   }
   .slider {
     opacity: 0;
     background: transparent;
+    width: 100%;
   }
 </style>
