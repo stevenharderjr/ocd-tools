@@ -190,6 +190,7 @@
     overflow: hidden;
   }
   .base {
+    user-select: none;
     position: relative;
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
