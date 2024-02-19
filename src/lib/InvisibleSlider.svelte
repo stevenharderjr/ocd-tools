@@ -2,12 +2,22 @@
   import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
+  export let id: string;
+  export let label: string;
+  export let prefix: string;
+  export let suffix: string;
   export let value: number;
-  // export let decimals: number;
+  export let baseline: number;
+  export let decimals: number = 0;
   export let min: number;
   export let max: number;
-  $: rate = 1 / (innerWidth / (max - min)) * 4;
+  export let progressBar = false;
+  let elementWidth = 100;
+  $: range = max - min;
+  $: rate = 1 / (elementWidth / range) * 2;
+  $: delta = +(value - baseline!).toFixed(decimals);
 
+  let base: HTMLButtonElement;
   let slider;
   let origin: number | [number, number];
   let direction = 0;
@@ -17,15 +27,15 @@
   let verticalTouchMove = false;
 
   function dragStart(event: DragEvent) {
-    // slider.style.visibility = 'hidden';
     const { screenX: x, screenY: y } = event;
     origin = x;
   }
 
   function dragEnd(event: DragEvent) {
-    // slider.style.visibility = 'visible';
-    const [{ screenX: x, screenY: y }] = event.touches;
+    const { screenX: x, screenY: y } = event;
     direction = 0;
+    console.log({ value, baseline});
+    dispatch('reset', { id, value });
   }
 
   function touchStart(event: TouchEvent) {
@@ -36,11 +46,11 @@
   }
 
   function touchEnd(event: TouchEvent) {
-    // const [{ clientX: x, clientY: y }] = event.touches;
-    console.log('end', event);
     direction = 0;
     horizontalTouchMove = false;
     verticalTouchMove = false;
+    console.log({ value, baseline});
+    dispatch('reset', { id, value });
   }
 
   function handleTouchMove(event: TouchEvent) {
@@ -65,12 +75,8 @@
     if (newValue < min) newValue = min;
     if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = [x, y];
 
-    dispatch('change', { value: newValue });
+    dispatch('update', { id, value: newValue });
   }
-
-  // function handleTouchDrag(event: TouchEvent) {
-  //   const { x, y } = event;
-  // }
 
   function handleDrag(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
@@ -82,21 +88,43 @@
     if (newValue < min) newValue = min;
     if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = x;
 
-    dispatch('change', { value: newValue });
+    dispatch('update', { id, value: newValue });
   }
 
   function increment() {
-    if (value < max) dispatch('change', { value: value + 1 });
+    const newValue = value + 1;
+    if (newValue <= max) dispatch('update', { id, value: newValue });
   }
 
   function decrement() {
-    if (value > min) dispatch('change', { value: value - 1 });
+    const newValue = value - 1;
+    if (newValue >= min) dispatch('update', { id, value: newValue });
   }
+
+  onMount(() => {
+    elementWidth = base.offsetWidth;
+  });
 </script>
 
-<svelte:window bind:innerWidth />
+{#if label }
+  <button class="independent-factor" on:click|stopPropagation>
+    <span class="label">{label}</span>
+    <div class='dynamics'>
+      {#if delta}
+        <span class="delta">({+delta > 0 ? '+' : ''}{delta})</span>
+      {/if}
+      <span class="value">{prefix + value.toFixed(decimals) + suffix}</span>
+      <!-- <span class="unit">{factor.unit}</span> -->
+    </div>
+  </button>
+{/if}
 
-<button class="base" on:mousedown|self|stopPropagation>
+<button bind:this={base} class="base" on:mousedown|self|stopPropagation>
+  <div class="visible-body">
+    {#if progressBar}
+      <div class="progress-bar" style={`height:${(100 / range) * value - 8}%`}></div>
+    {/if}
+  </div>
   <button class="minus" on:click|stopPropagation={decrement}>
     –
   </button>
@@ -108,6 +136,39 @@
 </button>
 
 <style>
+  .independent-factor {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: -3rem;
+    border: none;
+    background: none;
+  }
+  .dynamics {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  .label, .value {
+    font-size: 1rem;
+    font-weight: 300;
+    white-space: nowrap;
+  }
+
+  .label {
+    margin-right: 1rem;
+  }
+
+  .delta {
+    font-size: small;
+    font-weight: 300;
+    color: #999;
+  }
+
   button {
     pointer-events: auto;
     background: transparent;
@@ -115,15 +176,36 @@
     height: 42px;
     display: flex;
   }
+  .visible-body {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    border-radius: 12px;
+    background: linear-gradient(to right, #fff, #aaa, #aaa, #fff);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
   .base {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
-    background: #eee;
-    border-radius: 24px;
-    background: linear-gradient(to right, #ddd, #eee, #eee, #ddd);
-    width: 100%;
-    max-width: 20rem;
     justify-content: space-between;
+    width: calc(100% + 1rem);
+    /* width: 100%; */
+    margin: 1rem 0 1rem -0.5rem;
+  }
+  .progress-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    /* border-radius: 21px; */
+    pointer-events: none;
+    background: linear-gradient(#0002, #0001);
   }
   .plus, .minus {
     line-height: 42px;
@@ -135,16 +217,13 @@
   }
   .minus {
     justify-self: flex-start;
-    padding-bottom: 1px;
+    padding-bottom: 3px;
     font-size: 1.5rem;
-    /* font-weight: 50; */
-    border-radius: 50% 0 0 50%;
   }
   .plus {
-    padding-bottom: 2px;
+    padding-bottom: 5px;
     font-size: 1.7rem;
     font-weight: 300;
-    border-radius: 0 50% 50% 0;
     justify-self: flex-end;
   }
   .slider {
