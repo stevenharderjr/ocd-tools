@@ -3,13 +3,19 @@
   const dispatch = createEventDispatcher();
 
   export let id: string;
+  export let label: string;
+  export let prefix: string;
+  export let suffix: string;
   export let value: number;
+  export let baseline: number;
+  export let decimals: number = 0;
   export let min: number;
   export let max: number;
   export let progressBar = false;
   let elementWidth = 100;
   $: range = max - min;
   $: rate = 1 / (elementWidth / range) * 2;
+  $: delta = +(value - baseline!).toFixed(decimals);
 
   let base: HTMLButtonElement;
   let slider;
@@ -28,6 +34,7 @@
   function dragEnd(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
     direction = 0;
+    console.log({ value, baseline});
     dispatch('reset', { id, value });
   }
 
@@ -35,12 +42,14 @@
     const [{ clientX: x, clientY: y }] = event.touches;
     origin = [x, y];
     direction = 0;
+    console.log('start', [x, y]);
   }
 
   function touchEnd(event: TouchEvent) {
     direction = 0;
     horizontalTouchMove = false;
     verticalTouchMove = false;
+    console.log({ value, baseline});
     dispatch('reset', { id, value });
   }
 
@@ -97,6 +106,19 @@
   });
 </script>
 
+{#if label }
+  <button class="independent-factor" on:click|stopPropagation>
+    <span class="label">{label}</span>
+    <div class='dynamics'>
+      {#if delta}
+        <span class="delta">({+delta > 0 ? '+' : ''}{delta})</span>
+      {/if}
+      <span class="value">{prefix + value.toFixed(decimals) + suffix}</span>
+      <!-- <span class="unit">{factor.unit}</span> -->
+    </div>
+  </button>
+{/if}
+
 <button bind:this={base} class="base" on:mousedown|self|stopPropagation>
   <div class="visible-body">
     {#if progressBar}
@@ -114,6 +136,39 @@
 </button>
 
 <style>
+  .independent-factor {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: -3rem;
+    border: none;
+    background: none;
+  }
+  .dynamics {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  .label, .value {
+    font-size: 1rem;
+    font-weight: 300;
+    white-space: nowrap;
+  }
+
+  .label {
+    margin-right: 1rem;
+  }
+
+  .delta {
+    font-size: small;
+    font-weight: 300;
+    color: #999;
+  }
+
   button {
     pointer-events: auto;
     background: transparent;
@@ -154,7 +209,7 @@
   }
   .plus, .minus {
     line-height: 42px;
-    opacity: 0.5;
+    opacity: 0.6;
     width: 42px;
     display: flex;
     justify-content: center;

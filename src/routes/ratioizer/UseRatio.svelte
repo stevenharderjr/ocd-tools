@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Slider from './Slider.svelte';
-	import InvisibleSlider from '$lib/InvisibleSlider.svelte';
+	import FactorSlider from './FactorSlider.svelte';
 	import Factor from './Factor.svelte';
 	const dispatch = createEventDispatcher();
 
@@ -130,12 +130,12 @@
 					<Factor {factor} {precision} />
 				{:else}
 					<!-- <Slider {factor} {precision} on:update={handleSliderInput} /> -->
-					<InvisibleSlider id={factor.id} value={factor.value} min={factor.min} max={factor.max} baseline={factor.baseline} label={factor.label} prefix={factor.prefix} suffix={factor.suffix} on:update={handleSliderInput} on:reset={resetValues} />
+					<FactorSlider id={factor.id} value={factor.value} min={factor.min} max={factor.max} baseline={factor.baseline} label={factor.label} prefix={factor.prefix} suffix={factor.suffix} on:update={handleSliderInput} on:reset={resetValues} />
 				{/if}
 			{/each}
 			{#if locked}
 					<!-- <Slider	factor={currentBaseline} {precision} on:update={handleSliderInput} /> -->
-					<InvisibleSlider id={currentBaseline.id} value={currentBaseline.value} min={currentBaseline.min} max={currentBaseline.max} baseline={currentBaseline.baseline} on:update={handleSliderInput} on:reset={resetValues} />
+					<FactorSlider id={currentBaseline.id} value={currentBaseline.value} min={currentBaseline.min} max={currentBaseline.max} baseline={currentBaseline.baseline} on:update={handleSliderInput} on:reset={resetValues} />
 			{/if}
 		</div>
 
