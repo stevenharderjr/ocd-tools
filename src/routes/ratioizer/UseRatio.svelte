@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Slider from './Slider.svelte';
+	import InvisibleSlider from '$lib/InvisibleSlider.svelte';
 	import Factor from './Factor.svelte';
 	const dispatch = createEventDispatcher();
 
@@ -10,8 +11,9 @@
 	let precision = '1';
 	const initial = ratio.factors;
 	const baselineIndex = initial.length - 1;
-	const initialBaseline = initial[baselineIndex];
-	let { prefix, suffix } = initialBaseline;
+	// value of last entry should be smallest, so
+	const baselineFactor: App.Factor = initial[baselineIndex];
+	let { prefix, suffix } = baselineFactor;
 	let total = '';
 	let locked = true;
 	let valueMap: Map<string, number> = new Map();
@@ -25,10 +27,9 @@
 	const increaseRate = 1.25;
 
 	function getUsableRangeFromValue(value: number) {
-		return [
-			Math.max(1, Math.round(value * 0.125)),
-			Math.max(3, Math.round(value * 1.875))
-		];
+		const min = Math.max(1, Math.round(value * 0.125));
+		let max = Math.max(min + 10, Math.round(value * 1.875));
+		return [min, max];
 	}
 
 	function initialize() {
@@ -36,7 +37,6 @@
 		valueMap = new Map(
 			initial.map((factor) => {
 				const { id, name, value, prefix: factorPrefix, suffix: factorSuffix, precision: factorPrecision } = factor;
-				console.log({ factorPrecision })
 				if (factorPrecision && +precision < +factorPrecision) precision = factorPrecision;
 
 				if (!prefix || (prefix !== factorPrefix)) prefix = '';
@@ -51,7 +51,6 @@
 			})
 		);
 		total = sum.toFixed(decimals);
-		console.log({ precision })
 	}
 
 	function updateValues({ id, value: targetValue }: { id: string; value: number }, updateRanges = false) {
@@ -74,9 +73,8 @@
 		total = sum.toFixed(decimals);
 	}
 
-
-	function resetValues() {
-		updateValues(initialBaseline, true);
+	function resetValues(payload) {
+		updateValues(payload?.detail?.id ? payload.detail : baselineFactor, true);
 	}
 
 	function decrease() {
@@ -115,7 +113,9 @@
 		if (locked) updateValues(currentBaseline);
 	}
 
-  onMount(() => container.scrollIntoView({ behavior: 'smooth' }));
+  onMount(() => {
+		container.scrollIntoView({ behavior: 'smooth' });
+	});
 </script>
 
 <li bind:this={container} class="floating inline-modal">
@@ -129,11 +129,13 @@
 				{#if locked}
 					<Factor {factor} {precision} />
 				{:else}
-					<Slider {factor} {precision} on:update={handleSliderInput} />
+					<!-- <Slider {factor} {precision} on:update={handleSliderInput} /> -->
+					<InvisibleSlider id={factor.id} value={factor.value} min={factor.min} max={factor.max} baseline={factor.baseline} label={factor.label} prefix={factor.prefix} suffix={factor.suffix} on:update={handleSliderInput} on:reset={resetValues} />
 				{/if}
 			{/each}
 			{#if locked}
-				<Slider	factor={currentBaseline} {precision} on:update={handleSliderInput} />
+					<!-- <Slider	factor={currentBaseline} {precision} on:update={handleSliderInput} /> -->
+					<InvisibleSlider id={currentBaseline.id} value={currentBaseline.value} min={currentBaseline.min} max={currentBaseline.max} baseline={currentBaseline.baseline} on:update={handleSliderInput} on:reset={resetValues} />
 			{/if}
 		</div>
 
