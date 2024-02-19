@@ -40,7 +40,6 @@
     justify-content: space-between;
   }
   li {
-    font-size: 0.9rem;
     padding: 0 0.5rem;
     white-space: nowrap;
     min-width: 3rem;
@@ -48,7 +47,6 @@
   }
   .label {
     min-width: 4rem;
-    font-size: 0.9rem;
     padding-right: 2rem;
   }
 </style>

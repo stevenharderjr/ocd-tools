@@ -19,11 +19,9 @@
 
 <style>
   .box {
-    font-size: 0.9rem;
     align-items: center;
   }
   .label {
-    font-size: 0.9rem;
     min-width: 4rem;
   }
   .target {

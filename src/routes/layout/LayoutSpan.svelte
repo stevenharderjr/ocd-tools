@@ -38,7 +38,6 @@
     flex-wrap: nowrap;
   }
   .label {
-    font-size: 0.9rem;
     padding-right: 2rem;
     min-width: 4rem;
   }
