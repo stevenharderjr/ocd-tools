@@ -1,6 +1,8 @@
 <script lang="ts">
+  import InvisibleSlider from '$lib/InvisibleSlider.svelte';
   import { onMount } from 'svelte';
   import {formatter} from '$lib/utils/MeasurementConverter';
+	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
 
   export let span: number;
   let displayOptions = { feet: span > 144 };
@@ -18,9 +20,7 @@
 <div class="row">
   <span class="label">Span</span>
   <div class="measurement">
-    <span>&#8676;</span>
     <span>{readable(span)}</span>
-    <span>&#8677;</span>
   </div>
 </div>
 

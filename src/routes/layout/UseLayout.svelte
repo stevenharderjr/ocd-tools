@@ -3,19 +3,32 @@
   import LayoutPadding from './LayoutPadding.svelte'
   import LayoutSpacing from './LayoutSpacing.svelte';
   import LayoutPoints from './LayoutPoints.svelte';
+  import LayoutSlider from './LayoutSlider.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
   import { formatter } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
+	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
   const dispatch = createEventDispatcher();
   let container: HTMLLIElement;
 
   export let layout: App.Layout;
-  const { targetSpacing: spacing } = layout || {};
-  let span = layout.span;
-  const [start, end] = layout?.padding || [];
+  export let unlocked = false;
+  let temp = { ...layout };
   const measurementDisplayOptions = { feet: false };
   const readable = formatter(measurementDisplayOptions);
-  const points = deriveLayoutPoints(layout);
+
+  $: points = deriveLayoutPoints(temp);
+  $: range = points[1] - points[0];
+  $: [min, max] = getUsableRangeFromValue(temp.span);
+
+  function update({ detail: { id, value } }){
+    console.log({ id, value });
+    temp = { ...temp, [id]: value };
+  }
+
+  function resetRange({ detail: { id, value }}: { detail: { id: string, value: number }}) {
+    const [min, max] = getUsableRangeFromValue(value);
+  }
 
   function cancel() {
     dispatch('close');
@@ -28,12 +41,15 @@
   <button class="touchable" on:click={cancel}>
     <div class="content">
       <section class="card-top">
-        <h2>{layout?.label}</h2>
+        <h2>{temp?.label}</h2>
       </section>
       <section class="factors">
-        <LayoutSpan span={layout.span} />
-        <LayoutPadding padding={layout.padding} />
-        <LayoutSpacing spacing={[layout.targetSpacing, points[1] - points[0]]} />
+        <LayoutSpan span={temp.span} on:update={update} />
+        <LayoutSlider id="span" value={temp.span} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
+        <LayoutPadding padding={temp.padding} on:update={update} />
+        <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
+        <LayoutSpacing targetSpacing={temp.targetSpacing} actualSpacing={range} on:update={update} />
+        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
         <LayoutPoints {points} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
@@ -42,8 +58,12 @@
 
   <div class="card-options">
     <button class="option-icon" title={'edit ' + layout?.name || 'ratio'}>
-      <img height="16px" width="16px"src="edit.svg" alt="edit" />
-    </button>
+      {#if unlocked}
+        <img height="16px" width="16px" src="unlock.svg" alt="edit" />
+      {:else}
+        <img height="16px" width="16px" src="lock.svg" alt="edit" />
+      {/if}
+      </button>
   </div>
 </li>
 
