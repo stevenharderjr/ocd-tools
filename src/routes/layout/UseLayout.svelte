@@ -19,6 +19,7 @@
 
   $: points = deriveLayoutPoints(temp);
   $: range = points[1] - points[0];
+  $: [start, end] = temp.padding;
   $: [min, max] = getUsableRangeFromValue(temp.span);
 
   function update({ detail: { id, value } }){
@@ -44,11 +45,15 @@
         <h2>{temp?.label}</h2>
       </section>
       <section class="factors">
-        <LayoutSpan span={temp.span} on:update={update} />
+        <div class="shrink">
+          <LayoutSpan span={temp.span} on:update={update} />
+        </div>
         <LayoutSlider id="span" value={temp.span} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
-        <LayoutPadding padding={temp.padding} on:update={update} />
+        <LayoutPadding {start} {end} on:update={update} />
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
-        <LayoutSpacing targetSpacing={temp.targetSpacing} actualSpacing={range} on:update={update} />
+        <div class="shrink">
+          <LayoutSpacing targetSpacing={temp.targetSpacing} actualSpacing={range} on:update={update} />
+          </div>
         <LayoutSlider id="targetSpacing" value={temp.targetSpacing} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
         <LayoutPoints {points} />
         <!-- <input type="range" min={inches(span)} -->
@@ -84,5 +89,8 @@
 	}
   .horizontal-scroll {
     overflow-x: auto;
+  }
+  .shrink {
+    margin-bottom: -1.5rem;
   }
 </style>

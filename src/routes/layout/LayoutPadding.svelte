@@ -1,8 +1,8 @@
 <script lang="ts">
   import { formatter } from '$lib/utils/MeasurementConverter';
 
-  export let padding: [number, number];
-  $: [start, end] = padding;
+  export let start: number;
+  export let end: number;
 
   const readable = formatter({ feet: false });
 </script>
