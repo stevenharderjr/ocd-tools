@@ -3,6 +3,7 @@
 	import Slider from './Slider.svelte';
 	import FactorSlider from './FactorSlider.svelte';
 	import Factor from './Factor.svelte';
+	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
 	const dispatch = createEventDispatcher();
 
 	export let ratio: App.Ratio;
@@ -25,12 +26,6 @@
 
 	const decreaseRate = 0.75;
 	const increaseRate = 1.25;
-
-	function getUsableRangeFromValue(value: number) {
-		const min = Math.max(1, Math.round(value * 0.125));
-		let max = Math.max(min + 10, Math.round(value * 1.875));
-		return [min, max];
-	}
 
 	function initialize() {
 		let sum = 0;

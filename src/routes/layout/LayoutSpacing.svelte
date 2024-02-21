@@ -4,16 +4,16 @@
   const displayOptions = { feet: false };
   const readable = formatter(displayOptions);
 
-  export let spacing: number | [number, number];
-  $: [target, actual] = Array.isArray(spacing) ? spacing : [spacing, spacing];
+  export let targetSpacing: number;
+  export let actualSpacing: number;
 
 </script>
 
 <div class="box">
   <span class="label">Spacing</span>
-  <span class="target">{readable(target)}</span>
-  {#if target !== actual}
-    <span class="actual"> ({readable(actual)} actual)</span>
+  <span class="target">{readable(targetSpacing)}</span>
+  {#if targetSpacing !== actualSpacing}
+    <span class="actual"> ({readable(actualSpacing)} actual)</span>
   {/if}
 </div>
 
