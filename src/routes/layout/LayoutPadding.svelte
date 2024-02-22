@@ -8,13 +8,12 @@
 </script>
 
 <div class="row">
-  <span class="label">Padding</span>
   <div class="measurement">
     <span>&#8677;</span>
     <ul>
-
         <li>{readable(start) || '0"'}</li>
-        <li>{readable(end)}</li>
+        <li>Padding</li>
+        <li>{readable(end) || '0"'}</li>
     </ul>
     <span>&#8676;</span>
   </div>
@@ -28,7 +27,6 @@
   .measurement {
     display: flex;
     width: 100%;
-    max-width: 10rem;
     justify-content: space-between;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -40,13 +38,9 @@
     justify-content: space-between;
   }
   li {
-    padding: 0 0.5rem;
+    padding: 0;
     white-space: nowrap;
     min-width: 3rem;
     text-align: center;
-  }
-  .label {
-    min-width: 4rem;
-    padding-right: 2rem;
   }
 </style>

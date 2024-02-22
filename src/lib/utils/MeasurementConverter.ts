@@ -58,6 +58,7 @@ export class MeasurementConverter {
 		this.parse = this.parse.bind(this);
 		this.stringify = this.stringify.bind(this);
 		this._cycleFractions = this._cycleFractions.bind(this);
+		this._optionsMatch = this._optionsMatch.bind(this);
 	}
 
 	options(options: MeasurementOptions) {
@@ -75,11 +76,18 @@ export class MeasurementConverter {
 		optionOverrides?: MeasurementOptions
 	): Measurement | void {
 		if (!inputValue || isNaN(+inputValue)) return undefined;
-		const { options, _cachedMeasurements, _cachedOverrides, _cycleFractions, stringify } = this;
+		const {
+			options,
+			_optionsMatch,
+			_cachedMeasurements,
+			_cachedOverrides,
+			_cycleFractions,
+			stringify
+		} = this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
-			if (cachedResult && _cachedOverrides.get(inputValue) === optionOverrides) return cachedResult;
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(inputValue))) return cachedResult;
 		}
 
 		let reset: MeasurementOptions = {};
@@ -113,11 +121,11 @@ export class MeasurementConverter {
 	}
 
 	parse(inputValue: string, optionOverrides?: MeasurementOptions): Measurement | void {
-		const { options, stringify, _cachedMeasurements, _cachedOverrides } = this;
+		const { options, stringify, _optionsMatch, _cachedMeasurements, _cachedOverrides } = this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
-			if (cachedResult && _cachedOverrides.get(inputValue) === optionOverrides) return cachedResult;
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(inputValue))) return cachedResult;
 		}
 
 		let reset: MeasurementOptions = {};
@@ -253,11 +261,11 @@ export class MeasurementConverter {
 	}
 
 	stringify(freedomFraction: Measurement, optionOverrides?: MeasurementOptions): string {
-		const { options, _cachedStrings, _cachedOverrides } = this;
+		const { options, _optionsMatch, _cachedStrings, _cachedOverrides } = this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedStrings.get(freedomFraction);
-			if (cachedResult && _cachedOverrides.get(freedomFraction) === optionOverrides) {
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(freedomFraction))) {
 				console.log('cached readable');
 				return cachedResult as string;
 			}
@@ -310,6 +318,27 @@ export class MeasurementConverter {
 
 		return denominator > 1 ? numerator + '/' + denominator : '';
 	}
+
+	_optionsMatch(optionOverrides?: MeasurementOptions) {
+		if (!optionOverrides) return true;
+		const {
+			decimals: newDecimalsOption,
+			precision: newPrecisionOption,
+			feet: newFeetOption,
+			commas: newCommasOption,
+			zeros: newZerosOption,
+			caching: newCachingOption
+		} = optionOverrides;
+		const { decimals, precision, feet, commas, zeros, caching } = this._options;
+		return (
+			(decimals === newDecimalsOption || newDecimalsOption === undefined) &&
+			(precision === newPrecisionOption || newPrecisionOption === undefined) &&
+			(feet === newFeetOption || newFeetOption === undefined) &&
+			(commas === newCommasOption || newCommasOption === undefined) &&
+			(zeros === newZerosOption || newZerosOption === undefined) &&
+			(caching === newCachingOption || newCachingOption === undefined)
+		);
+	}
 }
 
 export const measurement = new MeasurementConverter();
@@ -317,6 +346,14 @@ export const measurement = new MeasurementConverter();
 export function formatter(optionOverrides?: MeasurementOptions): (decimalInches: number) => string {
 	return (decimalInches: number) =>
 		measurement.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
+}
+
+export function sae(decimalInches: number, displayOptions?: MeasurementOptions) {
+	return measurement.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
+}
+
+export function inches(saeMeasurement: string, displayOptions: MeasurementOptions) {
+	return measurement.parse(saeMeasurement, displayOptions)?.numeric;
 }
 
 export function measurer(
