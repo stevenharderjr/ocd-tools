@@ -3,7 +3,7 @@
 
   export let points: number[];
   const span = points[points.length - 1] - points[0];
-  const displayOptions = { feet: span > 144 };
+  const displayOptions = { feet: span > 144, precision: 8 };
   const readable = formatter(displayOptions);
 </script>
 

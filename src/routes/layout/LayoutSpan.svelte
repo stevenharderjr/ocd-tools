@@ -1,26 +1,22 @@
 <script lang="ts">
-  import InvisibleSlider from '$lib/InvisibleSlider.svelte';
   import { onMount } from 'svelte';
-  import {formatter} from '$lib/utils/MeasurementConverter';
-	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
+  import {sae} from '$lib/utils/MeasurementConverter';
 
   export let span: number;
-  let displayOptions = { feet: span > 144 };
-  let readable = formatter(displayOptions);
 
-  onMount(() => {
-    const changeThreshold = span > 144;
-    if (displayOptions.feet !== changeThreshold) {
-      displayOptions.feet = changeThreshold;
-      readable = formatter({ feet: changeThreshold });
-    }
-  });
+  // onMount(() => {
+  //   const changeThreshold = span > 144;
+  //   if (displayOptions.feet !== changeThreshold) {
+  //     displayOptions.feet = changeThreshold;
+  //     readable = formatter({ feet: changeThreshold });
+  //   }
+  // });
 </script>
 
 <div class="row">
   <span class="label">Span</span>
   <div class="measurement">
-    <span>{readable(span)}</span>
+    <span>{sae(span, { feet: span > 144, precision: 8 })}</span>
   </div>
 </div>
 

@@ -19,11 +19,17 @@
 
   $: points = deriveLayoutPoints(temp);
   $: range = points[1] - points[0];
+  $: [start, end] = temp.padding;
   $: [min, max] = getUsableRangeFromValue(temp.span);
 
   function update({ detail: { id, value } }){
-    console.log({ id, value });
-    temp = { ...temp, [id]: value };
+    let update = value;
+    if (id === 'start' || id === 'end') {
+      update = id === 'start' ? [value, end] : [start, value];
+      id = 'padding';
+    }
+    console.log({ key: id, value: update });
+    temp = { ...temp, [id]: update };
   }
 
   function resetRange({ detail: { id, value }}: { detail: { id: string, value: number }}) {
@@ -44,11 +50,21 @@
         <h2>{temp?.label}</h2>
       </section>
       <section class="factors">
-        <LayoutSpan span={temp.span} on:update={update} />
+        <div class="shrink">
+          <LayoutSpan span={temp.span} on:update={update} />
+        </div>
         <LayoutSlider id="span" value={temp.span} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
-        <LayoutPadding padding={temp.padding} on:update={update} />
+        <div class="shrink">
+          <LayoutPadding {start} {end} on:update={update} />
+        </div>
+        <div class="row">
+          <LayoutSlider id="start" value={start} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="end" value={end} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
+        </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
-        <LayoutSpacing targetSpacing={temp.targetSpacing} actualSpacing={range} on:update={update} />
+        <div class="shrink">
+          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} />
+          </div>
         <LayoutSlider id="targetSpacing" value={temp.targetSpacing} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
         <LayoutPoints {points} />
         <!-- <input type="range" min={inches(span)} -->
@@ -84,5 +100,15 @@
 	}
   .horizontal-scroll {
     overflow-x: auto;
+  }
+  .shrink {
+    margin-bottom: -1.5rem;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 2rem;
+    margin-right: -0.5rem;
   }
 </style>

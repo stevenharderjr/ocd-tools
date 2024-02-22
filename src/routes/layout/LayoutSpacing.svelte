@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { formatter } from '$lib/utils/MeasurementConverter';
+  import { sae } from '$lib/utils/MeasurementConverter';
 
-  const displayOptions = { feet: false };
-  const readable = formatter(displayOptions);
+  const displayOptions = { feet: false, precision: 8 };
 
-  export let targetSpacing: number;
-  export let actualSpacing: number;
+  export let target: number;
+  export let actual: number;
 
 </script>
 
 <div class="box">
   <span class="label">Spacing</span>
-  <span class="target">{readable(targetSpacing)}</span>
-  {#if targetSpacing !== actualSpacing}
-    <span class="actual"> ({readable(actualSpacing)} actual)</span>
+  <span class="target">{sae(target, displayOptions)}</span>
+  {#if target !== actual}
+    <span class="actual"> ({sae(actual, displayOptions)} actual)</span>
   {/if}
 </div>
 

@@ -26,8 +26,8 @@
       </section>
       <section class="factors">
         <LayoutSpan span={layout.span} />
-        <LayoutPadding padding={layout.padding} />
-        <LayoutSpacing spacing={layout.targetSpacing} />
+        <LayoutPadding start={layout.padding[0]} end={layout.padding[1]} />
+        <LayoutSpacing target={layout.targetSpacing} />
       </section>
     </div>
   </button>
