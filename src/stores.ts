@@ -81,7 +81,8 @@ export const layouts = writable([
 		label: 'Eclipse Rail Drilling',
 		span: 78,
 		targetSpacing: 16,
-		padding: [4, 4]
+		padding: [4, 4],
+		precision: 8
 	},
 	{
 		id: 2,
@@ -89,7 +90,8 @@ export const layouts = writable([
 		label: 'Truss Layout',
 		span: 144,
 		targetSpacing: 24,
-		padding: [0, 1.5]
+		padding: [0, 1.5],
+		precision: 1
 	}
 ]);
 

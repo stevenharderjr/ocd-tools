@@ -21,7 +21,7 @@ interface MeasurementOptions {
 	caching?: boolean;
 }
 
-const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
+export const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
 	1: 0,
 	2: 1,
 	4: 2,
@@ -31,7 +31,7 @@ const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
 	64: 6
 };
 
-const precisionByDecimals = [0, 2, 4, 8, 16, 32, 64];
+export const precisionByDecimals = [0, 2, 4, 8, 16, 32, 64];
 
 const defaultOptions: MeasurementOptions = {
 	precision: 16,

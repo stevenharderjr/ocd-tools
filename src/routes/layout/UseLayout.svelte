@@ -4,10 +4,12 @@
   import LayoutSpacing from './LayoutSpacing.svelte';
   import LayoutPoints from './LayoutPoints.svelte';
   import LayoutSlider from './LayoutSlider.svelte';
+  import LayoutPrecision from './LayoutPrecision.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
   import { formatter } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
+	import CloseButton from '$lib/CloseButton.svelte';
   const dispatch = createEventDispatcher();
   let container: HTMLLIElement;
 
@@ -20,6 +22,7 @@
   $: points = deriveLayoutPoints(temp);
   $: range = points[1] - points[0];
   $: [start, end] = temp.padding;
+  $: precision = temp.precision;
   $: [min, max] = getUsableRangeFromValue(temp.span);
 
   function update({ detail: { id, value } }){
@@ -53,19 +56,24 @@
         <div class="shrink">
           <LayoutSpan span={temp.span} on:update={update} />
         </div>
-        <LayoutSlider id="span" value={temp.span} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
+        <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
         <div class="shrink">
           <LayoutPadding {start} {end} on:update={update} />
         </div>
         <div class="row">
-          <LayoutSlider id="start" value={start} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
-          <LayoutSlider id="end" value={end} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="start" value={start} {precision} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="end" value={end} {precision} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
         </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
-        <div class="shrink">
-          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} />
+        <div class="row">
+          <div style="flex-grow: 2;">
+            <div class="shrink">
+                <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} />
+              </div>
+              <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
           </div>
-        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+            <LayoutPrecision precision={temp.precision} on:update={update} />
+          </div>
         <LayoutPoints {points} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
