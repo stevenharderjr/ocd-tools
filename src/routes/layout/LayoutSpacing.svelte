@@ -9,25 +9,41 @@
 </script>
 
 <div class="box">
-  <span class="label">Spacing</span>
-  <span class="target">{sae(target, displayOptions)}</span>
-  {#if target !== actual}
-    <span class="actual"> ({sae(actual, displayOptions)} actual)</span>
-  {/if}
+  <div class="measurement">
+    <span class="label">Spacing</span>
+    <span class="target">{sae(target, displayOptions)}</span>
+    <span class="actual">
+      {#if target !== actual}
+        ({sae(actual, displayOptions)})
+      {/if}
+    </span>
+  </div>
 </div>
 
 <style>
   .box {
     align-items: center;
   }
-  .label {
-    min-width: 4rem;
+  .measurement {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
+  /* .label {
+    min-width: 4rem;
+    text-align: center;
+  } */
   .target {
-    padding: 0 0.5rem;
+    min-width: 4rem;
+    text-align: center;
+    /* padding: 0 0.5rem; */
   }
   .actual {
+    min-width: 4rem;
+    text-align: right;
     font-size: small;
-    padding: 0 0.5rem;
+  }
+  span {
+    width: 100%;
   }
 </style>

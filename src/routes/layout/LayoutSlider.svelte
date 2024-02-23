@@ -6,10 +6,11 @@
   export let value: number;
   export let range: [number, number]
   export let progressBar = false;
+  export let precision = 1;
   let elementWidth = 100;
   $: [min, max] = range;
   $: diff = max - min;
-  $: rate = 1 / (elementWidth / diff) * 2;
+  $: rate = (1 / precision) / (elementWidth / diff) * 2;
 
   let base: HTMLButtonElement;
   let slider;
@@ -83,12 +84,12 @@
   }
 
   function increment() {
-    const newValue = value + 1;
+    const newValue = Math.round((value + (1 / precision)) * precision) / precision;
     if (newValue <= max) dispatch('update', { id, value: newValue });
   }
 
   function decrement() {
-    const newValue = value - 1;
+    const newValue = Math.round((value - (1 / precision)) * precision) / precision;
     if (newValue >= min) dispatch('update', { id, value: newValue });
   }
 

@@ -14,27 +14,26 @@
 </script>
 
 <div class="row">
-  <span class="label">Span</span>
-  <div class="measurement">
-    <span>{sae(span, { feet: span > 144, precision: 8 })}</span>
-  </div>
+    <span class="label">Span</span>
+    <span class="measurement">{sae(span, { feet: span > 144, precision: 8 })}</span>
+    <span></span>
 </div>
 
 <style>
   .row {
     display: flex;
-    flex-wrap: nowrap;
-  }
-  .measurement {
-    display: flex;
-    width: 100%;
-    max-width: 10rem;
-    justify-content: space-between;
     flex-direction: row;
     flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
   }
-  .label {
-    padding-right: 2rem;
-    min-width: 4rem;
+  .measurement {
+    text-align: center;
+  }
+  /* .label {
+    text-align: center;
+  } */
+  span {
+    width: 100%;
   }
 </style>
