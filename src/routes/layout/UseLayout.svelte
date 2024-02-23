@@ -65,14 +65,16 @@
           <LayoutSlider id="end" value={end} {precision} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
         </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
-        <div class="row">
-          <div style="flex-grow: 2;">
+        <div class="grid-row">
+          <div style="grid-colum: 1;">
             <div class="shrink">
-                <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} />
-              </div>
-              <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} />
+            </div>
+            <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
           </div>
+          <div style="grid-column: 2;">
             <LayoutPrecision precision={temp.precision} on:update={update} />
+          </div>
           </div>
         <LayoutPoints {points} />
         <!-- <input type="range" min={inches(span)} -->
@@ -118,5 +120,10 @@
     flex-wrap: nowrap;
     gap: 2rem;
     margin-right: -0.5rem;
+  }
+  .grid-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    column-gap: 2rem;
   }
 </style>
