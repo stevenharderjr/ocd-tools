@@ -11,11 +11,13 @@
 <div class="box">
   <div class="measurement">
     <span class="label">Spacing</span>
-    <span class="target">{sae(target, displayOptions)}</span>
-    <span class="actual">
-      {#if target !== actual}
-        ({sae(actual, displayOptions)})
-      {/if}
+    <span class="target">
+      <span>{sae(target, displayOptions)}</span>
+      <span class="actual">
+        {#if target !== actual}
+          ({sae(actual, displayOptions)})
+        {/if}
+      </span>
     </span>
   </div>
 </div>
@@ -23,6 +25,7 @@
 <style>
   .box {
     align-items: center;
+    margin-right: 0.5rem;
   }
   .measurement {
     display: flex;
@@ -34,14 +37,18 @@
     text-align: center;
   } */
   .target {
+    display: flex;
+    align-items: center;
     min-width: 4rem;
     text-align: center;
+    white-space: nowrap;
     /* padding: 0 0.5rem; */
   }
   .actual {
     min-width: 4rem;
     text-align: right;
     font-size: small;
+    white-space: nowrap;
   }
   span {
     width: 100%;
