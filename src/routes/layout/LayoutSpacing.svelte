@@ -1,10 +1,12 @@
 <script lang="ts">
   import { sae } from '$lib/utils/MeasurementConverter';
 
-  const displayOptions = { feet: false, precision: 8 };
 
   export let target: number;
   export let actual: number;
+  export let precision = 8;
+  let displayOptions: MeasurementOptions = { feet: false };
+  $: displayOptions.precision = precision;
 
 </script>
 
@@ -14,7 +16,7 @@
     <span class="target">
       <span>{sae(target, displayOptions)}</span>
       <span class="actual">
-        {#if target !== actual}
+        {#if actual && target !== actual}
           ({sae(actual, displayOptions)})
         {/if}
       </span>
@@ -32,17 +34,21 @@
     flex-direction: row;
     justify-content: space-between;
   }
-  /* .label {
-    min-width: 4rem;
-    text-align: center;
-  } */
+  .label {
+    text-transform: uppercase;
+    font-size: small;
+  }
   .target {
     display: flex;
     align-items: center;
+
     min-width: 4rem;
-    text-align: center;
+    /* text-align: center; */
     white-space: nowrap;
     /* padding: 0 0.5rem; */
+  }
+  .target span {
+    font-weight: 500;
   }
   .actual {
     min-width: 4rem;

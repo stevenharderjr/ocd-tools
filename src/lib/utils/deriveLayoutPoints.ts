@@ -4,22 +4,7 @@ export function points(layout: App.Layout) {
 
 	const usableSpan = span - start - end;
 	const pointCount = Math.ceil(usableSpan / targetSpacing);
-	const spacing = alignment === 'fill' ? usableSpan / pointCount : targetSpacing;
-
-	// let offset = 0;
-	// switch (alignment) {
-	// 	case 'center':
-	// 		// even spacing between fixed start/end points
-	// 		offset = (usableSpan % targetSpacing) / 2;
-	// 		break;
-	// 	case 'even':
-	// 		// even spacing without fixed start/end points
-	// 		offset = (usableSpan % targetSpacing) / 2;
-	// 		break;
-	// 	default:
-	// 		// narrower spacing between last/penultimate points
-	// 		break;
-	// }
+	const spacing = alignment === 'even' ? usableSpan / pointCount : targetSpacing;
 
 	const points = [];
 
