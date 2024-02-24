@@ -76,7 +76,6 @@
       if (navigator.mediaSession) {
         navigator.mediaSession.setActionHandler('play', sayNextMeasurement);
         navigator.mediaSession.setActionHandler('pause', sayNextMeasurement);
-        navigator.mediaSession.setActionHandler('stop', () => audio.play());
       }
       audio.play();
     }
