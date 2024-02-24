@@ -341,7 +341,6 @@ export class MeasurementConverter {
 			let ending = verbalDenominators[+denominator] + (numerator === '1' ? '' : 's');
 			if (feet || inches) {
 				beginning = ' and ' + beginning;
-				ending += ' inches';
 			} else ending = ' of an inch';
 			phraseComponents[index++] = beginning + ending;
 		} else if (inches && !feet) {
