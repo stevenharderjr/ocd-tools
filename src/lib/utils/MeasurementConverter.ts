@@ -9,10 +9,10 @@ export interface Measurement {
 	readable?: string;
 }
 
-type MeasurementPrecision = 0 | 1 | 2 | 4 | 8 | 16 | 32 | 64;
+export type MeasurementPrecision = 0 | 1 | 2 | 4 | 8 | 16 | 32 | 64;
 type MeasurementDecimals = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-interface MeasurementOptions {
+export interface MeasurementOptions {
 	decimals?: MeasurementDecimals;
 	precision?: MeasurementPrecision;
 	feet?: boolean;
@@ -31,6 +31,15 @@ export const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
 	64: 6
 };
 
+const verbalDenominators = {
+	2: 'half',
+	4: 'quarter',
+	8: 'eighth',
+	16: 'sixteenth',
+	32: 'thirtysecond',
+	64: 'sixtyfourth'
+};
+
 export const precisionByDecimals = [0, 2, 4, 8, 16, 32, 64];
 
 const defaultOptions: MeasurementOptions = {
@@ -46,6 +55,7 @@ export class MeasurementConverter {
 	_cachedMeasurements: Map<string | number, Measurement>;
 	_cachedOverrides: Map<string | number | Measurement, MeasurementOptions | undefined>;
 	_cachedStrings: Map<Measurement, string>;
+	_empty: Measurement;
 
 	constructor(_options: MeasurementOptions = defaultOptions) {
 		this._options = { ...defaultOptions, ..._options };
@@ -53,10 +63,20 @@ export class MeasurementConverter {
 		this._cachedOverrides = new Map();
 		this._cachedStrings = new Map();
 
+		this._empty = {
+			fixed: '',
+			numeric: 0,
+			feet: 0,
+			inches: 0,
+			fraction: '',
+			readable: '0"'
+		};
+
 		this.options = this.options.bind(this);
 		this.fromDecimalInches = this.fromDecimalInches.bind(this);
 		this.parse = this.parse.bind(this);
 		this.stringify = this.stringify.bind(this);
+		this.verbal = this.verbal.bind(this);
 		this._cycleFractions = this._cycleFractions.bind(this);
 		this._optionsMatch = this._optionsMatch.bind(this);
 	}
@@ -308,6 +328,29 @@ export class MeasurementConverter {
 		return result;
 	}
 
+	verbal(measurement: Measurement) {
+		const phraseComponents = [];
+		const { feet, inches, fraction } = measurement;
+		let index = 0;
+		if (feet === 0 && inches === 0 && fraction === '') return 'zero inches';
+		if (feet) phraseComponents[index++] = feet + (inches ? ' foot' : ' feet');
+		if (inches) phraseComponents[index++] = inches + '';
+		if (fraction) {
+			const [numerator, denominator] = fraction.split('/');
+			let beginning = numerator + ' ';
+			let ending = verbalDenominators[+denominator] + (numerator === '1' ? '' : 's');
+			if (feet || inches) {
+				beginning = ' and ' + beginning;
+				ending += ' inches';
+			} else ending = ' of an inch';
+			phraseComponents[index++] = beginning + ending;
+		} else if (inches && !feet) {
+			phraseComponents[index - 1] += inches === 1 ? ' inch' : ' inches';
+		}
+
+		return phraseComponents.join(' ');
+	}
+
 	_cycleFractions(decimal: number) {
 		let denominator = this._options.precision || 16;
 		let numerator = Math.round(decimal * denominator);
@@ -350,6 +393,11 @@ export function formatter(optionOverrides?: MeasurementOptions): (decimalInches:
 
 export function sae(decimalInches: number, displayOptions?: MeasurementOptions) {
 	return measurement.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
+}
+
+export function wordify(decimalInches: string, options?: MeasurementOptions) {
+	const result = measurement.verbal(measurement.fromDecimalInches(decimalInches, options)!);
+	return result;
 }
 
 export function inches(saeMeasurement: string, displayOptions: MeasurementOptions) {

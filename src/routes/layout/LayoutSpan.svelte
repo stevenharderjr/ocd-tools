@@ -29,10 +29,12 @@
   }
   .measurement {
     text-align: center;
+    font-weight: 500;
   }
-  /* .label {
-    text-align: center;
-  } */
+  .label {
+    text-transform: uppercase;
+    font-size: small;
+  }
   span {
     width: 100%;
   }

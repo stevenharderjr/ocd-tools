@@ -1,35 +1,39 @@
 <script lang="ts">
-  import { formatter } from '$lib/utils/MeasurementConverter';
+  import { sae } from '$lib/utils/MeasurementConverter';
+  import type { MeasurementOptions, MeasurementPrecision } from '$lib/utils/MeasurementConverter'
 
   export let start: number;
   export let end: number;
-
-  const readable = formatter({ feet: false });
+  export let precision: MeasurementPrecision = 8;
+  let displayOptions: MeasurementOptions = { feet: false };
+  $: displayOptions.precision = precision;
 </script>
 
 <div class="row">
-  <div class="measurement">
     <span>&#8677;</span>
     <ul>
-        <li>{readable(start) || '0"'}</li>
-        <li>Padding</li>
-        <li>{readable(end) || '0"'}</li>
+        <li class="measurement">{sae(start, displayOptions) || '0"'}</li>
+        <li class="label">Padding</li>
+        <li class="measurement">{sae(end, displayOptions) || '0"'}</li>
     </ul>
     <span>&#8676;</span>
-  </div>
 </div>
 
 <style>
   .row {
     display: flex;
-    flex-wrap: nowrap;
-  }
-  .measurement {
-    display: flex;
     width: 100%;
     justify-content: space-between;
     flex-direction: row;
     flex-wrap: nowrap;
+    font-weight: 500;
+  }
+  .measurement {
+    font-weight: 500;
+  }
+  .label {
+    text-transform: uppercase;
+    font-size: small;
   }
   ul {
     list-style: none;

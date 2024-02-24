@@ -16,7 +16,7 @@
 
 <div class="box">
   <div class="row">
-    <span class="label">Precision</span>
+    <span class="label"> precision</span>
     <span class="measurement">{precision > 1 ? '1/' + precision : precision}"</span>
   </div>
   <LayoutSlider id="precision" value={precision} range={[1, 64]} on:update={handleUpdate} on:reset={() => {}} />
@@ -33,16 +33,20 @@
     flex-wrap: nowrap;
     width: 100%;
     justify-content: space-between;
-    margin-bottom: -1.5rem;
+    align-items: baseline;
+    margin-bottom: -1.55rem;
   }
   .measurement {
     text-align: center;
+    font-weight: 500;
   }
-  /* .label {
-    text-align: center;
-  } */
-  span {
+  .label {
     font-size: small;
+    text-align: center;
+    padding-right: 0.5rem;
+  }
+  span {
+    text-transform: uppercase;
     width: 100%;
   }
 </style>

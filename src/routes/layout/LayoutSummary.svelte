@@ -3,15 +3,15 @@
   import LayoutSpan from './LayoutSpan.svelte';
   import LayoutPadding from './LayoutPadding.svelte';
   import LayoutSpacing from './LayoutSpacing.svelte';
-  import { formatter } from '$lib/utils/MeasurementConverter';
+  import { formatter, sae } from '$lib/utils/MeasurementConverter';
   const dispatch = createEventDispatcher();
 
   export let layout: App.Layout;
-  const displayOptions = { feet: false, precision: layout.precision };
-  const readable = formatter(displayOptions);
-  const span = readable(layout.span);
-
-  const spacing = readable(layout.targetSpacing);
+  const displayOptions = {
+    padding: { feet: false },
+    span: { feet: layout.span > 144, precision: layout.precision },
+    spacing: { feet: false
+  }};
 
   function use() {
     dispatch('select', layout);
@@ -25,9 +25,11 @@
         <h2>{layout?.label}</h2>
       </section>
       <section class="factors">
-        <LayoutSpan span={layout.span} />
-        <LayoutPadding start={layout.padding[0]} end={layout.padding[1]} />
-        <LayoutSpacing target={layout.targetSpacing} />
+        <div class="row">
+          <span class="small">&#8677; {sae(layout.padding[0], displayOptions.padding) || '0"'}</span>
+          <span>{sae(layout.span, displayOptions.span)} / {sae(layout.targetSpacing, displayOptions.spacing)}</span>
+          <span class="small">{sae(layout.padding[1], displayOptions.padding) || '0"'} &#8676;</span>
+        </div>
       </section>
     </div>
   </button>
@@ -38,3 +40,19 @@
     </button>
   </div>
 </li>
+
+<style>
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .small {
+    font-size: small;
+  }
+  span {
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+  }
+</style>

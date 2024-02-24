@@ -1,18 +1,20 @@
 <script lang="ts">
   import { sae } from '$lib/utils/MeasurementConverter';
+  import type { MeasurementOptions } from '$lib/utils/MeasurementConverter';
 
   export let points: number[];
-  export let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
+  export let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64 = 8;
+  let displayOptions: MeasurementOptions = {};
   $: pointCount = points.length;
   $: span = points[pointCount - 1] - points[0];
-  $: displayOptions = { feet: span > 144, precision: 8 };
-
+  $: displayOptions.precision = precision;
+  $: displayOptions.feet = span > 144;
 </script>
 
 <div class="row">
-  <span>{pointCount} Measurement{pointCount === 1 ? '' : 's'}</span>
+  <span class="label">Measurements ({pointCount})</span>
 </div>
-<ul on:click|stopPropagation>
+<ul>
   {#each points as point, i}
     <li><label for={`point ${i}`}><input id={`point ${i}`} type="checkbox" />{sae(point, displayOptions) || '0"'}</label></li>
   {/each}
@@ -39,5 +41,9 @@
     border-radius: 8px;
     font-size: 0.9rem;
     text-indent: 6px;
+  }
+  .label {
+    text-transform: uppercase;
+    font-size: small;
   }
 </style>

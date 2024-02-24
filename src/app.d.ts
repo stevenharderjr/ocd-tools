@@ -49,8 +49,7 @@ declare global {
 			targetSpacing: number;
 			precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
 			decimals: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-			offset: 'leading' | 'center' | 'trailing';
-			alignment: 'even' | 'fill' | 'simple';
+			alignment: 'even' | 'simple';
 		}
 
 		interface Layout extends LayoutBaseline {
