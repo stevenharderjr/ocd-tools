@@ -117,7 +117,7 @@ export const layouts = writable([
 		span: 144,
 		targetSpacing: 24,
 		padding: [0, 1.5],
-		precision: 1
+		precision: 2
 	},
 	{
 		id: 3,
@@ -126,7 +126,7 @@ export const layouts = writable([
 		span: 144,
 		targetSpacing: 16,
 		padding: [0, 1.5],
-		precision: 1
+		precision: 2
 	}
 ]);
 
