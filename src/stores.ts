@@ -61,6 +61,32 @@ export const ratios = writable<App.Ratio[]>(
 					value: '3.5 g'
 				}
 			]
+		},
+		{
+			id: '3',
+			label: 'Ice Tea',
+			factors: [
+				{
+					id: '0',
+					label: 'Water',
+					value: '460 g'
+				},
+				{
+					id: '1',
+					label: 'Ice',
+					value: '220 g'
+				},
+				{
+					id: '2',
+					label: 'Sugar',
+					value: '24 g'
+				},
+				{
+					id: '3',
+					label: 'Tea',
+					value: '1 g'
+				}
+			]
 		}
 	].map(overload.ratio)
 );

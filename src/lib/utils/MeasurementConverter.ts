@@ -121,7 +121,7 @@ export class MeasurementConverter {
 
 		const string = inputValue + '';
 		const fixed = Number(string).toFixed(decimals);
-		const numeric = +inputValue;
+		const numeric = +fixed;
 
 		if (measureFeet) {
 			feet = Math.floor(numeric / 12);

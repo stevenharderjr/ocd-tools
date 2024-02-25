@@ -6,10 +6,12 @@
   import LayoutPoints from './LayoutPoints.svelte';
   import LayoutSlider from './LayoutSlider.svelte';
   import LayoutPrecision from './LayoutPrecision.svelte';
+  import ToggleButton from '$lib/ToggleButton.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
   import { formatter, wordify } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
+  import type { ToggleOption } from '$lib/ToggleButton.svelte';
   import Toast from '$lib/../toast';
 	import CloseButton from '$lib/CloseButton.svelte';
   const dispatch = createEventDispatcher();
@@ -24,8 +26,19 @@
   let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
   const measurementDisplayOptions = { feet: false };
   const readable = formatter(measurementDisplayOptions);
+  const alignmentOptions: [ToggleOption, ToggleOption] = [
+    {
+      label: 'Even',
+      value: 'even'
+    },
+    {
+      label: 'Simple',
+      value: 'simple'
+    }
+  ];
 
   $: precision = temp.precision;
+  $: alignment = temp.alignment;
   $: range = points[1] - points[0];
   $: [start, end] = temp.padding;
   $: points = deriveLayoutPoints(temp);
@@ -77,7 +90,6 @@
         navigator.mediaSession.setActionHandler('play', sayNextMeasurement);
         navigator.mediaSession.setActionHandler('pause', sayNextMeasurement);
       }
-      audio.play();
     }
   });
 </script>
@@ -120,7 +132,7 @@
             <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
           </div>
           <div style="grid-column: 2;">
-            <LayoutPrecision precision={temp.precision} on:update={update} />
+            <ToggleButton id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
           </div>
         </div>
         <LayoutPoints {points} {precision} />
@@ -152,14 +164,8 @@
 		margin: 0 4rem 1rem 4rem;
     align-self: center;
 	}
-  .horizontal-scroll {
-    overflow-x: auto;
-  }
   .shrink {
     margin-bottom: -1.5rem;
-  }
-  .grow {
-    margin-bottom: -1rem;
   }
   .row {
     display: flex;
