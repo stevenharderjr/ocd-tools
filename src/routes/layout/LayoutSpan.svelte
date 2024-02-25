@@ -1,8 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import {sae} from '$lib/utils/MeasurementConverter';
+  import { sae } from '$lib/utils/MeasurementConverter';
+  import type { MeasurementPrecision } from '$lib/utils/MeasurementConverter';
 
   export let span: number;
+  export let precision: MeasurementPrecision = 8;
+
+  $: displayOptions = { precision };
 
   // onMount(() => {
   //   const changeThreshold = span > 144;
@@ -15,8 +19,8 @@
 
 <div class="row">
     <span class="label">Span</span>
-    <span class="measurement">{sae(span, { feet: span > 144, precision: 8 })}</span>
-    <span></span>
+    <span class="measurement">{sae(span, displayOptions)}</span>
+    <span style="font-size: small; text-align: right;">({sae(span / 2, displayOptions)})</span>
 </div>
 
 <style>
@@ -30,10 +34,12 @@
   .measurement {
     text-align: center;
     font-weight: 500;
+    white-space: nowrap;
   }
   .label {
     text-transform: uppercase;
     font-size: small;
+    white-space: nowrap;
   }
   span {
     width: 100%;

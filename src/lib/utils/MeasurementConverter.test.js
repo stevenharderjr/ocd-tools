@@ -135,14 +135,14 @@ test('should return undefined when called without arguments', () => {
 test('numeric value respects decimals option', () => {
 	const options = { decimals: 4 };
 	const { fixed, numeric } = measurement.fromDecimalInches(1.25000087, options);
-	expect(numeric).toEqual(1.25000087);
+	expect(numeric).toEqual(1.25);
 	expect(fixed).toEqual('1.2500');
 });
 
 test('numeric value respects decimals option', () => {
 	const options = { decimals: 4 };
 	const { fixed, numeric } = measurement.fromDecimalInches(1.0625087676, options);
-	expect(numeric).toEqual(1.0625087676);
+	expect(numeric).toEqual(1.0625);
 	expect(fixed).toEqual('1.0625');
 });
 
@@ -150,7 +150,7 @@ test('fixed value respects decimals option', () => {
 	const options = { decimals: 4 };
 	const { fixed, numeric } = measurement.fromDecimalInches(106.06250983, options);
 	expect(fixed).toEqual('106.0625');
-	expect(numeric).toEqual(106.06250983);
+	expect(numeric).toEqual(106.0625);
 });
 
 test('numeric value trimmed to feet and inches', () => {
@@ -178,15 +178,3 @@ test('decimal fraction should return one eighth', () => {
 test('decimal should return nearest sixteenth', () => {
 	expect(measurement._cycleFractions(0.1225)).toEqual('1/8');
 });
-
-// test('should yield irregular fractions', () => {
-// 	expect(cycleFractions(1.0625)).toEqual([17, 16]);
-// });
-
-// test('should yield irregular fractions', () => {
-// 	expect(cycleFractions(1.0625)).toEqual([17, 16]);
-// });
-
-// test('float should be converted to the nearest 16th inch', () => {
-// 	expect(inches(1.25)).toEqual('1 1/4"');
-// });

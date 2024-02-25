@@ -34,7 +34,6 @@
   function dragEnd(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
     direction = 0;
-    console.log({ value, baseline});
     dispatch('reset', { id, value });
   }
 
@@ -42,14 +41,12 @@
     const [{ clientX: x, clientY: y }] = event.touches;
     origin = [x, y];
     direction = 0;
-    console.log('start', [x, y]);
   }
 
   function touchEnd(event: TouchEvent) {
     direction = 0;
     horizontalTouchMove = false;
     verticalTouchMove = false;
-    console.log({ value, baseline});
     dispatch('reset', { id, value });
   }
 

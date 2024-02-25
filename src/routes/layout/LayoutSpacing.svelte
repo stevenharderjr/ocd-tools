@@ -27,7 +27,6 @@
 <style>
   .box {
     align-items: center;
-    margin-right: 0.5rem;
   }
   .measurement {
     display: flex;
@@ -35,6 +34,7 @@
     justify-content: space-between;
   }
   .label {
+    width: 100%;
     text-transform: uppercase;
     font-size: small;
   }
@@ -42,7 +42,7 @@
     display: flex;
     align-items: center;
 
-    min-width: 4rem;
+    width: 100%;
     /* text-align: center; */
     white-space: nowrap;
     /* padding: 0 0.5rem; */
@@ -51,10 +51,11 @@
     font-weight: 500;
   }
   .actual {
-    min-width: 4rem;
+    width: 100%;
     text-align: right;
     font-size: small;
     white-space: nowrap;
+    color: #555;
   }
   span {
     width: 100%;

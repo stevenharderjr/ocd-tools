@@ -3,6 +3,7 @@ export function points(layout: App.Layout) {
 	const [start, end] = layout.padding;
 
 	const usableSpan = span - start - end;
+	if (usableSpan < start + end) return [];
 	const pointCount = Math.ceil(usableSpan / targetSpacing);
 	const spacing = alignment === 'even' ? usableSpan / pointCount : targetSpacing;
 

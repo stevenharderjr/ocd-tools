@@ -1,6 +1,5 @@
 <script>
   export let number = 0;
-  console.log(number);
 
   let W = 0, N = 0, D = 0;
 
