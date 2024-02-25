@@ -76,7 +76,7 @@ export class MeasurementConverter {
 		this.fromDecimalInches = this.fromDecimalInches.bind(this);
 		this.parse = this.parse.bind(this);
 		this.stringify = this.stringify.bind(this);
-		this.verbal = this.verbal.bind(this);
+		this.verbalize = this.verbalize.bind(this);
 		this._cycleFractions = this._cycleFractions.bind(this);
 		this._optionsMatch = this._optionsMatch.bind(this);
 	}
@@ -325,7 +325,7 @@ export class MeasurementConverter {
 		return result;
 	}
 
-	verbal(measurement: Measurement) {
+	verbalize(measurement: Measurement) {
 		const phraseComponents = [];
 		const { feet, inches, fraction } = measurement;
 		let index = 0;
@@ -334,7 +334,7 @@ export class MeasurementConverter {
 		phraseComponents[index++] = inches ? inches + '' : 'zero';
 		if (fraction) {
 			const [numerator, denominator] = fraction.split('/');
-			let beginning = numerator + ' ';
+			let beginning = (numerator === '1' ? (denominator === '8' ? 'an' : 'a') : numerator) + ' ';
 			let ending = verbalDenominators[+denominator] + (numerator === '1' ? '' : 's');
 			if (feet || inches) {
 				beginning = ' and ' + beginning;
@@ -392,7 +392,7 @@ export function sae(decimalInches: number, displayOptions?: MeasurementOptions) 
 }
 
 export function wordify(decimalInches: string, options?: MeasurementOptions) {
-	const result = measurement.verbal(measurement.fromDecimalInches(decimalInches, options)!);
+	const result = measurement.verbalize(measurement.fromDecimalInches(decimalInches, options)!);
 	return result;
 }
 

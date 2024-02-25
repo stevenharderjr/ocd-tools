@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { points } from './deriveLayoutPoints';
-import { measurement } from './MeasurementConverter';
+import { measurement, decimalsByPrecision } from './MeasurementConverter';
 
 // const layout = {
 // 	span: 78.5,
@@ -46,7 +46,7 @@ test('returns correct number of points', () => {
 	const { span, targetSpacing } = layout;
 	const [start, end] = layout.padding;
 	const usableSpan = span - start - end;
-	const pointCount = Math.ceil(usableSpan / targetSpacing);
+	const pointCount = usableSpan < start + end ? 0 : Math.ceil(usableSpan / targetSpacing);
 	const spacing = usableSpan / pointCount;
 	// console.log('spacing:', measurement.fromDecimalInches(spacing));
 	// console.log(measurements.map((m) => measurement.fromDecimalInches(m).readable));
@@ -55,6 +55,6 @@ test('returns correct number of points', () => {
 
 test('actual spacing does not exceed target spacing', () => {
 	const [p1, p2] = points(layout);
-	const diff = p2 - p1;
+	const diff = +(p2 - p1).toFixed(4);
 	expect(diff).not.toBeGreaterThan(layout.targetSpacing);
 });

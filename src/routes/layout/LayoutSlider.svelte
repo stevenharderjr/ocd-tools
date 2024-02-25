@@ -129,7 +129,7 @@
     right: 0;
     bottom: 5px;
     border-radius: 8px;
-    /* background: linear-gradient(to right, #fff, #ccc, #fff); */
+    /* background: linear-gradient(to right, #ccc, #eee, #ccc); */
     background: #eee;
     box-shadow: inset 0 1px 3px #999;
     /* box-shadow: 0 0 4px #000; */

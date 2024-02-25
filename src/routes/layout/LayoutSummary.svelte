@@ -9,7 +9,7 @@
   export let layout: App.Layout;
   const displayOptions = {
     padding: { feet: false },
-    span: { feet: layout.span > 144, precision: layout.precision },
+    span: { precision: layout.precision },
     spacing: { feet: false
   }};
 
