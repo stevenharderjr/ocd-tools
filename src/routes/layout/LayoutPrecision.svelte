@@ -20,7 +20,6 @@
   function handleChange(key: string) {
     const selectedOption = options.find(({ label }) => label === key);
     if (!selectedOption || selectedOption.value === precision) return;
-    console.log('change precision to', key);
     dispatch('update', { id: 'precision', value: selectedOption.value });
   }
 

@@ -21,6 +21,7 @@
   export let unlocked = false;
   export let pointIndex = 0;
   let audio: HTMLAudioElement;
+  let cued = false;
   let temp = { ...layout };
   let points: number[] = [];
   let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
@@ -43,13 +44,13 @@
   $: [start, end] = temp.padding;
   $: points = deriveLayoutPoints(temp);
 
-  function update({ detail: { id, value } }){
+  function update({ detail: { id, value } }) {
+    pointIndex = 0;
     let update = value;
     if (id === 'start' || id === 'end') {
       update = id === 'start' ? [value, end] : [start, value];
       id = 'padding';
     }
-    // console.log({ key: id, value: update });
     temp = { ...temp, [id]: update };
   }
 
@@ -76,17 +77,23 @@
   }
 
   function sayNextMeasurement() {
-    // audio.pause();
-    audio.play();
+    // HACK: try to maintain device audio focus with mediaSession...
+    const { playbackState } = navigator.mediaSession;
+    if (playbackState === 'paused') audio.play();
+    else if (playbackState === 'playing') audio.pause();
+    else throw new Error('no audio focus');
+
     const point = nextPoint();
-    if (point !== undefined) say(point ? wordify(point, { precision }) : 'zero inches');
+    if (point !== undefined) say(point ? wordify(point, { precision: temp.precision }) : 'zero inches');
   }
 
-  function cueAudio() {
-    console.log('cue audio');
-    const duration = 20000;
-    Toast.add({ message: 'Audio ready: use headset play/pause button to hear each measurement', duration });
-    audio.play();
+  async function cueAudio() {
+    if (!browser) return;
+    if (cued) return sayNextMeasurement();
+    cued = true;
+    const duration = 5000;
+    Toast.add({ message: 'Audio ready. Use bluetooth headset to cycle measurements.', duration, blur: false });
+   audio.play().catch(console.error);
   }
 
   onMount(() => {
@@ -97,6 +104,9 @@
         navigator.mediaSession.setActionHandler('play', sayNextMeasurement);
         navigator.mediaSession.setActionHandler('pause', sayNextMeasurement);
       }
+      audio.play().then(() => {
+        navigator.mediaSession.playbackState = 'playing';
+      });
     }
   });
 </script>
@@ -109,32 +119,32 @@
       </section>
       <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
-        <LayoutPrecision {precision} on:update={update} />
+        <LayoutPrecision precision={temp.precision} on:update={update} />
             <div class="shrink">
-              <LayoutSpan span={temp.span} {precision} on:update={update} />
-              <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} /> -->
+              <LayoutSpan span={temp.span} precision={temp.precision} on:update={update} />
+              <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
             </div>
-            <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
+            <LayoutSlider id="span" value={temp.span} precision={temp.precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
           <div class="shrink">
-            <LayoutPadding {start} {end} on:update={update} {precision} />
+            <LayoutPadding {start} {end} on:update={update} precision={temp.precision} />
           </div>
           <div class="row">
-            <LayoutSlider id="start" value={start} {precision} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
-            <LayoutSlider id="end" value={end} {precision} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
+            <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
+            <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
           </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
         <div class="row">
           <div style="width: 100%;">
             <div style="margin-bottom: -16px;">
-              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} />
+              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} />
             </div>
-            <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+            <LayoutSlider id="targetSpacing" value={temp.targetSpacing} precision={temp.precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
           </div>
           <div>
             <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
           </div>
         </div>
-        <LayoutPoints {points} {precision} on:cue={cueAudio} />
+        <LayoutPoints {points} precision={temp.precision} on:cue={cueAudio} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>

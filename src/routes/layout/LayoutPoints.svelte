@@ -6,26 +6,23 @@
 
   export let points: number[];
   export let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64 = 8;
-  let displayOptions: MeasurementOptions = {};
   $: pointCount = points.length;
   $: span = points[pointCount - 1] - points[0];
-  $: displayOptions.precision = precision;
-  $: displayOptions.feet = span > 144;
+  $: displayOptions = { precision };
 
   function cueAudio() {
-    console.log('dispatch audio cue');
     dispatch('cue');
   }
 </script>
 
-<span style="font-size: small; text-align: center; text-transform: uppercase;">{pointCount} Measurements</span>
+<span style="font-size: small; text-align: center; text-transform: uppercase;">{pointCount} Measurement{pointCount === 1 ? '' : 's'}</span>
 <ul>
   {#each points as point, i}
     <li><label for={`point ${i}`}><input id={`point ${i}`} type="checkbox" />{sae(point, displayOptions) || '0"'}</label></li>
   {/each}
 </ul>
 <div class="audio-controls">
-  <button on:click={cueAudio} title="add new layout" style="margin: auto; background: #0009;">
+  <button on:click|stopPropagation={cueAudio} title="add new layout" style="margin: auto; background: #0009;">
     <img style="filter: invert(1); -webkit-filter: invert(1);" src="headphones.svg" />
   </button>
 </div>

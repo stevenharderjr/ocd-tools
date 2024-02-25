@@ -270,7 +270,6 @@ export class MeasurementConverter {
 		result.feet = feet;
 		result.inches = inches;
 		result.readable = stringify(result);
-		console.log(this._options, optionOverrides);
 
 		if (reset) options(reset);
 
@@ -285,10 +284,8 @@ export class MeasurementConverter {
 
 		if (this._options.caching) {
 			const cachedResult = _cachedStrings.get(freedomFraction);
-			if (cachedResult && _optionsMatch(_cachedOverrides.get(freedomFraction))) {
-				console.log('cached readable');
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(freedomFraction)))
 				return cachedResult as string;
-			}
 		}
 
 		let reset: MeasurementOptions = {};
@@ -333,8 +330,8 @@ export class MeasurementConverter {
 		const { feet, inches, fraction } = measurement;
 		let index = 0;
 		if (feet === 0 && inches === 0 && fraction === '') return 'zero inches';
-		if (feet) phraseComponents[index++] = feet + (inches ? ' foot' : ' feet');
-		if (inches) phraseComponents[index++] = inches + '';
+		if (feet) phraseComponents[index++] = feet + ' foot';
+		phraseComponents[index++] = inches ? inches + '' : 'zero';
 		if (fraction) {
 			const [numerator, denominator] = fraction.split('/');
 			let beginning = numerator + ' ';

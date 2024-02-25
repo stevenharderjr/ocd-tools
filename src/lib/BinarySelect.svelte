@@ -18,7 +18,6 @@
   $: [a, b] = options;
 
   function switchValues() {
-    console.log('switch');
     const newValue = selected === a.value ? b.value : a.value;
     dispatch('change', { id, value: newValue });
   }

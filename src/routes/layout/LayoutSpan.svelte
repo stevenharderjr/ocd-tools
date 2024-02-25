@@ -1,13 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import {sae} from '$lib/utils/MeasurementConverter';
+  import { sae } from '$lib/utils/MeasurementConverter';
+  import type { MeasurementPrecision } from '$lib/utils/MeasurementConverter';
 
   export let span: number;
-  export let precision: number = 8;
-  let displayOptions = {};
+  export let precision: MeasurementPrecision = 8;
 
-  $: displayOptions.feet = span > 144;
-  $: displayOptions.precision = precision;
+  $: displayOptions = { precision };
 
   // onMount(() => {
   //   const changeThreshold = span > 144;
