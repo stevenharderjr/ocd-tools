@@ -36,8 +36,8 @@ const verbalDenominators = {
 	4: 'quarter',
 	8: 'eighth',
 	16: 'sixteenth',
-	32: 'thirtysecond',
-	64: 'sixtyfourth'
+	32: 'thirty-second',
+	64: 'sixty-fourth'
 };
 
 export const precisionByDecimals = [1, 2, 4, 8, 16, 32, 64];
