@@ -129,8 +129,8 @@
             <LayoutPadding {start} {end} on:update={update} precision={temp.precision} />
           </div>
           <div class="row">
-            <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
-            <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
+            <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
+            <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
           </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
         <div class="row">
