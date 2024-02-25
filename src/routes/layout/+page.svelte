@@ -28,22 +28,18 @@
       {/if}
     {/each}
   </ul>
-  <div class="button-container" style={use ? 'z-index: 8;' : ''}>
-    {#if use}
-      <button on:click title="add new layout" disabled style="margin: auto; background: #777;">
-        <img style="filter: invert(1); -webkit-filter: invert(1);" src="headphones.svg" />
-      </button>
-    {:else}
-      <a href="/" title="return to dashboard">
-        <img height="16px" width="16px"src="arrow-left.svg" alt="left arrow" aria-hidden={true} />
-      </a>
-      <button on:click title="add new layout" disabled>
-        <svg aria-hidden="true" viewBox="0 0 1 1">
-          <path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
-        </svg>
-      </button>
-    {/if}
-  </div>
+  {#if !use}
+    <div class="button-container" style={use ? 'z-index: 8;' : ''}>
+        <a href="/" title="return to dashboard">
+          <img height="16px" width="16px"src="arrow-left.svg" alt="left arrow" aria-hidden={true} />
+        </a>
+        <button on:click title="add new layout" disabled>
+          <svg aria-hidden="true" viewBox="0 0 1 1">
+            <path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
+          </svg>
+        </button>
+    </div>
+  {/if}
 </div>
 
 <style>

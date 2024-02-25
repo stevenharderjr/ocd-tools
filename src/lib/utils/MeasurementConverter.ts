@@ -40,7 +40,7 @@ const verbalDenominators = {
 	64: 'sixtyfourth'
 };
 
-export const precisionByDecimals = [0, 2, 4, 8, 16, 32, 64];
+export const precisionByDecimals = [1, 2, 4, 8, 16, 32, 64];
 
 const defaultOptions: MeasurementOptions = {
 	precision: 16,

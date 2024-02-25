@@ -8,7 +8,7 @@
   import LayoutPrecision from './LayoutPrecision.svelte';
   import BinarySelect from '$lib/BinarySelect.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { formatter, wordify } from '$lib/utils/MeasurementConverter';
+  import { formatter, precisionByDecimals, wordify } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
   import type { ToggleOption } from '$lib/BinarySelect.svelte';
@@ -82,6 +82,13 @@
     if (point !== undefined) say(point ? wordify(point, { precision }) : 'zero inches');
   }
 
+  function cueAudio() {
+    console.log('cue audio');
+    const duration = 20000;
+    Toast.add({ message: 'Audio ready: use headset play/pause button to hear each measurement', duration });
+    audio.play();
+  }
+
   onMount(() => {
     let phrase: SpeechSynthesisUtterance;
     container.scrollIntoView({ behavior: 'smooth' });
@@ -100,21 +107,14 @@
       <section class="card-top">
         <h2>{temp?.label}</h2>
       </section>
+      <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
-
-        <div class="grid-row">
-          <div style="grid-colum: 1;">
+        <LayoutPrecision {precision} on:update={update} />
             <div class="shrink">
               <LayoutSpan span={temp.span} {precision} on:update={update} />
               <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} /> -->
             </div>
             <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
-          </div>
-          <div style="grid-column: 2;">
-            <LayoutPrecision {precision} on:update={update} />
-          </div>
-        </div>
-        <div>
           <div class="shrink">
             <LayoutPadding {start} {end} on:update={update} {precision} />
           </div>
@@ -122,11 +122,10 @@
             <LayoutSlider id="start" value={start} {precision} range={getUsableRangeFromValue(start)} on:update={update} on:reset={resetRange} />
             <LayoutSlider id="end" value={end} {precision} range={getUsableRangeFromValue(end)} on:update={update} on:reset={resetRange} />
           </div>
-        </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
         <div class="row">
           <div style="width: 100%;">
-            <div class="shrink">
+            <div style="margin-bottom: -16px;">
               <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} />
             </div>
             <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
@@ -135,7 +134,7 @@
             <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
           </div>
         </div>
-        <LayoutPoints {points} {precision} />
+        <LayoutPoints {points} {precision} on:cue={cueAudio} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>
@@ -165,13 +164,13 @@
     align-self: center;
 	}
   .shrink {
-    margin-bottom: -16px;
+    margin-bottom: -24px;
   }
   .row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    gap: 2rem;
+    gap: 1.5rem;
     margin-right: -0.5rem;
   }
   .grid-row {
@@ -182,4 +181,5 @@
   audio {
     pointer-events: auto;
   }
+
 </style>

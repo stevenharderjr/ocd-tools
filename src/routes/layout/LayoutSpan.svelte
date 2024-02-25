@@ -4,6 +4,10 @@
 
   export let span: number;
   export let precision: number = 8;
+  let displayOptions = {};
+
+  $: displayOptions.feet = span > 144;
+  $: displayOptions.precision = precision;
 
   // onMount(() => {
   //   const changeThreshold = span > 144;
@@ -16,8 +20,8 @@
 
 <div class="row">
     <span class="label">Span</span>
-    <span class="measurement">{sae(span, { feet: span > 144, precision })}</span>
-    <span></span>
+    <span class="measurement">{sae(span, displayOptions)}</span>
+    <span style="font-size: small; text-align: right;">({sae(span / 2, displayOptions)})</span>
 </div>
 
 <style>
@@ -36,6 +40,7 @@
   .label {
     text-transform: uppercase;
     font-size: small;
+    white-space: nowrap;
   }
   span {
     width: 100%;
