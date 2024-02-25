@@ -25,20 +25,19 @@
 </script>
 
 <button class={alignment + ' base'} on:click={switchValues}>
-  <div class={selected === a.value ? "selected option" : 'option'}>{a.label}</div>
-  <div class={selected === b.value ? "selected option" : 'option'}>{b.label}</div>
+  <div class={selected === a.value ? "option selected" : 'option'}>{a.label}</div>
+  <div class={selected === b.value ? "option selected" : 'option'}>{b.label}</div>
 </button>
 
 <style>
   .base {
+    /* border: 2px solid #ccc; */
     border: none;
+    box-shadow: inset 0 1px 3px #999;
     display: flex;
     background: #eee;
     border-radius: 8px;
     padding: 4px;
-    font-size: small;
-    color: #333;
-    margin-left: -0.5rem;
     justify-content: center;
     align-items: center;
     align-self: center;
@@ -54,13 +53,20 @@
   .option {
     width: 100%;
     text-transform: uppercase;
-    border-radius: 4px;
-    padding: 0 6px;
+    border-radius: 5px;
+    padding: 1px 6px;
     text-align: center;
+    font-weight: 100;
+    font-size: small;
+    color: #888;
+    border: 1.5px solid transparent;
   }
   .selected {
+    padding: 1px 6.5px;
+    border: none;
     font-weight: 500;
     color: #000;
     background: #fff;
+    box-shadow: 0 1px 4px #0006;
   }
 </style>

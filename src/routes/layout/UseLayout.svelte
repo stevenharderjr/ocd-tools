@@ -6,12 +6,12 @@
   import LayoutPoints from './LayoutPoints.svelte';
   import LayoutSlider from './LayoutSlider.svelte';
   import LayoutPrecision from './LayoutPrecision.svelte';
-  import ToggleButton from '$lib/ToggleButton.svelte';
+  import BinarySelect from '$lib/BinarySelect.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
   import { formatter, wordify } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
-  import type { ToggleOption } from '$lib/ToggleButton.svelte';
+  import type { ToggleOption } from '$lib/BinarySelect.svelte';
   import Toast from '$lib/../toast';
 	import CloseButton from '$lib/CloseButton.svelte';
   const dispatch = createEventDispatcher();
@@ -49,7 +49,7 @@
       update = id === 'start' ? [value, end] : [start, value];
       id = 'padding';
     }
-    console.log({ key: id, value: update });
+    // console.log({ key: id, value: update });
     temp = { ...temp, [id]: update };
   }
 
@@ -105,13 +105,13 @@
         <div class="grid-row">
           <div style="grid-colum: 1;">
             <div class="shrink">
-              <LayoutSpan span={temp.span} on:update={update} />
+              <LayoutSpan span={temp.span} {precision} on:update={update} />
               <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} /> -->
             </div>
             <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
           </div>
           <div style="grid-column: 2;">
-            <LayoutPrecision precision={temp.precision} on:update={update} />
+            <LayoutPrecision {precision} on:update={update} />
           </div>
         </div>
         <div>
@@ -124,15 +124,15 @@
           </div>
         </div>
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
-        <div class="grid-row">
-          <div style="grid-colum: 1;">
+        <div class="row">
+          <div style="width: 100%;">
             <div class="shrink">
               <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} />
             </div>
             <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
           </div>
-          <div style="grid-column: 2;">
-            <ToggleButton id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
+          <div>
+            <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
           </div>
         </div>
         <LayoutPoints {points} {precision} />
@@ -165,19 +165,19 @@
     align-self: center;
 	}
   .shrink {
-    margin-bottom: -1.5rem;
+    margin-bottom: -16px;
   }
   .row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-right: -0.5rem;
   }
   .grid-row {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    column-gap: 2rem;
+    column-gap: 2.5rem;
   }
   audio {
     pointer-events: auto;

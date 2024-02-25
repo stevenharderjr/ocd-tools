@@ -3,6 +3,7 @@
   import {sae} from '$lib/utils/MeasurementConverter';
 
   export let span: number;
+  export let precision: number = 8;
 
   // onMount(() => {
   //   const changeThreshold = span > 144;
@@ -15,7 +16,7 @@
 
 <div class="row">
     <span class="label">Span</span>
-    <span class="measurement">{sae(span, { feet: span > 144, precision: 8 })}</span>
+    <span class="measurement">{sae(span, { feet: span > 144, precision })}</span>
     <span></span>
 </div>
 
@@ -30,6 +31,7 @@
   .measurement {
     text-align: center;
     font-weight: 500;
+    white-space: nowrap;
   }
   .label {
     text-transform: uppercase;

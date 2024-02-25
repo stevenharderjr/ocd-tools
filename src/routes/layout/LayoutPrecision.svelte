@@ -25,7 +25,6 @@
 <style>
   .box {
     flex-shrink: 1;
-    margin-right: 0.5rem;
   }
   .row {
     display: flex;
@@ -34,7 +33,7 @@
     width: 100%;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: -1.55rem;
+    margin-bottom: -17px;
   }
   .measurement {
     text-align: center;

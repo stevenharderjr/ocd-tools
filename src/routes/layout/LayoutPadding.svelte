@@ -47,4 +47,7 @@
     min-width: 3rem;
     text-align: center;
   }
+  .row span {
+    color: #777;
+  }
 </style>
