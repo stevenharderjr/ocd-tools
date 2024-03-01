@@ -3,9 +3,9 @@
   const dispatch = createEventDispatcher();
 
   export let id: string;
-  export let label: string;
-  export let prefix: string;
-  export let suffix: string;
+  export let label: string = '';
+  export let prefix: string = '';
+  export let suffix: string = '';
   export let value: number;
   export let baseline: number;
   export let decimals: number = 0;
@@ -175,12 +175,15 @@
   }
   .visible-body {
     position: absolute;
-    top: 8px;
+    top: 5px;
     left: 0;
     right: 0;
-    bottom: 8px;
-    border-radius: 12px;
-    background: linear-gradient(to right, #fff, #aaa, #aaa, #fff);
+    bottom: 5px;
+    border-radius: 8px;
+    /* background: linear-gradient(to right, #ccc, #eee, #ccc); */
+    background: #eee;
+    box-shadow: inset 0 1px 3px #999;
+    /* box-shadow: 0 0 4px #000; */
     pointer-events: none;
     display: flex;
     align-items: center;

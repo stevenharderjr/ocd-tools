@@ -8,7 +8,7 @@
   import LayoutPrecision from './LayoutPrecision.svelte';
   import BinarySelect from '$lib/BinarySelect.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { formatter, precisionByDecimals, wordify } from '$lib/utils/MeasurementConverter';
+  import { decimalsByPrecision, formatter, precisionByDecimals, wordify } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
   import type { ToggleOption } from '$lib/BinarySelect.svelte';
@@ -39,7 +39,9 @@
   ];
 
   $: precision = temp.precision;
+  // $: decimals = decimalsByPrecision[precision];
   $: alignment = temp.alignment;
+  // $: range = +(points[1] - points[0]).toFixed(decimals);
   $: range = points[1] - points[0];
   $: [start, end] = temp.padding;
   $: points = deriveLayoutPoints(temp);
@@ -77,11 +79,11 @@
   }
 
   function sayNextMeasurement() {
+    if (!audioElement) throw new Error('Audio element missing');
     // HACK: try to maintain device audio focus with mediaSession...
     const { playbackState } = navigator.mediaSession;
     if (playbackState === 'paused') audioElement.play();
-    else if (playbackState === 'playing') audioElement.pause();
-    else throw new Error('no audio focus');
+    else audioElement.pause();
 
     const point = nextPoint();
     if (point !== undefined) say(point ? wordify(point, { precision: temp.precision }) : 'zero inches');
@@ -92,7 +94,7 @@
     if (cued) return sayNextMeasurement();
     cued = true;
     const duration = 5000;
-    Toast.add({ message: 'Audio ready. Use bluetooth headset to cycle measurements.', duration, blur: false });
+    Toast.add({ message: 'Audio enabled. Use bluetooth play/pause to cycle measurements.', duration, blur: false });
   }
 
   onMount(() => {
@@ -119,19 +121,14 @@
       <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
         <LayoutPrecision precision={temp.precision} on:update={update} />
-            <div class="shrink">
-              <LayoutSpan span={temp.span} precision={temp.precision} on:update={update} />
-              <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
-            </div>
-            <LayoutSlider id="span" value={temp.span} precision={temp.precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
-          <div class="shrink">
-            <LayoutPadding {start} {end} on:update={update} precision={temp.precision} />
-          </div>
-          <div class="row">
-            <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
-            <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
-          </div>
-        <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
+        <div class="shrink">
+          <LayoutPadding {start} {end} on:update={update} precision={temp.precision} />
+        </div>
+        <div class="row">
+          <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
+        </div>
+
         <div class="row">
           <div style="width: 100%;">
             <div style="margin-bottom: -16px;">
@@ -143,6 +140,12 @@
             <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
           </div>
         </div>
+        <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
+        <div class="shrink">
+          <LayoutSpan span={temp.span} precision={temp.precision} on:update={update} />
+          <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
+        </div>
+        <LayoutSlider id="span" value={temp.span} precision={temp.precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
         <LayoutPoints {points} precision={temp.precision} on:cue={cueAudio} />
         <!-- <input type="range" min={inches(span)} -->
       </section>

@@ -15,7 +15,7 @@
     <div class="floating card">
       <div class="content">
         <h2>{value}</h2>
-        <InvisibleSlider {value} {min} {max} on:change={handleChange} />
+        <InvisibleSlider {value} {min} {max} on:update={handleChange} />
       </div>
     </div>
   </div>

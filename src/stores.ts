@@ -96,7 +96,7 @@ export const layouts = writable([
 		id: 0,
 		alignment: 'even',
 		label: 'Gutter Hanger Layout',
-		span: 40 * 12,
+		span: 15 * 12,
 		targetSpacing: 30,
 		padding: [8, 8],
 		precision: 1

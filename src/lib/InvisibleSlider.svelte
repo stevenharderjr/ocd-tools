@@ -2,7 +2,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let id: string;
+  export let id: string = '';
   export let value: number;
   export let min: number;
   export let max: number;
@@ -123,12 +123,15 @@
   }
   .visible-body {
     position: absolute;
-    top: 8px;
+    top: 5px;
     left: 0;
     right: 0;
-    bottom: 8px;
-    border-radius: 12px;
-    background: linear-gradient(to right, #fff, #aaa, #aaa, #fff);
+    bottom: 5px;
+    border-radius: 8px;
+    /* background: linear-gradient(to right, #ccc, #eee, #ccc); */
+    background: #eee;
+    box-shadow: inset 0 1px 3px #999;
+    /* box-shadow: 0 0 4px #000; */
     pointer-events: none;
     display: flex;
     align-items: center;
@@ -139,9 +142,8 @@
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
     justify-content: space-between;
-    width: calc(100% + 1rem);
+    width: 100%;
     /* width: 100%; */
-    margin: 1rem 0 1rem -0.5rem;
   }
   .progress-bar {
     position: absolute;
