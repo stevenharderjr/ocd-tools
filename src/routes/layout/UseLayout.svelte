@@ -20,7 +20,7 @@
   export let layout: App.Layout;
   export let unlocked = false;
   export let pointIndex = 0;
-  let audio: HTMLAudioElement;
+  let audioElement: HTMLAudioElement;
   let cued = false;
   let temp = { ...layout };
   let points: number[] = [];
@@ -79,8 +79,8 @@
   function sayNextMeasurement() {
     // HACK: try to maintain device audio focus with mediaSession...
     const { playbackState } = navigator.mediaSession;
-    if (playbackState === 'paused') audio.play();
-    else if (playbackState === 'playing') audio.pause();
+    if (playbackState === 'paused') audioElement.play();
+    else if (playbackState === 'playing') audioElement.pause();
     else throw new Error('no audio focus');
 
     const point = nextPoint();
@@ -93,7 +93,6 @@
     cued = true;
     const duration = 5000;
     Toast.add({ message: 'Audio ready. Use bluetooth headset to cycle measurements.', duration, blur: false });
-   audio.play().catch(console.error);
   }
 
   onMount(() => {
@@ -104,7 +103,7 @@
         navigator.mediaSession.setActionHandler('play', sayNextMeasurement);
         navigator.mediaSession.setActionHandler('pause', sayNextMeasurement);
       }
-      audio.play().then(() => {
+      if (cued && audioElement) audioElement.play().then(() => {
         navigator.mediaSession.playbackState = 'playing';
       });
     }
@@ -155,8 +154,10 @@
         <img height="16px" width="16px" src="x.svg" alt="edit" />
       </button>
   </div>
-  <audio bind:this={audio} playsinline={true} src="1-second-of-silence.mp3">Audio Element</audio>
-</li>
+  {#if cued}
+    <audio bind:this={audioElement} playsinline={true} src="1-second-of-silence.mp3">Audio Element</audio>
+  {/if}
+  </li>
 
 <style>
   .inline-modal {
