@@ -1,4 +1,4 @@
-export function points(layout: App.Layout) {
+export function points(layout: App.Layout, precision: number) {
 	const { targetSpacing, span, alignment } = layout;
 	const [start, end] = layout.padding;
 
@@ -9,7 +9,7 @@ export function points(layout: App.Layout) {
 
 	const points = [];
 
-	for (let i = 0; i < pointCount; i++) points.push(start + i * spacing);
+	for (let i = 0; i < pointCount; i++) points.push(+(start + i * spacing).toFixed(precision));
 
 	points.push(span - end);
 

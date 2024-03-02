@@ -1,17 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import Ellipses from './Ellipses.svelte';
   import LayoutSpan from './LayoutSpan.svelte';
   import LayoutPadding from './LayoutPadding.svelte';
   import LayoutSpacing from './LayoutSpacing.svelte';
   import { formatter, sae } from '$lib/utils/MeasurementConverter';
+	import Toast from '../../toast';
   const dispatch = createEventDispatcher();
 
   export let layout: App.Layout;
-  const displayOptions = {
-    padding: { feet: false },
-    span: { precision: layout.precision },
-    spacing: { feet: false
-  }};
+  const displayOptions = { feet: layout.targetSpacing > 144 };
 
   function use() {
     dispatch('select', layout);
@@ -26,16 +24,20 @@
       </section>
       <section class="factors">
         <div class="row">
-          <span class="small">&#8677; {sae(layout.padding[0], displayOptions.padding) || '0"'}</span>
-          <span>{sae(layout.span, displayOptions.span)} / {sae(layout.targetSpacing, displayOptions.spacing)}</span>
-          <span class="small">{sae(layout.padding[1], displayOptions.padding) || '0"'} &#8676;</span>
+          <span class="small">{sae(layout.padding[0], displayOptions) || '0"'}</span>
+          <div class="row">
+            <span class="small"><Ellipses count={3} direction={1} /></span>
+            <span class="spacing-measurement">{sae(layout.targetSpacing, displayOptions)}</span>
+            <span class="small"><Ellipses count={3} direction={-1} /></span>
+          </div>
+          <span class="small">{sae(layout.padding[1], displayOptions) || '0"'}</span>
         </div>
       </section>
     </div>
   </button>
 
   <div class="card-options">
-    <button class="option-icon" title={'edit ' + layout?.name || 'ratio'}>
+    <button class="option-icon" title={'edit ' + layout?.name || 'ratio'} on:click={() => Toast.add({ message: 'Editing disabled.', dismissable: true })}>
       <img height="16px" width="16px"src="edit.svg" alt="edit" />
     </button>
   </div>
@@ -45,14 +47,21 @@
   .row {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
   .small {
-    font-size: small;
+    font-size: 0.9rem;
+  }
+  .spacing-measurement {
+    font-size: 1rem;
+    /* flex-shrink: 2; */
+    padding: 0 0.5rem;
   }
   span {
     white-space: nowrap;
     width: 100%;
-    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
   }
 </style>

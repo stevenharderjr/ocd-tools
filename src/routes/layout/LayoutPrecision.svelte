@@ -15,7 +15,14 @@
   let selectedElement: HTMLButtonElement;
   let dummyElement: HTMLButtonElement;
 
-  const options = Object.values(precisionByDecimals).map(precision => ({ label: +precision > 1 ? '1/' + precision : '1', value: precision }));
+  // const options = Object.values(precisionByDecimals).map(precision => ({ label: +precision > 1 ? '1/' + precision : '1', value: precision }));
+  const options = [
+    { label: '1"', value: 1 },
+    { label: '1/2"', value: 2 },
+    { label: '1/4"', value: 4 },
+    { label: '1/8"', value: 8 },
+    { label: '1/16"', value: 16 },
+  ];
 
   function handleChange(key: string) {
     const selectedOption = options.find(({ label }) => label === key);
@@ -44,8 +51,7 @@
     margin-bottom: -20px;
   }
   .small-caps {
-    font-size: small;
-    text-transform: uppercase;
+    text-align: center;
   }
   .base {
     /* border: 2px solid #ccc; */
@@ -78,6 +84,7 @@
     font-size: small;
     color: #888;
     border: 1.5px solid transparent;
+    padding: 0 1px;
   }
   .selected {
     padding: 0 2px;

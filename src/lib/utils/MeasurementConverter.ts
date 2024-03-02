@@ -107,7 +107,8 @@ export class MeasurementConverter {
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
-			if (cachedResult && _optionsMatch(_cachedOverrides.get(inputValue))) return cachedResult;
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(inputValue)))
+				return { ...cachedResult };
 		}
 
 		let reset: MeasurementOptions = {};
@@ -253,9 +254,9 @@ export class MeasurementConverter {
 			result.fixed = fixed;
 			result.numeric = +fixed;
 		} else {
-			const numeric = feet * 12 + inches;
-			result.numeric = numeric;
-			result.fixed = numeric + '';
+			const fixed = (feet * 12 + inches).toFixed(decimals);
+			result.numeric = +fixed;
+			result.fixed = fixed;
 		}
 
 		if (precision === 1) {

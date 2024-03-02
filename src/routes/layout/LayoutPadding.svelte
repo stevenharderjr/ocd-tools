@@ -5,21 +5,30 @@
   export let start: number;
   export let end: number;
   export let precision: MeasurementPrecision = 8;
-  $: displayOptions = { precision };
+  $: displayOptions = { feet: Math.max(start, end) > 144, precision: 16 };
 </script>
 
 <div class="row">
-    <span>&#8677;</span>
-    <ul>
-        <li class="measurement">{sae(start, displayOptions) || '0"'}</li>
-        <li class="label">Padding</li>
-        <li class="measurement">{sae(end, displayOptions) || '0"'}</li>
-    </ul>
-    <span>&#8676;</span>
-</div>
+  <!-- <span class="start">Start</span> -->
+
+      <span class="measurement">{sae(start, displayOptions) || '0"'}<span class="symbol">&#8677;</span></span>
+
+      <span class="small-caps label">Padding</span>
+
+      <span class="end measurement"><span class="symbol">&#8676;</span>{sae(end, displayOptions) || '0"'}</span>
+
+  <!-- <span class="end">End</span> -->
+  </div>
 
 <style>
+  .grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 12fr 1fr;
+    grid-auto-columns: min-content;
+  }
   .row {
+    position: relative;
     display: flex;
     width: 100%;
     justify-content: space-between;
@@ -31,22 +40,44 @@
     font-weight: 500;
   }
   .label {
-    text-transform: uppercase;
-    font-size: small;
-  }
-  ul {
-    list-style: none;
-    display: flex;
+    position: absolute;
     width: 100%;
-    justify-content: space-between;
-  }
-  li {
-    padding: 0;
+    /* display: flex;
+    justify-content: space-between; */
     white-space: nowrap;
-    min-width: 3rem;
     text-align: center;
   }
-  .row span {
+  /* .start, .end {
+    position: absolute;
+    top: -0.75rem;
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    text-align: right;
+  } */
+  .start {
+    left: 0;
+  }
+  .end {
+    right: 0;
+    text-align: right;
+    white-space: nowrap;
+  }
+  span {
+    white-space: nowrap;
+    padding: 0;
+    /* flex-grow: 2; */
+    /* min-width: 3rem;
+    text-align: center; */
+  }
+  .symbol {
+    font-size: 1rem;
     color: #777;
+    padding: 0 0.5rem;
+  }
+
+  @media screen and (max-width: 400px) {
+    .label {
+      top: -1rem;
+    }
   }
 </style>

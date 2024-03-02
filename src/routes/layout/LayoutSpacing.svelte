@@ -5,49 +5,37 @@
   export let target: number;
   export let actual: number;
   export let precision = 8;
-  let displayOptions: MeasurementOptions = { feet: false };
-  $: displayOptions.precision = precision;
+  $: displayOptions = { feet: target > 144, precision: 16 };
 
 </script>
 
-<div class="box">
-  <div class="measurement">
-    <span class="label">Spacing</span>
-    <span class="target">
-      <span>{sae(target, displayOptions)}</span>
-      <span class="actual">
-        {#if actual && target !== actual}
-          ({sae(actual, displayOptions)})
-        {/if}
-      </span>
-    </span>
-  </div>
+<div class="measurement">
+  <span class="tiny-caps start">Target</span>
+  <span class="target">{sae(target, displayOptions)}</span>
+  <span class="small-caps label">Spacing</span>
+  <span class="actual">
+    {#if actual && target !== actual}
+      {sae(actual, displayOptions)}
+    {/if}
+  </span>
+  <span class="tiny-caps end">Actual</span>
 </div>
 
 <style>
-  .box {
-    align-items: center;
-  }
-  .measurement {
+  div {
+    position: relative;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
   }
   .label {
     width: 100%;
-    text-transform: uppercase;
-    font-size: small;
+    text-align: center;
   }
   .target {
-    display: flex;
-    align-items: center;
-
     width: 100%;
-    /* text-align: center; */
     white-space: nowrap;
-    /* padding: 0 0.5rem; */
-  }
-  .target span {
     font-weight: 500;
   }
   .actual {
@@ -57,7 +45,15 @@
     white-space: nowrap;
     color: #555;
   }
-  span {
-    width: 100%;
+  .start, .end {
+    position: absolute;
+    top: -0.75rem;
+  }
+  .start {
+    left: 0;
+  }
+  .end {
+    right: 0;
+    text-align: right;
   }
 </style>

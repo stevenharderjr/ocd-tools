@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { decimalsByPrecision, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
   import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
@@ -6,11 +7,12 @@
   export let value: number;
   export let range: [number, number]
   export let progressBar = false;
-  export let precision = 1;
+  export let precision: MeasurementPrecision = 1;
   let elementWidth = 100;
   $: [min, max] = range;
   $: diff = max - min;
-  $: rate = (1 / precision) / (elementWidth / diff) * 2;
+  $: rate = (1 / precision) / (elementWidth / diff);
+  $: decimals = decimalsByPrecision[precision];
 
   let base: HTMLButtonElement;
   let slider;
@@ -60,8 +62,9 @@
     horizontalTouchMove = true;
     event.stopPropagation();
     event.preventDefault();
-    const change = ~~(changeH * rate);
-    let newValue = value + change;
+    // const change = ~~(changeH * rate);
+    const change = changeH * rate;
+    let newValue = Math.round((value + (change * (1 / precision))) * precision) / precision;
     if (newValue === value) return;
     if (newValue > max) newValue = max;
     if (newValue < min) newValue = min;
@@ -73,8 +76,10 @@
   function handleDrag(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
     if (x < 1) return;
-    const change = ~~((x - (origin as number)) * rate);
-    let newValue = value + change;
+    // const change = ~~((x - (origin as number)) * rate);
+    const change = (x - (origin as number)) * rate;
+    // let newValue = +(value + change).toFixed(decimals);
+    let newValue = Math.round((value + (change * (1 / precision))) * precision) / precision;
     if (newValue === value) return;
     if (newValue > max) newValue = max;
     if (newValue < min) newValue = min;
@@ -85,12 +90,12 @@
 
   function increment() {
     const newValue = Math.round((value + (1 / precision)) * precision) / precision;
-    if (newValue <= max) dispatch('update', { id, value: newValue });
+    if (newValue <= max) dispatch('update', { id, value: +(newValue).toFixed(decimals) });
   }
 
   function decrement() {
     const newValue = Math.round((value - (1 / precision)) * precision) / precision;
-    if (newValue >= min) dispatch('update', { id, value: newValue });
+    if (newValue >= min) dispatch('update', { id, value: +(newValue).toFixed(decimals) });
   }
 
   onMount(() => {
@@ -103,6 +108,17 @@
     {#if progressBar}
       <div class="progress-bar" style={`height:${(100 / diff) * value - 8}%`}></div>
     {/if}
+    <div class="thumb-tab" aria-hidden={true}>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+    </div>
   </div>
   <button class="minus" on:click|stopPropagation={decrement}>
     –
@@ -136,12 +152,45 @@
     pointer-events: none;
     display: flex;
     align-items: center;
+    justify-content: center;
     overflow: hidden;
+  }
+  .thumb-tab {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 0;
+    opacity: 0.2;
+  }
+  .thumb-tab div:nth-child(1), .thumb-tab div:nth-child(9) {
+    opacity: 0.1;
+  }
+  .thumb-tab div:nth-child(2), .thumb-tab div:nth-child(8) {
+    opacity: 0.2;
+  }
+  .thumb-tab div:nth-child(3), .thumb-tab div:nth-child(7) {
+    opacity: 0.3;
+  }
+  .thumb-tab div:nth-child(4), .thumb-tab div:nth-child(6) {
+    opacity: 0.4;
+  }
+  .thumb-tab div:nth-child(5) {
+    opacity: 0.5;
+  }
+  .vertical-line {
+    background: #888;
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
   }
   .base {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 12fr 1fr;
     justify-content: space-between;
     width: calc(100% + 1rem);
     /* width: 100%; */

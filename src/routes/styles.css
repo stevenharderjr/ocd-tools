@@ -1,5 +1,7 @@
 * {
 	line-height: 1.4rem;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 h1 {
@@ -26,7 +28,9 @@ input {
 	font-weight: 300;
 }
 
-button {
+button,
+button:active {
+	border: none;
 	background: transparent;
 	color: #000;
 }
@@ -42,6 +46,18 @@ input {
 input:focus {
 	outline: none !important;
 	border: 2px solid #ccc;
+}
+
+.small-caps {
+	font-size: 0.8rem;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.tiny-caps {
+	font-size: 0.5rem;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
 }
 
 .debug {

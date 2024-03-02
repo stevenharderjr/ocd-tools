@@ -34,7 +34,7 @@
 			</section>
 			<ul class="factors">
 				{#each factors as factor}
-					<Factor {factor} />
+					<Factor {factor} precision={factor.precision} />
 				{/each}
 			</ul>
 		</div>
