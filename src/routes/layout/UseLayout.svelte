@@ -225,14 +225,6 @@
     gap: 1.5rem;
     margin-right: -0.5rem;
   }
-  .grid-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    column-gap: 2.5rem;
-  }
-  audio {
-    pointer-events: auto;
-  }
   .audio-controls {
     position: sticky;
     width: calc(100% - 8px);

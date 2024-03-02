@@ -9,6 +9,7 @@
   export let progressBar = false;
   export let precision: MeasurementPrecision = 1;
   let elementWidth = 100;
+  const dragTolerance = 1.1;
   $: [min, max] = range;
   $: diff = max - min;
   $: rate = (1 / precision) / (elementWidth / diff);
@@ -214,13 +215,13 @@
   .plus, .minus {
     line-height: 42px;
     opacity: 0.5;
-    width: 42px;
+    width: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   .minus {
-    justify-self: flex-start;
+    /* justify-self: flex-start; */
     padding-bottom: 3px;
     font-size: 1.5rem;
   }
@@ -228,11 +229,11 @@
     padding-bottom: 5px;
     font-size: 1.7rem;
     font-weight: 300;
-    justify-self: flex-end;
+    /* justify-self: flex-end; */
   }
   .slider {
-    opacity: 0;
-    background: transparent;
+    opacity: 1;
+    background: #f006;
     width: 100%;
   }
 </style>
