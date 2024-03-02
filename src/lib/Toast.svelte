@@ -19,7 +19,9 @@
       {#if toast.title}
         <h2 class={toast.type}>{toast.title}</h2>
       {/if}
-      <p>{toast.message}</p>
+      {#each toast.message.split("\n") as paragraph}
+        <p class={toast.huge ? 'huge' : ''}>{paragraph}</p>
+      {/each}
     </div>
     {/each}
   </div>
@@ -66,5 +68,10 @@
     color: #fff;
     margin: 1rem;
     hyphens: auto;
+  }
+  .huge {
+    text-align: center;
+    font-size: 6rem;
+    padding: 2rem;
   }
 </style>

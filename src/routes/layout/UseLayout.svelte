@@ -8,7 +8,7 @@
   import LayoutPrecision from './LayoutPrecision.svelte';
   import BinarySelect from '$lib/BinarySelect.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { decimalsByPrecision, formatter, precisionByDecimals, wordify } from '$lib/utils/MeasurementConverter';
+  import { decimalsByPrecision, formatter, precisionByDecimals, sae, wordify } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
   import type { ToggleOption } from '$lib/BinarySelect.svelte';
@@ -68,7 +68,6 @@
   }
 
   function nextPoint() {
-    const { points } = temp;
     if (!points?.length) return;
     const point = points[pointIndex++];
     if (pointIndex >= points.length) pointIndex = 0;
@@ -83,6 +82,7 @@
   }
 
   function sayNextMeasurement() {
+    console.log('next measurement');
     if (!audioElement) throw new Error('Audio element missing');
     // HACK: try to maintain device audio focus with mediaSession...
     const { playbackState } = navigator.mediaSession;
@@ -90,7 +90,13 @@
     else audioElement.pause();
 
     const point = nextPoint();
-    if (point !== undefined) say(point ? wordify(point, { precision: temp.precision }) : 'zero inches');
+    console.log({ point });
+    if (point === undefined) return;
+    const options = { precision: temp/precision };
+    const text = point ? wordify(point, options) : 'zero inches'
+
+    say(text);
+    Toast.add({ message: sae(point, options), blur: false, huge: true, replace: true });
   }
 
   async function cueAudio() {
@@ -98,7 +104,14 @@
     if (cued) return sayNextMeasurement();
     cued = true;
     const duration = 5000;
-    Toast.add({ message: 'Audio enabled. Use bluetooth play/pause to cycle measurements.', duration, blur: false });
+    Toast.add({ message: 'Audio enabled.\nUse bluetooth play/pause to cycle measurements.', duration, blur: false });
+  }
+
+  function placeholder(message?: string) {
+    Toast.add({
+      message: 'COMING SOON:\n' + message,
+      duration: 5000
+    });
   }
 
   onMount(() => {
@@ -167,6 +180,23 @@
         <img height="16px" width="16px" src="x.svg" alt="edit" />
       </button>
   </div>
+  <div class="audio-controls">
+    <div>
+      <button on:click|stopPropagation={() => placeholder('Switch to save/edit mode with current changes.')} title="add new layout" style="margin: auto; background: #0009;">
+        <img src="edit.svg" />
+      </button>
+    </div>
+    <div>
+      <button on:click|stopPropagation={cueAudio} title="add new layout" style="margin: auto; background: #0009;">
+        <img src="headphones.svg" />
+      </button>
+    </div>
+    <div>
+      <button on:click|stopPropagation={() => placeholder('Copy measurements to device clipboard.')} title="add new layout" style="margin: auto; background: #0009;">
+        <img src="clipboard.svg" />
+      </button>
+    </div>
+  </div>
   {#if cued}
     <audio bind:this={audioElement} playsinline={true} src="1-second-of-silence.mp3">Audio Element</audio>
   {/if}
@@ -205,5 +235,42 @@
   audio {
     pointer-events: auto;
   }
-
+  .audio-controls {
+    position: sticky;
+    width: calc(100% - 8px);
+    margin-left: 4px;
+    bottom: 0;
+    height: 4.5rem;
+    pointer-events: none;
+		display: flex;
+		justify-content: space-around;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 4px 1rem;
+    background: #fff6;
+    backdrop-filter: blur(2px);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  .audio-controls img {
+    filter: invert(0.1);
+    -webkit-filter: invert(1);
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+	.audio-controls button {
+    pointer-events: auto;
+		border-radius: 9999px;
+		background: #fffc;
+		width: 3rem;
+		height: 3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		touch-action: manipulation;
+		font-size: 2rem;
+		box-shadow: 0 0 4px 2px #0003;
+		/* backdrop-filter: blur(4px); */
+	}
 </style>

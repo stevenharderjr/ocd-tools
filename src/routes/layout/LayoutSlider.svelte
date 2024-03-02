@@ -23,6 +23,10 @@
   let horizontalTouchMove = false;
   let verticalTouchMove = false;
 
+  function round(value: number) {
+    return Math.round(value * precision) / precision;
+  }
+
   function dragStart(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
     origin = x;
@@ -89,13 +93,15 @@
   }
 
   function increment() {
-    const newValue = Math.round((value + (1 / precision)) * precision) / precision;
-    if (newValue <= max) dispatch('update', { id, value: +(newValue).toFixed(decimals) });
+    const preciseValue = round(value);
+    const newValue = preciseValue > value ? preciseValue : round(value + (1 / precision));
+    if (newValue <= max) dispatch('update', { id, value: newValue });
   }
 
   function decrement() {
-    const newValue = Math.round((value - (1 / precision)) * precision) / precision;
-    if (newValue >= min) dispatch('update', { id, value: +(newValue).toFixed(decimals) });
+    const preciseValue = round(value);
+    const newValue = preciseValue < value ? preciseValue : round(value - (1 / precision));
+    if (newValue >= min) dispatch('update', { id, value: newValue });
   }
 
   onMount(() => {
