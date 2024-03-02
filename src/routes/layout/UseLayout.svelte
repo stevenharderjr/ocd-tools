@@ -23,8 +23,9 @@
   let audioElement: HTMLAudioElement;
   let cued = false;
   let temp = { ...layout };
+  // temp.points = deriveLayoutPoints(temp);
   let points: number[] = [];
-  let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
+  // let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
   const measurementDisplayOptions = { feet: false };
   const readable = formatter(measurementDisplayOptions);
   const alignmentOptions: [ToggleOption, ToggleOption] = [
@@ -39,14 +40,15 @@
   ];
 
   $: precision = temp.precision;
-  // $: decimals = decimalsByPrecision[precision];
+  $: decimals = decimalsByPrecision[precision];
   $: alignment = temp.alignment;
-  // $: range = +(points[1] - points[0]).toFixed(decimals);
-  $: range = points[1] - points[0];
+  $: range = +(points[1] - points[0]).toFixed(decimals);
+  // $: range = points[1] - points[0];
   $: [start, end] = temp.padding;
-  $: points = deriveLayoutPoints(temp);
+  $: points = deriveLayoutPoints(temp, decimals || 0);
 
   function update({ detail: { id, value } }) {
+    if (temp[id] === value) return console.log('duplicate value');
     pointIndex = 0;
     let update = value;
     if (id === 'start' || id === 'end') {
@@ -54,6 +56,7 @@
       id = 'padding';
     }
     temp = { ...temp, [id]: update };
+    // temp.points = [...deriveLayoutPoints(temp)];
   }
 
   function resetRange({ detail: { id, value }}: { detail: { id: string, value: number }}) {
@@ -65,6 +68,7 @@
   }
 
   function nextPoint() {
+    const { points } = temp;
     if (!points?.length) return;
     const point = points[pointIndex++];
     if (pointIndex >= points.length) pointIndex = 0;
@@ -121,6 +125,12 @@
       <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
         <LayoutPrecision precision={temp.precision} on:update={update} />
+
+        <div class="shrink">
+          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} on:reset={resetRange} />
+        </div>
+        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} precision={temp.precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+
         <div class="shrink">
           <LayoutPadding {start} {end} on:update={update} precision={temp.precision} />
         </div>
@@ -129,7 +139,7 @@
           <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
         </div>
 
-        <div class="row">
+        <!-- <div class="row">
           <div style="width: 100%;">
             <div style="margin-bottom: -16px;">
               <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} />
@@ -139,14 +149,14 @@
           <div>
             <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
           </div>
-        </div>
+        </div> -->
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
         <div class="shrink">
           <LayoutSpan span={temp.span} precision={temp.precision} on:update={update} />
           <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
         </div>
         <LayoutSlider id="span" value={temp.span} precision={temp.precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
-        <LayoutPoints {points} precision={temp.precision} on:cue={cueAudio} />
+        <LayoutPoints {points} {precision} on:cue={cueAudio} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>

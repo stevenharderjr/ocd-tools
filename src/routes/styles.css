@@ -48,6 +48,18 @@ input:focus {
 	border: 2px solid #ccc;
 }
 
+.small-caps {
+	font-size: 0.8rem;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.tiny-caps {
+	font-size: 0.5rem;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+}
+
 .debug {
 	background: #f006 !important;
 }

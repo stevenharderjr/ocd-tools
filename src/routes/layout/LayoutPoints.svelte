@@ -1,13 +1,12 @@
 <script lang="ts">
   import { sae } from '$lib/utils/MeasurementConverter';
   import type { MeasurementOptions } from '$lib/utils/MeasurementConverter';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
   export let points: number[];
   export let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64 = 8;
   $: pointCount = points.length;
-  $: span = points[pointCount - 1] - points[0];
   $: displayOptions = { precision };
 
   function cueAudio() {
@@ -15,7 +14,7 @@
   }
 </script>
 
-<span style="font-size: small; text-align: center; text-transform: uppercase;">{pointCount} Measurement{pointCount === 1 ? '' : 's'}</span>
+<span class="small-caps">Measurements ({pointCount})</span>
 <ul>
   {#each points as point, i}
     <li><label for={`point ${i}`}><input id={`point ${i}`} type="checkbox" />{sae(point, displayOptions) || '0"'}</label></li>
@@ -55,9 +54,10 @@
   span {
     white-space: nowrap;
   }
-  .label {
-    text-transform: uppercase;
-    font-size: small;
+  .small-caps {
+    text-align: center;
+    /* font-size: 0.9rem;
+    letter-spacing: 1.5px; */
   }
   .audio-controls {
     position: sticky;

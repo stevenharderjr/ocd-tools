@@ -107,7 +107,7 @@
     {#if progressBar}
       <div class="progress-bar" style={`height:${(100 / diff) * value - 8}%`}></div>
     {/if}
-    <!-- <div class="thumb-tab" aria-hidden={true}>
+    <div class="thumb-tab" aria-hidden={true}>
       <div class="vertical-line"></div>
       <div class="vertical-line"></div>
       <div class="vertical-line"></div>
@@ -117,7 +117,7 @@
       <div class="vertical-line"></div>
       <div class="vertical-line"></div>
       <div class="vertical-line"></div>
-    </div> -->
+    </div>
   </div>
   <button class="minus" on:click|stopPropagation={decrement}>
     –
@@ -156,14 +156,14 @@
   }
   .thumb-tab {
     height: 100%;
-    width: fit-content;
+    width: 100%;
     position: relative;
     margin: auto;
     display: flex;
     justify-content: center;
     gap: 2px;
     padding: 4px 0;
-    opacity: 0.5;
+    opacity: 0.2;
   }
   .thumb-tab div:nth-child(1), .thumb-tab div:nth-child(9) {
     opacity: 0.1;
@@ -189,7 +189,7 @@
   .base {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 12fr 1fr;
     justify-content: space-between;
     width: calc(100% + 1rem);
     /* width: 100%; */
