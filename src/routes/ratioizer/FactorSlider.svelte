@@ -13,6 +13,7 @@
   export let max: number;
   export let progressBar = false;
   let elementWidth = 100;
+  let touched = false;
   $: range = max - min;
   $: rate = 1 / (elementWidth / range) * 2;
   $: delta = +(value - baseline!).toFixed(decimals);
@@ -72,6 +73,7 @@
     if (newValue < min) newValue = min;
     if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = [x, y];
 
+    touched = true;
     dispatch('update', { id, value: newValue });
   }
 
@@ -85,6 +87,7 @@
     if (newValue < min) newValue = min;
     if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = x;
 
+    touched = true;
     dispatch('update', { id, value: newValue });
   }
 
@@ -121,17 +124,23 @@
     {#if progressBar}
       <div class="progress-bar" style={`height:${(100 / range) * value - 8}%`}></div>
     {/if}
-    <div class="thumb-tab" aria-hidden={true}>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
-      <div class="vertical-line"></div>
+    {#if touched}
+      <div class="thumb-tab" aria-hidden={true}>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+        <div class="vertical-line"></div>
+      </div>
+    {:else}
+    <div class="tooltip">
+      <span>DRAG ALONG THIS BAR</span>
     </div>
+    {/if}
   </div>
   <button class="minus" on:click|stopPropagation={decrement}>
     –
@@ -209,7 +218,7 @@
     justify-content: center;
     gap: 2px;
     padding: 4px 0;
-    opacity: 0.2;
+    opacity: 0.9;
   }
   .thumb-tab div:nth-child(1), .thumb-tab div:nth-child(9) {
     opacity: 0.1;
@@ -274,5 +283,19 @@
     opacity: 0;
     background: transparent;
     width: 100%;
+  }
+  .tooltip {
+    position: absolute;
+    width: 100%;
+    pointer-events: none;
+  }
+  .tooltip span {
+    background: #666;
+    color: #eee;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
   }
 </style>

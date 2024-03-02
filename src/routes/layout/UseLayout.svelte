@@ -8,7 +8,7 @@
   import LayoutPrecision from './LayoutPrecision.svelte';
   import BinarySelect from '$lib/BinarySelect.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { decimalsByPrecision, formatter, precisionByDecimals, sae, wordify } from '$lib/utils/MeasurementConverter';
+  import { decimalsByPrecision, formatter, precisionByDecimals, sae, wordify, type MeasurementOptions } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
 	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
   import type { ToggleOption } from '$lib/BinarySelect.svelte';
@@ -82,7 +82,6 @@
   }
 
   function sayNextMeasurement() {
-    console.log('next measurement');
     if (!audioElement) throw new Error('Audio element missing');
     // HACK: try to maintain device audio focus with mediaSession...
     const { playbackState } = navigator.mediaSession;
@@ -90,9 +89,8 @@
     else audioElement.pause();
 
     const point = nextPoint();
-    console.log({ point });
     if (point === undefined) return;
-    const options = { precision: temp/precision };
+    const options: MeasurementOptions = { precision: temp.precision };
     const text = point ? wordify(point, options) : 'zero inches'
 
     say(text);
@@ -240,15 +238,17 @@
     width: calc(100% - 8px);
     margin-left: 4px;
     bottom: 0;
-    height: 4.5rem;
+    height: 6rem;
     pointer-events: none;
 		display: flex;
-		justify-content: space-around;
-    align-items: flex-start;
+		justify-content: space-between;
+    align-items: flex-end;
     gap: 1rem;
-    padding: 4px 1rem;
-    background: #fff6;
-    backdrop-filter: blur(2px);
+    padding: 1rem 1rem;
+    margin-top: -2.5rem;
+    /* background: #f006; */
+    background: linear-gradient(#fff0, #fff9, #fff);
+    /* backdrop-filter: blur(2px); */
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
   }
@@ -271,6 +271,6 @@
 		touch-action: manipulation;
 		font-size: 2rem;
 		box-shadow: 0 0 4px 2px #0003;
-		/* backdrop-filter: blur(4px); */
+		backdrop-filter: blur(4px);
 	}
 </style>
