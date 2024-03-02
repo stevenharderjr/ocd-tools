@@ -5,7 +5,7 @@
   export let start: number;
   export let end: number;
   export let precision: MeasurementPrecision = 8;
-  $: displayOptions = { precision };
+  $: displayOptions = { feet: Math.max(start, end) > 144, precision: 16 };
 </script>
 
 <div class="row">

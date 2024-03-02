@@ -41,7 +41,6 @@
 
   $: precision = temp.precision;
   $: decimals = decimalsByPrecision[precision];
-  $: alignment = temp.alignment;
   $: range = +(points[1] - points[0]).toFixed(decimals);
   // $: range = points[1] - points[0];
   $: [start, end] = temp.padding;
@@ -55,6 +54,7 @@
       update = id === 'start' ? [value, end] : [start, value];
       id = 'padding';
     }
+    // if (id === 'precision') temp.span = +temp.span.toFixed(decimalsByPrecision[value]);
     temp = { ...temp, [id]: update };
     // temp.points = [...deriveLayoutPoints(temp)];
   }
@@ -124,15 +124,15 @@
       </section>
       <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
-        <LayoutPrecision precision={temp.precision} on:update={update} />
+        <LayoutPrecision {precision} on:update={update} />
 
         <div class="shrink">
-          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} on:reset={resetRange} />
+          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} on:reset={resetRange} />
         </div>
-        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} precision={temp.precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
 
         <div class="shrink">
-          <LayoutPadding {start} {end} on:update={update} precision={temp.precision} />
+          <LayoutPadding {start} {end} on:update={update} {precision} />
         </div>
         <div class="row">
           <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
@@ -155,7 +155,7 @@
           <LayoutSpan span={temp.span} precision={temp.precision} on:update={update} />
           <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
         </div>
-        <LayoutSlider id="span" value={temp.span} precision={temp.precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
+        <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
         <LayoutPoints {points} {precision} on:cue={cueAudio} />
         <!-- <input type="range" min={inches(span)} -->
       </section>

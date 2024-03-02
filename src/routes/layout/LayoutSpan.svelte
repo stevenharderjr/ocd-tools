@@ -6,7 +6,7 @@
   export let span: number;
   export let precision: MeasurementPrecision = 8;
 
-  $: displayOptions = { precision };
+  const displayOptions = { feet: true, precision: 16 };
 
   // onMount(() => {
   //   const changeThreshold = span > 144;

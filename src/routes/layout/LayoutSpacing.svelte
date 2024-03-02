@@ -5,7 +5,7 @@
   export let target: number;
   export let actual: number;
   export let precision = 8;
-  $: displayOptions = { feet: target > 144, precision };
+  $: displayOptions = { feet: target > 144, precision: 16 };
 
 </script>
 

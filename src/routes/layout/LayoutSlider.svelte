@@ -11,7 +11,7 @@
   let elementWidth = 100;
   $: [min, max] = range;
   $: diff = max - min;
-  $: rate = (1 / precision) / (elementWidth / diff) * (precision > 1 ? 2 : 1);
+  $: rate = (1 / precision) / (elementWidth / diff);
   $: decimals = decimalsByPrecision[precision];
 
   let base: HTMLButtonElement;
@@ -63,8 +63,8 @@
     event.stopPropagation();
     event.preventDefault();
     // const change = ~~(changeH * rate);
-    const change = +(changeH * rate).toFixed(decimals);
-    let newValue = value + change;
+    const change = changeH * rate;
+    let newValue = Math.round((value + (change * (1 / precision))) * precision) / precision;
     if (newValue === value) return;
     if (newValue > max) newValue = max;
     if (newValue < min) newValue = min;
@@ -77,8 +77,9 @@
     const { screenX: x, screenY: y } = event;
     if (x < 1) return;
     // const change = ~~((x - (origin as number)) * rate);
-    const change = +((x - (origin as number)) * rate).toFixed(decimals);
-    let newValue = value + change;
+    const change = (x - (origin as number)) * rate;
+    // let newValue = +(value + change).toFixed(decimals);
+    let newValue = Math.round((value + (change * (1 / precision))) * precision) / precision;
     if (newValue === value) return;
     if (newValue > max) newValue = max;
     if (newValue < min) newValue = min;
@@ -89,12 +90,12 @@
 
   function increment() {
     const newValue = Math.round((value + (1 / precision)) * precision) / precision;
-    if (newValue <= max) dispatch('update', { id, value: newValue });
+    if (newValue <= max) dispatch('update', { id, value: +(newValue).toFixed(decimals) });
   }
 
   function decrement() {
     const newValue = Math.round((value - (1 / precision)) * precision) / precision;
-    if (newValue >= min) dispatch('update', { id, value: newValue });
+    if (newValue >= min) dispatch('update', { id, value: +(newValue).toFixed(decimals) });
   }
 
   onMount(() => {
