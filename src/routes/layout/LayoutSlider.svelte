@@ -170,7 +170,7 @@
     justify-content: center;
     gap: 2px;
     padding: 4px 0;
-    opacity: 0.2;
+    opacity: 0.9;
   }
   .thumb-tab div:nth-child(1), .thumb-tab div:nth-child(9) {
     opacity: 0.1;

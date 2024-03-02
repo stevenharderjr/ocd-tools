@@ -392,7 +392,7 @@ export function sae(decimalInches: number, displayOptions?: MeasurementOptions) 
 	return measurement.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
 }
 
-export function wordify(decimalInches: string, options?: MeasurementOptions) {
+export function wordify(decimalInches: number, options?: MeasurementOptions) {
 	const result = measurement.verbalize(measurement.fromDecimalInches(decimalInches, options)!);
 	return result;
 }

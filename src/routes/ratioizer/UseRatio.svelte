@@ -137,13 +137,13 @@
 		<button class="modal-actions" on:click|stopPropagation>
 			<!-- <button on:click|stopPropagation={decrease} title="halve"> ½ </button> -->
 			<button on:click|stopPropagation={decrease} title="halve">
-				<img height="16px" width="16px"src="arrow-left-circle.svg" alt="subtraction symbol" />
+				<img height="16px" width="16px"src="minus.svg" alt="subtraction symbol" />
 			</button>
 			<button on:click|stopPropagation={resetValues} title="restore initial values">
 				<img height="16px" width="16px"src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
 			</button>
 			<button on:click|stopPropagation={increase} style="font-size:small;" title="double">
-				<img height="16px" width="16px"src="arrow-right-circle.svg" alt="addition symbol" />
+				<img height="16px" width="16px"src="plus.svg" alt="addition symbol" />
 			</button>
 		</button>
 
