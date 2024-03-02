@@ -25,6 +25,7 @@ interface ToastOptions {
 	blur?: boolean;
 	dismissable?: boolean;
 	duration?: number;
+	huge?: boolean;
 }
 
 type OptionsOrMessage = string | ToastOptions;

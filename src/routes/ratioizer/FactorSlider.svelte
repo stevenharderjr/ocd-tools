@@ -121,6 +121,17 @@
     {#if progressBar}
       <div class="progress-bar" style={`height:${(100 / range) * value - 8}%`}></div>
     {/if}
+    <div class="thumb-tab" aria-hidden={true}>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+    </div>
   </div>
   <button class="minus" on:click|stopPropagation={decrement}>
     –
@@ -188,6 +199,38 @@
     display: flex;
     align-items: center;
     overflow: hidden;
+  }
+  .thumb-tab {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 0;
+    opacity: 0.2;
+  }
+  .thumb-tab div:nth-child(1), .thumb-tab div:nth-child(9) {
+    opacity: 0.1;
+  }
+  .thumb-tab div:nth-child(2), .thumb-tab div:nth-child(8) {
+    opacity: 0.2;
+  }
+  .thumb-tab div:nth-child(3), .thumb-tab div:nth-child(7) {
+    opacity: 0.3;
+  }
+  .thumb-tab div:nth-child(4), .thumb-tab div:nth-child(6) {
+    opacity: 0.4;
+  }
+  .thumb-tab div:nth-child(5) {
+    opacity: 0.5;
+  }
+  .vertical-line {
+    background: #888;
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
   }
   .base {
     user-select: none;
