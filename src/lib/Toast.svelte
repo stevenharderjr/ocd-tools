@@ -72,6 +72,7 @@
   .huge {
     text-align: center;
     font-size: 6rem;
-    padding: 2rem;
+    padding: 0 2rem;
+    white-space: nowrap;
   }
 </style>
