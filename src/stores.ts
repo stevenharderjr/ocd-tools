@@ -94,7 +94,7 @@ export const ratios = writable<App.Ratio[]>(
 export const layouts = writable([
 	{
 		id: 0,
-		// alignment: 'even',
+		alignment: 'even',
 		label: 'Gutter Hanger Layout',
 		span: 15 * 12,
 		targetSpacing: 30,
@@ -103,7 +103,7 @@ export const layouts = writable([
 	},
 	{
 		id: 1,
-		// alignment: 'even',
+		alignment: 'even',
 		label: 'Eclipse Rail Drilling',
 		span: 8 * 12,
 		targetSpacing: 16,
