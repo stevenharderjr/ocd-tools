@@ -12,7 +12,7 @@
   export let id: string;
   export let options: [ToggleOption, ToggleOption];
   export let selected: any;
-  export let alignment = 'horizontal';
+  export let orientation = 'horizontal';
   // export let vertical = false;
 
   $: [a, b] = options;
@@ -23,7 +23,7 @@
   }
 </script>
 
-<button class={alignment + ' base'} on:click={switchValues}>
+<button class={orientation + ' base'} on:click={switchValues}>
   <div class={selected === a.value ? "option selected" : 'option'}>{a.label}</div>
   <div class={selected === b.value ? "option selected" : 'option'}>{b.label}</div>
 </button>

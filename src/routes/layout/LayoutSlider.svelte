@@ -232,8 +232,7 @@
     /* justify-self: flex-end; */
   }
   .slider {
-    opacity: 1;
-    background: #f006;
+    opacity: 0;
     width: 100%;
   }
 </style>

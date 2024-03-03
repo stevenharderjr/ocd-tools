@@ -47,6 +47,7 @@
   $: points = deriveLayoutPoints(temp, decimals || 0);
 
   function update({ detail: { id, value } }) {
+    console.log({ id, value, current: temp[id] });
     if (temp[id] === value) return console.log('duplicate value');
     pointIndex = 0;
     let update = value;
@@ -102,7 +103,7 @@
     if (cued) return sayNextMeasurement();
     cued = true;
     const duration = 5000;
-    Toast.add({ message: 'Audio enabled.\nUse bluetooth play/pause to cycle measurements.', duration, blur: false });
+    Toast.add({ message: 'Audio enabled:\nUse bluetooth play/pause to cycle measurements\n(or continue pressing the on-screen button).', duration, blur: false });
   }
 
   function placeholder(message?: string) {
@@ -137,36 +138,40 @@
       <section class="factors">
         <LayoutPrecision {precision} on:update={update} />
 
+        {#if temp.alignment}
+        <div class="row">
+          <div style="width: 100%;">
+            <div style="margin-bottom: -16px;">
+              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} />
+            </div>
+            <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+          </div>
+          <div>
+            <BinarySelect id="alignment" options={alignmentOptions} selected={temp.alignment} orientation="vertical" on:change={update} />
+          </div>
+        </div>
+        {:else}
         <div class="shrink">
           <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} on:reset={resetRange} />
         </div>
         <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+        {/if}
 
         <div class="shrink">
           <LayoutPadding {start} {end} on:update={update} {precision} />
         </div>
         <div class="row">
-          <LayoutSlider id="start" value={start} precision={temp.precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
-          <LayoutSlider id="end" value={end} precision={temp.precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="start" value={start} {precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="end" value={end} {precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
         </div>
 
-        <!-- <div class="row">
-          <div style="width: 100%;">
-            <div style="margin-bottom: -16px;">
-              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} />
-            </div>
-            <LayoutSlider id="targetSpacing" value={temp.targetSpacing} precision={temp.precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
-          </div>
-          <div>
-            <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} alignment="vertical" on:change={update} />
-          </div>
-        </div> -->
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
         <div class="shrink">
-          <LayoutSpan span={temp.span} precision={temp.precision} on:update={update} />
+          <LayoutSpan span={temp.span} {precision} on:update={update} />
           <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
         </div>
         <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
+
         <LayoutPoints {points} {precision} on:cue={cueAudio} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
@@ -179,21 +184,21 @@
       </button>
   </div>
   <div class="audio-controls">
-    <div>
+    <!-- <div>
       <button on:click|stopPropagation={() => placeholder('Switch to save/edit mode with current changes.')} title="add new layout" style="margin: auto; background: #0009;">
         <img src="edit.svg" />
       </button>
-    </div>
-    <div>
-      <button on:click|stopPropagation={cueAudio} title="add new layout" style="margin: auto; background: #0009;">
-        <img src="headphones.svg" />
+    </div> -->
+    <!-- <div> -->
+      <button on:click|stopPropagation={cueAudio} title="cue audio" style="margin: auto; background: #0009;">
+        <img src="headphones.svg" alt="headphones"/>
       </button>
-    </div>
-    <div>
+    <!-- </div> -->
+    <!-- <div>
       <button on:click|stopPropagation={() => placeholder('Copy measurements to device clipboard.')} title="add new layout" style="margin: auto; background: #0009;">
         <img src="clipboard.svg" />
       </button>
-    </div>
+    </div> -->
   </div>
   {#if cued}
     <audio bind:this={audioElement} playsinline={true} src="1-second-of-silence.mp3">Audio Element</audio>

@@ -24,13 +24,15 @@
       </section>
       <section class="factors">
         <div class="row">
-          <span class="small padding-measurement">{sae(layout.padding[0], displayOptions) || '0"'}<span class="symbol">&#8677;</span></span>
+          <!-- <span class="small padding-measurement">{sae(layout.padding[0], displayOptions) || '0"'}<span class="symbol">&#8677;</span></span> -->
+          <span class="small padding-measurement">{sae(layout.padding[0], displayOptions) || '0"'}</span>
           <div class="row">
             <span class="small"><Ellipses count={3} direction={1} /></span>
             <span class="spacing-measurement">{sae(layout.targetSpacing, displayOptions)}</span>
             <span class="small"><Ellipses count={3} direction={-1} /></span>
           </div>
-          <span class="small padding-measurement"><span class="symbol">&#8676;</span>{sae(layout.padding[1], displayOptions) || '0"'}</span>
+          <span class="small padding-measurement">{sae(layout.padding[1], displayOptions) || '0"'}</span>
+          <!-- <span class="small padding-measurement"><span class="symbol">&#8676;</span>{sae(layout.padding[1], displayOptions) || '0"'}</span> -->
         </div>
       </section>
     </div>
@@ -62,11 +64,11 @@
     display: flex;
     align-items: center;
   }
-  .symbol {
+  /* .symbol {
     font-size: 1rem;
     color: #777;
     padding: 0 0.5rem;
-  }
+  } */
   span {
     white-space: nowrap;
     display: flex;

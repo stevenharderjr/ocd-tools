@@ -137,15 +137,15 @@
 		<button class="modal-actions" on:click|stopPropagation>
 			<!-- <button on:click|stopPropagation={decrease} title="halve"> ½ </button> -->
 			<button on:click|stopPropagation={decrease} title="halve">
-				<span class="jump-left">⤴</span>
-				<img height="16px" width="16px"src="minus.svg" alt="subtraction symbol" />
+				<!-- <span class="jump-left">⤴</span> -->
+				<img height="16px" width="16px"src="jump-left.svg" alt="subtraction symbol" />
 			</button>
 			<button class="no-text" on:click|stopPropagation={resetValues} title="restore initial values">
-				<img height="16px" width="16px"src="rotate-ccw.svg" alt="arrow indicating a counterclockwise circle" />
+				<img height="16px" width="16px" src={currentBaseline.value < baselineFactor.value ? "refresh-cw.svg" : "refresh-ccw.svg"} alt="arrow indicating a counterclockwise circle" />
 			</button>
 			<button on:click|stopPropagation={increase} style="font-size:small;" title="double">
-				<span class="jump-right">⤵</span>
-					<img height="16px" width="16px"src="plus.svg" alt="addition symbol" />
+				<!-- <span class="jump-right">⤵</span> -->
+				<img height="16px" width="16px"src="jump-right.svg" alt="addition symbol" />
 			</button>
 		</button>
 

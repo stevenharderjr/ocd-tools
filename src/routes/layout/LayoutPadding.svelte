@@ -5,28 +5,25 @@
   export let start: number;
   export let end: number;
   export let precision: MeasurementPrecision = 8;
-  $: displayOptions = { feet: Math.max(start, end) > 144, precision: 16 };
+  $: max = Math.max(start, end);
+  $: displayOptions = { feet: max > 144, precision: 16 };
 </script>
 
 <div class="row">
   <!-- <span class="start">Start</span> -->
 
-      <span class="measurement">{sae(start, displayOptions) || '0"'}<span class="symbol">&#8677;</span></span>
+      <!-- <span class="measurement">{sae(start, displayOptions) || '0"'}<span class="symbol">&#8677;</span></span> -->
+      <span class="measurement">{sae(start, displayOptions) || '0"'}</span>
 
       <span class="small-caps label">Padding</span>
 
-      <span class="end measurement"><span class="symbol">&#8676;</span>{sae(end, displayOptions) || '0"'}</span>
+      <span class="end measurement">{sae(end, displayOptions) || '0"'}</span>
+      <!-- <span class="end measurement"><span class="symbol">&#8676;</span>{sae(end, displayOptions) || '0"'}</span> -->
 
   <!-- <span class="end">End</span> -->
   </div>
 
 <style>
-  .grid {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 12fr 1fr;
-    grid-auto-columns: min-content;
-  }
   .row {
     position: relative;
     display: flex;
@@ -54,9 +51,6 @@
     text-transform: uppercase;
     text-align: right;
   } */
-  .start {
-    left: 0;
-  }
   .end {
     right: 0;
     text-align: right;
@@ -69,13 +63,13 @@
     /* min-width: 3rem;
     text-align: center; */
   }
-  .symbol {
+  /* .symbol {
     font-size: 1rem;
     color: #777;
     padding: 0 0.5rem;
-  }
+  } */
 
-  @media screen and (max-width: 400px) {
+  @media screen and (max-width: 320px) {
     .label {
       top: -1rem;
     }

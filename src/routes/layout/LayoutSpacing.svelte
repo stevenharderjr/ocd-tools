@@ -4,21 +4,24 @@
 
   export let target: number;
   export let actual: number;
+  export let alignment: 'even' | 'simple';
   export let precision = 8;
   $: displayOptions = { feet: target > 144, precision: 16 };
 
 </script>
 
 <div class="measurement">
-  <span class="tiny-caps start">Target</span>
   <span class="target">{sae(target, displayOptions)}</span>
   <span class="small-caps label">Spacing</span>
-  <span class="actual">
-    {#if actual && target !== actual}
+  {#if actual && target !== actual && alignment === 'even'}
+    <span class="tiny-caps start">Target</span>
+    <span class="actual">
       {sae(actual, displayOptions)}
-    {/if}
-  </span>
-  <span class="tiny-caps end">Actual</span>
+    </span>
+    <span class="tiny-caps end">Actual</span>
+  {:else}
+    <span class="actual"></span>
+  {/if}
 </div>
 
 <style>
