@@ -143,7 +143,7 @@
         <div class="row">
           <div style="width: 100%;">
             <div style="margin-bottom: -16px;">
-              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} />
+              <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} alignment={temp.alignment} on:reset={resetRange} />
             </div>
             <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
           </div>
@@ -153,7 +153,7 @@
         </div>
         {:else}
         <div class="shrink">
-          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} on:reset={resetRange} />
+          <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} alignment={temp.alignment} on:reset={resetRange} />
         </div>
         <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
         {/if}
