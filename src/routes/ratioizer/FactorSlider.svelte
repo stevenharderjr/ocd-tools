@@ -13,7 +13,7 @@
   export let max: number;
   export let progressBar = false;
   let elementWidth = 100;
-  let touched = false;
+  let touched = true;
   $: range = max - min;
   $: rate = 1 / (elementWidth / range) * 2;
   $: delta = +(value - baseline!).toFixed(decimals);
@@ -136,20 +136,23 @@
         <div class="vertical-line"></div>
         <div class="vertical-line"></div>
       </div>
-    {:else}
+    <!-- {:else}
     <div class="tooltip">
       <span>DRAG ALONG THIS BAR</span>
-    </div>
+    </div> -->
     {/if}
   </div>
-  <button class="minus" on:click|stopPropagation={decrement}>
-    –
-  </button>
+    <button class="minus" on:click|stopPropagation={decrement} on:dragstart={(event) => {
+      console.log('drag start');
+      dragStart(event);
+    }}>
+      –
+    </button>
   <button bind:this={slider} class="slider" on:dragstart={dragStart} on:touchstart={touchStart} on:drag={handleDrag} on:touchend={touchEnd} on:touchmove={handleTouchMove} on:dragend={dragEnd} on:click|stopPropagation draggable={true}>
   </button>
-  <button class="plus" on:click|stopPropagation={increment}>
-    +
-  </button>
+    <button class="plus" on:click|stopPropagation={increment}>
+      +
+    </button>
 </button>
 
 <style>
@@ -242,10 +245,8 @@
     border-radius: 2px;
   }
   .base {
-    user-select: none;
     position: relative;
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    display: flex;
     justify-content: space-between;
     width: calc(100% + 1rem);
     /* width: 100%; */
@@ -263,7 +264,7 @@
   .plus, .minus {
     line-height: 42px;
     opacity: 0.6;
-    width: 42px;
+    width: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -281,7 +282,6 @@
   }
   .slider {
     opacity: 0;
-    background: transparent;
     width: 100%;
   }
   .tooltip {
