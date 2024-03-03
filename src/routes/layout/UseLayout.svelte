@@ -22,7 +22,7 @@
   export let pointIndex = 0;
   let audioElement: HTMLAudioElement;
   let cued = false;
-  let temp = { ...layout };
+  let temp = { alignment: 'even', ...layout };
   // temp.points = deriveLayoutPoints(temp);
   let points: number[] = [];
   // let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
@@ -39,6 +39,7 @@
     }
   ];
 
+  // $: alignment = temp.alignment || 'even';
   $: precision = temp.precision;
   $: decimals = decimalsByPrecision[precision];
   $: range = +(points[1] - points[0]).toFixed(decimals);
