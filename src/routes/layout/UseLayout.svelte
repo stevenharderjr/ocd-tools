@@ -53,7 +53,6 @@
 
   function resetRange({ detail: { id, value, precision }}: { detail: { id: string, value: number, precision: MeasurementPrecision }}) {
     const [min, max] = getUsableRangeWithPrecision(value, { precision });
-    console.log({ min, max });
     dynamicPrecision = precision;
   }
 
@@ -219,6 +218,10 @@
   </li>
 
 <style>
+  .factors {
+    /* padding: 2rem 0.25rem; */
+    /* padding-left: 0.5rem; */
+  }
   .inline-modal {
     z-index: 5;
     scroll-margin-top: 20vh;
@@ -241,7 +244,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 1.5rem;
-    margin-right: -0.5rem;
+    /* margin-right: -0.5rem; */
   }
   .audio-controls {
     position: sticky;

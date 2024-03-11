@@ -208,9 +208,10 @@
     display: grid;
     grid-template-columns: 1fr 12fr 1fr;
     justify-content: space-between;
-    width: calc(100% + 1rem);
+    /* width: calc(100% + 1rem); */
     /* width: 100%; */
-    margin: 1rem 0 1rem -0.5rem;
+    /* margin: 1rem 0 1rem -0.5rem; */
+    margin: 1rem 0;
   }
   .progress-bar {
     position: absolute;
