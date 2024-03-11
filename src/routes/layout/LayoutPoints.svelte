@@ -40,8 +40,8 @@
   $: displayOptions = { precision };
 </script>
 
-<!-- <span class="small-caps">Measurements ({pointCount})</span> -->
 <div class="row">
+  <!-- <span class="small-caps">Measurements ({pointCount})</span> -->
   <h2>Measurements ({pointCount})</h2>
   <button on:click|stopPropagation={handleCopy} title="add new layout">
     {#if browser && navigator.canShare?.()}
@@ -52,7 +52,9 @@
     {/if}
   </button>
 </div>
-<LayoutPrecision {precision} on:update />
+<!-- <div class="breakout"> -->
+  <LayoutPrecision {precision} on:update />
+<!-- </div> -->
 <ul>
   {#each points as point, i}
     <li><label for={`point ${i}`}><input id={`point ${i}`} type="checkbox" />{sae(point, displayOptions) || '0"'}</label></li>
@@ -96,6 +98,10 @@
     margin-bottom: -4px;
     /* font-size: 0.9rem;
     letter-spacing: 1.5px; */
+  }
+  .breakout {
+    width: calc(100% + 1rem);
+    margin: 1rem 0 1.5rem -0.5rem;
   }
   .options {
     display: flex;

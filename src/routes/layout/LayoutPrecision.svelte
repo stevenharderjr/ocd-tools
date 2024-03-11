@@ -13,6 +13,7 @@
 
   export let precision: MeasurementPrecision;
   export let dynamicPrecision: MeasurementPrecision;
+  export let shrink = false;
   let selectedElement: HTMLButtonElement;
   let dummyElement: HTMLButtonElement;
 
@@ -36,9 +37,9 @@
   });
 </script>
 
-<span class="small-caps">Precision</span>
 <div>
-  <div class="base">
+  <span class="small-caps">Precision</span>
+  <div class="base" style={shrink ? 'height: fit-content;' : ''}>
     {#each options as option}
       {#if option.value === dynamicPrecision}
         <button bind:this={selectedElement} class="option dynamic" on:click={() => handleChange(option.label)}>{option.label}</button>
@@ -52,12 +53,13 @@
 </div>
 
 <style>
-  span {
+  /* span {
     margin-bottom: -20px;
-  }
+  } */
   .small-caps {
     width: 100%;
-    /* text-align: center; */
+    margin-bottom: -4px;
+    text-align: center;
   }
   .base {
     /* border: 2px solid #ccc; */
@@ -71,9 +73,7 @@
     align-items: center;
     height: 42px;
     overflow-x: scroll;
-    width: calc(100% + 1rem);
-    /* width: 100%; */
-    margin: 1rem 0 0 -0.5rem;
+    width: 100%;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }

@@ -183,6 +183,8 @@
         </div>
         <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeWithPrecision(temp.span)} on:update={update} on:reset={resetRange} />
 
+        <!-- <LayoutPrecision precision={temp.precision} {dynamicPrecision} on:update /> -->
+
         <LayoutPoints {points} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:update={update} on:copy={handleShare} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
