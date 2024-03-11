@@ -39,7 +39,7 @@
   </button>
 
   <div class="card-options">
-    <button class="option-icon" title={'edit ' + layout?.name || 'ratio'} on:click={() => Toast.add({ message: 'Editing disabled.', dismissable: true })}>
+    <button class="option-icon" title={'edit ' + layout?.name || 'ratio'} on:click={() => Toast.add({ message: 'Editing not yet enabled.', dismissable: true })}>
       <img height="16px" width="16px"src="edit.svg" alt="edit" />
     </button>
   </div>

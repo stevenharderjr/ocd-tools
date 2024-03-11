@@ -1,5 +1,5 @@
 export function prettyBigNumber(digits: number | string) {
-	if (isNaN(+digits)) return undefined;
+	if (isNaN(+digits)) return '';
 	let result = digits + '';
 	const digitCount = result.length;
 	let nextCommaIndex = digitCount - 3;

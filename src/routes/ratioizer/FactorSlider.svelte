@@ -14,8 +14,9 @@
   export let progressBar = false;
   let elementWidth = 100;
   let touched = true;
+  let dragTolerance = 0.9;
   $: range = max - min;
-  $: rate = 1 / (elementWidth / range) * 2;
+  $: rate = 1 / (elementWidth / range);
   $: delta = +(value - baseline!).toFixed(decimals);
 
   let base: HTMLButtonElement;

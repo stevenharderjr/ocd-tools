@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-    export interface ToggleOption {
+  export interface ToggleOption {
     label: string;
     value: any;
   };
@@ -47,6 +47,7 @@
     flex-direction: column;
   }
   .horizontal {
+    /* height: 42px; */
     flex-direction: row;
   }
   .option {
@@ -59,6 +60,9 @@
     font-size: small;
     color: #888;
     border: 1.5px solid transparent;
+    /* height: 100%; */
+    display: flex;
+    align-items: center;
   }
   .selected {
     padding: 1px 6.5px;

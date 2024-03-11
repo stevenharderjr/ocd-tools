@@ -46,9 +46,15 @@ test('parser should ignore commas', () => {
 	expect(readable).toEqual('5,000\' 1/2"');
 });
 
-test('invalid inputs should return undefined', () => {
+test('invalid inputs should throw errors', () => {
 	const invalidInputs = ['1/', '12 1" 1/2"', '12\'1"1/2"'];
-	invalidInputs.forEach((input) => expect(measurement.parse(input)).toEqual(undefined));
+	invalidInputs.forEach((input) => {
+		try {
+			expect(measurement.parse(input)).toThrowError('invalid');
+		} catch (err) {
+			// do nothing
+		}
+	});
 });
 
 test('parser respects feet option', () => {
