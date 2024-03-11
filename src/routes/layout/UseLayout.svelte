@@ -8,10 +8,9 @@
   import LayoutPrecision from './LayoutPrecision.svelte';
   import BinarySelect from '$lib/BinarySelect.svelte';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { decimalsByPrecision, formatter, precisionByDecimals, sae, wordify, type MeasurementOptions } from '$lib/utils/MeasurementConverter';
+  import { decimalsByPrecision, formatter, precisionByDecimals, sae, wordify, type MeasurementOptions, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
   import { points as deriveLayoutPoints } from '$lib/utils/deriveLayoutPoints';
-	import { getUsableRangeFromValue } from '$lib/utils/getUsableRangeFromValue';
-  import type { ToggleOption } from '$lib/BinarySelect.svelte';
+	import { getUsableRangeWithPrecision } from '$lib/utils/getUsableRangeWithPrecision';
   import Toast from '$lib/../toast';
 	import CloseButton from '$lib/CloseButton.svelte';
   const dispatch = createEventDispatcher();
@@ -22,34 +21,24 @@
   export let pointIndex = 0;
   let audioElement: HTMLAudioElement;
   let cued = false;
-  let temp = { alignment: 'even', ...layout };
+  let temp = { ...layout };
+  let dynamicPrecision: number | undefined = temp.precision;
   // temp.points = deriveLayoutPoints(temp);
   let points: number[] = [];
   // let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
   const measurementDisplayOptions = { feet: false };
   const readable = formatter(measurementDisplayOptions);
-  const alignmentOptions: [ToggleOption, ToggleOption] = [
-    {
-      label: 'Even',
-      value: 'even'
-    },
-    {
-      label: 'Simple',
-      value: 'simple'
-    }
-  ];
 
   // $: alignment = temp.alignment || 'even';
-  $: precision = temp.precision;
+  $: precision = (dynamicPrecision || temp.precision) as MeasurementPrecision;
   $: decimals = decimalsByPrecision[precision];
   $: range = +(points[1] - points[0]).toFixed(decimals);
   // $: range = points[1] - points[0];
   $: [start, end] = temp.padding;
   $: points = deriveLayoutPoints(temp, decimals || 0);
 
-  function update({ detail: { id, value } }) {
-    console.log({ id, value, current: temp[id] });
-    if (temp[id] === value) return console.log('duplicate value');
+  function update({ detail: { id, value, precision } }) {
+    if (temp[id] === value && precision === dynamicPrecision) return console.log('duplicate value');
     pointIndex = 0;
     let update = value;
     if (id === 'start' || id === 'end') {
@@ -57,12 +46,15 @@
       id = 'padding';
     }
     // if (id === 'precision') temp.span = +temp.span.toFixed(decimalsByPrecision[value]);
+    dynamicPrecision = precision;
     temp = { ...temp, [id]: update };
     // temp.points = [...deriveLayoutPoints(temp)];
   }
 
-  function resetRange({ detail: { id, value }}: { detail: { id: string, value: number }}) {
-    const [min, max] = getUsableRangeFromValue(value);
+  function resetRange({ detail: { id, value, precision }}: { detail: { id: string, value: number, precision: MeasurementPrecision }}) {
+    const [min, max] = getUsableRangeWithPrecision(value, { precision });
+    console.log({ min, max });
+    dynamicPrecision = precision;
   }
 
   function cancel() {
@@ -114,6 +106,25 @@
     });
   }
 
+  function handleShare({ detail: { displayOptions }}) {
+    if (!browser && !points?.length) return;
+
+    const pointCount = points.length;
+    const text = `Layout${
+        (temp.alignment === 'even' ? ` (measured to 1/${precision}" precision)` : '')
+      }:\n${
+        points.map((point, index) => (
+          `${index + 1})\t${sae(point, { precision: temp.precision })}`
+        )).join('\n')
+      }`;
+    if (navigator.canShare?.()) navigator.share({ text });
+    else {
+      console.log(text);
+      navigator.clipboard.writeText(text);
+      Toast.add({ message: 'Layout copied.', duration: 1000, replace: true });
+    }
+  }
+
   onMount(() => {
     let phrase: SpeechSynthesisUtterance;
     container.scrollIntoView({ behavior: 'smooth' });
@@ -137,9 +148,9 @@
       </section>
       <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
-        <LayoutPrecision {precision} on:update={update} />
+        <LayoutPrecision {dynamicPrecision} precision={temp.precision} on:update={update} />
 
-        {#if temp.alignment}
+        <!-- {#if temp.alignment}
         <div class="row">
           <div style="width: 100%;">
             <div style="margin-bottom: -16px;">
@@ -151,19 +162,19 @@
             <BinarySelect id="alignment" options={alignmentOptions} selected={temp.alignment} orientation="vertical" on:change={update} />
           </div>
         </div>
-        {:else}
+        {:else} -->
         <div class="shrink">
           <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} {precision} alignment={temp.alignment} on:reset={resetRange} />
         </div>
-        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeFromValue(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
-        {/if}
+        <LayoutSlider id="targetSpacing" value={temp.targetSpacing} {precision} range={getUsableRangeWithPrecision(temp.targetSpacing)} on:update={update} on:reset={resetRange} />
+        <!-- {/if} -->
 
         <div class="shrink">
           <LayoutPadding {start} {end} on:update={update} {precision} />
         </div>
         <div class="row">
-          <LayoutSlider id="start" value={start} {precision} range={getUsableRangeFromValue(start, [0, undefined])} on:update={update} on:reset={resetRange} />
-          <LayoutSlider id="end" value={end} {precision} range={getUsableRangeFromValue(end, [0, undefined])} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="start" value={start} {precision} range={getUsableRangeWithPrecision(start, { min: 0 })} on:update={update} on:reset={resetRange} />
+          <LayoutSlider id="end" value={end} {precision} range={getUsableRangeWithPrecision(end, { min: 0 })} on:update={update} on:reset={resetRange} />
         </div>
 
         <!-- <InvisibleSlider value={temp.span} range={getUsableRangeFromValue(temp.padding)} on:update on:reset={resetRange} /> -->
@@ -171,9 +182,9 @@
           <LayoutSpan span={temp.span} {precision} on:update={update} />
           <!-- <LayoutSpacing target={temp.targetSpacing} actual={range} on:update={update} precision={temp.precision} /> -->
         </div>
-        <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeFromValue(temp.span)} on:update={update} on:reset={resetRange} />
+        <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeWithPrecision(temp.span)} on:update={update} on:reset={resetRange} />
 
-        <LayoutPoints {points} {precision} on:cue={cueAudio} />
+        <LayoutPoints {points} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:realign={update} on:copy={handleShare} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>
@@ -270,5 +281,5 @@
 		font-size: 2rem;
 		box-shadow: 0 0 4px 2px #0003;
 		backdrop-filter: blur(4px);
-	}
+  }
 </style>

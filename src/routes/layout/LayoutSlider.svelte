@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { decimalsByPrecision, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
+  import { round } from '$lib/utils/round';
+	import { decimalsByPrecision, precisionByDecimals, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
   import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
@@ -8,35 +9,34 @@
   export let range: [number, number]
   export let progressBar = false;
   export let precision: MeasurementPrecision = 1;
+  const precisionStep = 42;
+  let precisionIndex = decimalsByPrecision[precision];
   let elementWidth = 100;
   const dragTolerance = 1.1;
   $: [min, max] = range;
   $: diff = max - min;
-  $: rate = (1 / precision) / (elementWidth / diff);
-  $: decimals = decimalsByPrecision[precision];
+  $: rate = (1 / round(precision / 2, Math.max(precision / 2 , 1))) / (elementWidth / diff);
+  // $: decimals = decimalsByPrecision[precision];
 
   let base: HTMLButtonElement;
   let slider;
-  let origin: number | [number, number];
+  let origin: [number, number];
   let direction = 0;
   // let end: [number, number];
   let innerWidth: number;
   let horizontalTouchMove = false;
   let verticalTouchMove = false;
 
-  function round(value: number) {
-    return Math.round(value * precision) / precision;
-  }
-
   function dragStart(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
-    origin = x;
+    origin = [x, y];
+    // dispatch('update', { precision: 1 });
   }
 
   function dragEnd(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
     direction = 0;
-    dispatch('reset', { id, value });
+    dispatch('reset', { id, value, precision: undefined });
   }
 
   function touchStart(event: TouchEvent) {
@@ -49,60 +49,69 @@
     direction = 0;
     horizontalTouchMove = false;
     verticalTouchMove = false;
-    dispatch('reset', { id, value });
+    dispatch('reset', { id, value, precision: undefined });
   }
 
   function handleTouchMove(event: TouchEvent) {
     if (verticalTouchMove) return;
     const [{ clientX: x, clientY: y }] = event.touches;
     const [originX, originY] = (origin as [number, number]);
-    const changeH = x - originX;
+    const deltaH = x - originX;
+    const deltaV = y - originY;
 
     // try to prevent horizontal input from interfering with vertical scrolling
-    if (!horizontalTouchMove) {
-      const changeV = y - originY;
-      if (Math.abs(changeV) > Math.abs(changeH)) return verticalTouchMove = true;
-    }
+    if (!horizontalTouchMove && Math.abs(deltaV) > Math.abs(deltaH)) return verticalTouchMove = true;
 
     horizontalTouchMove = true;
     event.stopPropagation();
     event.preventDefault();
-    // const change = ~~(changeH * rate);
-    const change = changeH * rate;
-    let newValue = Math.round((value + (change * (1 / precision))) * precision) / precision;
-    if (newValue === value) return;
+
+    const deltaValue = deltaH * rate;
+    let newValue = Math.round((value + (deltaValue * (1 / precision))) * precision) / precision;
+    const dynamicPrecision = precisionFromPixels(deltaV);
+    if (newValue === value && dynamicPrecision === precision) return;
     if (newValue > max) newValue = max;
     if (newValue < min) newValue = min;
-    if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = [x, y];
+    if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = [x, originY];
 
-    dispatch('update', { id, value: newValue });
+    dispatch('update', { id, value: newValue, precision: dynamicPrecision });
+    if (dynamicPrecision !== precision) dispatch('reset', { id, precision: dynamicPrecision });
   }
 
   function handleDrag(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
+    const [originX, originY] = origin;
     if (x < 1) return;
     // const change = ~~((x - (origin as number)) * rate);
-    const change = (x - (origin as number)) * rate;
+    const deltaX = (x - originX as number) * rate;
+    const deltaY = Math.abs(y - originY);
+    const dynamicPrecision = precisionFromPixels(deltaY);
     // let newValue = +(value + change).toFixed(decimals);
-    let newValue = Math.round((value + (change * (1 / precision))) * precision) / precision;
-    if (newValue === value) return;
+    let newValue = Math.round((value + (deltaX * (1 / precision))) * precision) / precision;
+    if (newValue === value && dynamicPrecision === precision) return;
     if (newValue > max) newValue = max;
     if (newValue < min) newValue = min;
-    if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = x;
+    if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = [x, originY];
 
-    dispatch('update', { id, value: newValue });
+    dispatch('update', { id, value: newValue, precision: dynamicPrecision });
+    if (dynamicPrecision !== precision) dispatch('reset', { id, precision: dynamicPrecision });
   }
 
   function increment() {
-    const preciseValue = round(value);
-    const newValue = preciseValue > value ? preciseValue : round(value + (1 / precision));
+    const preciseValue = round(value, precision);
+    const newValue = preciseValue > value ? preciseValue : round(value + (1 / precision), precision);
     if (newValue <= max) dispatch('update', { id, value: newValue });
   }
 
   function decrement() {
-    const preciseValue = round(value);
-    const newValue = preciseValue < value ? preciseValue : round(value - (1 / precision));
+    const preciseValue = round(value, precision);
+    const newValue = preciseValue < value ? preciseValue : round(value - (1 / precision), precision);
     if (newValue >= min) dispatch('update', { id, value: newValue });
+  }
+
+  function precisionFromPixels(pixels: number) {
+    const decimals = 4 - Math.min(Math.round(pixels / precisionStep), 4);
+    return precisionByDecimals[decimals];
   }
 
   onMount(() => {

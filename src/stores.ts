@@ -2,6 +2,8 @@ import { writable } from 'svelte/store';
 import { uuid } from '$lib/utils/uuid';
 import { overload } from '$lib/utils/loaders';
 
+// TODO: combine separate lists (ratios & layouts) into one list called "tools"
+
 export const ratios = writable<App.Ratio[]>(
 	[
 		{

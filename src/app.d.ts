@@ -6,6 +6,12 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
+		interface ToolPin {
+			id: string;
+			toolType: 'ratio' | 'layout';
+			toolId: string;
+		}
+
 		interface RatioBaseline {
 			id: string;
 			label: string;
@@ -55,7 +61,7 @@ declare global {
 		interface Layout extends LayoutBaseline {
 			name?: string;
 			points: number[];
-			spacing: number;
+			actualSpacing: number;
 		}
 
 		type RatioFlag = Ratio | undefined;

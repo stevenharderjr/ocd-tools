@@ -12,6 +12,7 @@
   const dispatch = createEventDispatcher();
 
   export let precision: MeasurementPrecision;
+  export let dynamicPrecision: MeasurementPrecision;
   let selectedElement: HTMLButtonElement;
   let dummyElement: HTMLButtonElement;
 
@@ -38,7 +39,9 @@
 <span class="small-caps">Precision</span>
 <div class="base">
   {#each options as option}
-    {#if option.value === precision}
+    {#if option.value === dynamicPrecision}
+      <button bind:this={selectedElement} class="option dynamic" on:click={() => handleChange(option.label)}>{option.label}</button>
+    {:else if option.value === precision}
       <button bind:this={selectedElement} class="option selected" on:click={() => handleChange(option.label)}>{option.label}</button>
     {:else}
       <button class="option" on:click={() => handleChange(option.label)}>{option.label}</button>
@@ -63,11 +66,11 @@
     padding: 4px;
     justify-content: flex-start;
     align-items: center;
-    height: 42px;
+    /* height: 42px; */
     overflow-x: scroll;
     width: calc(100% + 1rem);
     /* width: 100%; */
-    margin: 1rem 0 1rem -0.5rem;
+    margin: 1rem 0 1.5rem -0.5rem;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
@@ -86,13 +89,17 @@
     border: 1.5px solid transparent;
     padding: 0 1px;
   }
-  .selected {
+  .selected, .dynamic {
     padding: 0 2px;
     border: none;
     font-weight: 500;
     color: #000;
     background: #fff;
     box-shadow: 0 1px 4px #0006;
+  }
+  .dynamic {
+    background: #666;
+    color: #fff;
   }
   button {
     width: 100%;

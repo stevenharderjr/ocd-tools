@@ -21,7 +21,10 @@ export interface MeasurementOptions {
 	caching?: boolean;
 }
 
-export const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
+export const precisionByDecimals = [1, 2, 4, 8, 16, 32, 64];
+
+export const decimalsByPrecision: { [K in MeasurementPrecision]: number } = {
+	0: 0,
 	1: 0,
 	2: 1,
 	4: 2,
@@ -31,7 +34,7 @@ export const decimalsByPrecision: { [K in MeasurementPrecision]?: number } = {
 	64: 6
 };
 
-const verbalDenominators = {
+const verbalDenominators: { [K in MeasurementPrecision]?: string } = {
 	2: 'half',
 	4: 'quarter',
 	8: 'eighth',
@@ -39,8 +42,6 @@ const verbalDenominators = {
 	32: 'thirty-second',
 	64: 'sixty-fourth'
 };
-
-export const precisionByDecimals = [1, 2, 4, 8, 16, 32, 64];
 
 const defaultOptions: MeasurementOptions = {
 	precision: 16,
@@ -72,22 +73,25 @@ export class MeasurementConverter {
 			readable: '0"'
 		};
 
-		this.options = this.options.bind(this);
 		this.fromDecimalInches = this.fromDecimalInches.bind(this);
-		this.parse = this.parse.bind(this);
 		this.stringify = this.stringify.bind(this);
 		this.verbalize = this.verbalize.bind(this);
+		this.options = this.options.bind(this);
+		this.parse = this.parse.bind(this);
+
 		this._cycleFractions = this._cycleFractions.bind(this);
 		this._optionsMatch = this._optionsMatch.bind(this);
 	}
 
 	options(options: MeasurementOptions) {
 		const { precision, decimals, caching } = options;
-		if (caching == false) console.warn('MeasurementConverter CACHING DISABLED');
-		if (precision && !decimals && decimals !== 0)
+		// if (caching == false) console.warn('MeasurementConverter CACHING DISABLED');
+
+		if (precision !== undefined && decimals === undefined)
 			options.decimals = decimalsByPrecision[precision] as MeasurementDecimals;
-		else if (decimals && !precision)
+		else if (decimals !== undefined && precision === undefined)
 			options.precision = precisionByDecimals[decimals] as MeasurementPrecision;
+
 		this._options = { ...this._options, ...options };
 	}
 
@@ -107,8 +111,7 @@ export class MeasurementConverter {
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
-			if (cachedResult && _optionsMatch(_cachedOverrides.get(inputValue)))
-				return { ...cachedResult };
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(inputValue))) return cachedResult;
 		}
 
 		let reset: MeasurementOptions = {};
@@ -172,20 +175,20 @@ export class MeasurementConverter {
 		let segment: 'feet' | 'inches' | 'fraction' = 'inches';
 		let numerator = 0;
 		let denominator = 0;
-		let spaceCount = 0;
+		let segmentCount = 0;
 		let prevChar = '';
 
+		// work backward through input string
 		while (i--) {
-			// work backward through input string
 			const char = inputValue[i];
 
+			// segment changes are indicated by non-numeric characters (', ", /) or spaces
 			if (isNaN(+char)) {
-				// segment changes are indicated by non-numeric characters (', ", /) or spaces
 				switch (char) {
 					case '/':
 						// indicates that the current set of digits is a denominator, and the next set should be a numerator
 						if (!digits)
-							return console.error('invalid input: fraction indicated by "/" with no denominator');
+							throw new Error('invalid input: fraction (indicated by "/") requires a denominator');
 						denominator = +digits;
 						segment = 'fraction';
 						break;
@@ -196,26 +199,21 @@ export class MeasurementConverter {
 						break;
 					case '"':
 						if (denominator || numerator || result.inches)
-							return console.error(
-								'invalid input: inches (and fractions of inches) should come before the inch symbol (")'
-							);
+							throw new Error('inches (and fractions of inches) must precede the inch symbol (")');
 						break;
 					case ',':
 						continue;
 					default:
-						return console.error('invalid input (valid characters are \', ", /, 0-9');
+						throw new Error('invalid input (valid characters are \', ", /, 0-9');
 				}
 
 				digits = '';
 				continue;
 			} else if (char === ' ') {
-				// a space should indicate that "digits" now represents a complete value
-				if (++spaceCount > 2 || prevChar === ' ')
-					return console.error(
-						'invalid input ' + prevChar === ' '
-							? 'no double spaces'
-							: 'there should be spaces only between feet, inches and/or fractions'
-					);
+				// a space indicates that the value represented by "digits" is complete
+				if (prevChar === ' ') continue;
+				if (++segmentCount > 2)
+					throw new Error('spaces are allowed only between feet, inches and/or fractions');
 
 				if (segment === 'fraction') numerator = +digits;
 				else result[segment] = +digits;
@@ -280,13 +278,12 @@ export class MeasurementConverter {
 		return result;
 	}
 
-	stringify(freedomFraction: Measurement, optionOverrides?: MeasurementOptions): string {
+	stringify(measurement: Measurement, optionOverrides?: MeasurementOptions): string {
 		const { options, _optionsMatch, _cachedStrings, _cachedOverrides } = this;
 
 		if (this._options.caching) {
-			const cachedResult = _cachedStrings.get(freedomFraction);
-			if (cachedResult && _optionsMatch(_cachedOverrides.get(freedomFraction)))
-				return cachedResult as string;
+			const cachedResult = _cachedStrings.get(measurement);
+			if (cachedResult && _optionsMatch(_cachedOverrides.get(measurement))) return cachedResult;
 		}
 
 		let reset: MeasurementOptions = {};
@@ -297,7 +294,7 @@ export class MeasurementConverter {
 		const { feet: measureFeet, zeros, commas } = this._options;
 
 		// eslint-disable-next-line prefer-const
-		let { feet, inches, fraction } = freedomFraction;
+		let { feet, inches, fraction } = measurement;
 		if (feet && !measureFeet) {
 			inches += feet * 12;
 			feet = 0;
@@ -320,23 +317,28 @@ export class MeasurementConverter {
 
 		const result = f + i;
 
-		_cachedStrings.set(freedomFraction, result);
-		_cachedOverrides.set(freedomFraction, optionOverrides);
+		_cachedStrings.set(measurement, result);
+		_cachedOverrides.set(measurement, optionOverrides);
 
 		return result;
 	}
 
-	verbalize(measurement: Measurement) {
+	verbalize(measurement: Measurement): string {
 		const phraseComponents = [];
 		const { feet, inches, fraction } = measurement;
 		let index = 0;
+
 		if (feet === 0 && inches === 0 && fraction === '') return 'zero inches';
+
 		if (feet) phraseComponents[index++] = feet + ' foot';
 		phraseComponents[index++] = inches ? inches + '' : 'zero';
+
 		if (fraction) {
 			const [numerator, denominator] = fraction.split('/');
 			let beginning = (numerator === '1' ? (denominator === '8' ? 'an' : 'a') : numerator) + ' ';
-			let ending = verbalDenominators[+denominator] + (numerator === '1' ? '' : 's');
+			let ending =
+				verbalDenominators[denominator as unknown as MeasurementPrecision] +
+				(numerator === '1' ? '' : 's');
 			if (feet || inches) {
 				beginning = ' and ' + beginning;
 			} else ending = ' of an inch';
@@ -348,7 +350,7 @@ export class MeasurementConverter {
 		return phraseComponents.join(' ');
 	}
 
-	_cycleFractions(decimal: number) {
+	_cycleFractions(decimal: number): string {
 		let denominator = this._options.precision || 16;
 		let numerator = Math.round(decimal * denominator);
 		while (numerator % 2 === 0 && denominator % 2 === 0) {
