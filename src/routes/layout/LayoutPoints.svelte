@@ -2,6 +2,7 @@
   import { browser } from '$app/environment';
   import Toast from '../../toast';
   import BinarySelect from '$lib/BinarySelect.svelte';
+  import LayoutPrecision from './LayoutPrecision.svelte';
   import type { ToggleOption } from '$lib/BinarySelect.svelte';
   import type AlignmentOptions from '$lib/BinarySelect.svelte';
   import { sae } from '$lib/utils/MeasurementConverter';
@@ -18,8 +19,8 @@
       value: 'even'
     },
     {
-      label: 'Simple',
-      value: 'simple'
+      label: 'Basic',
+      value: 'basic'
     }
   ];
 
@@ -31,10 +32,6 @@
     });
   }
 
-  function realign({ detail }) {
-    dispatch('realign', detail);
-  }
-
   function handleCopy() {
     dispatch('copy', { ...displayOptions });
   }
@@ -43,29 +40,34 @@
   $: displayOptions = { precision };
 </script>
 
-<span class="small-caps">Measurements ({pointCount})</span>
-<div class="options">
-  <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} orientation="horizontal" on:change={realign} />
+<!-- <span class="small-caps">Measurements ({pointCount})</span> -->
+<div class="row">
+  <h2>Measurements ({pointCount})</h2>
   <button on:click|stopPropagation={handleCopy} title="add new layout">
     {#if browser && navigator.canShare?.()}
-      <img class="iOS" src="share.svg" alt="share"/>
-      <img class="android" src="share-2.svg" alt="share"/>
+    <img class="iOS" src="share.svg" alt="share"/>
+    <img class="android" src="share-2.svg" alt="share"/>
     {:else}
-      <img src="clipboard.svg" alt="clipboard" />
+    <img src="clipboard.svg" alt="clipboard" />
     {/if}
   </button>
 </div>
+<LayoutPrecision {precision} on:update />
 <ul>
   {#each points as point, i}
     <li><label for={`point ${i}`}><input id={`point ${i}`} type="checkbox" />{sae(point, displayOptions) || '0"'}</label></li>
   {/each}
 </ul>
+<div class="options">
+  <BinarySelect id="alignment" options={alignmentOptions} selected={alignment} orientation="horizontal" on:update />
+</div>
 
 <style>
   .row {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
   }
   ul {

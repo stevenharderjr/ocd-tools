@@ -22,7 +22,7 @@
   let audioElement: HTMLAudioElement;
   let cued = false;
   let temp = { ...layout };
-  let dynamicPrecision: number | undefined = temp.precision;
+  let dynamicPrecision: number | undefined;
   // temp.points = deriveLayoutPoints(temp);
   let points: number[] = [];
   // let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64;
@@ -148,7 +148,6 @@
       </section>
       <!-- <SegmentedSelect id="precision"  /> -->
       <section class="factors">
-        <LayoutPrecision {dynamicPrecision} precision={temp.precision} on:update={update} />
 
         <!-- {#if temp.alignment}
         <div class="row">
@@ -184,7 +183,7 @@
         </div>
         <LayoutSlider id="span" value={temp.span} {precision} range={getUsableRangeWithPrecision(temp.span)} on:update={update} on:reset={resetRange} />
 
-        <LayoutPoints {points} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:realign={update} on:copy={handleShare} />
+        <LayoutPoints {points} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:update={update} on:copy={handleShare} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>

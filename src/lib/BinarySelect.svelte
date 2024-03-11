@@ -10,23 +10,30 @@
   const dispatch = createEventDispatcher();
 
   export let id: string;
+  export let label: string;
   export let options: [ToggleOption, ToggleOption];
   export let selected: any;
   export let orientation = 'horizontal';
+  export let shrink = false;
   // export let vertical = false;
 
   $: [a, b] = options;
 
   function switchValues() {
     const newValue = selected === a.value ? b.value : a.value;
-    dispatch('change', { id, value: newValue });
+    dispatch('update', { id, value: newValue });
   }
 </script>
 
-<button class={orientation + ' base'} on:click={switchValues}>
-  <div class={selected === a.value ? "option selected" : 'option'}>{a.label}</div>
-  <div class={selected === b.value ? "option selected" : 'option'}>{b.label}</div>
-</button>
+<div>
+  {#if label}
+    <span class="small-caps">{label}</span>
+  {/if}
+  <button class={orientation + ' base'} on:click={switchValues} style={shrink ? 'height: min-content' : ''}>
+    <div class={selected === a.value ? "option selected" : 'option'}>{a.label}</div>
+    <div class={selected === b.value ? "option selected" : 'option'}>{b.label}</div>
+  </button>
+</div>
 
 <style>
   .base {
@@ -44,10 +51,11 @@
     pointer-events: auto;
   }
   .vertical {
+    height: 84px;
     flex-direction: column;
   }
   .horizontal {
-    /* height: 42px; */
+    height: 42px;
     flex-direction: row;
   }
   .option {
@@ -60,9 +68,10 @@
     font-size: small;
     color: #888;
     border: 1.5px solid transparent;
-    /* height: 100%; */
+    height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
   .selected {
     padding: 1px 6.5px;
@@ -71,5 +80,8 @@
     color: #000;
     background: #fff;
     box-shadow: 0 1px 4px #0006;
+  }
+  button {
+    pointer-events: auto;
   }
 </style>

@@ -37,24 +37,27 @@
 </script>
 
 <span class="small-caps">Precision</span>
-<div class="base">
-  {#each options as option}
-    {#if option.value === dynamicPrecision}
-      <button bind:this={selectedElement} class="option dynamic" on:click={() => handleChange(option.label)}>{option.label}</button>
-    {:else if option.value === precision}
-      <button bind:this={selectedElement} class="option selected" on:click={() => handleChange(option.label)}>{option.label}</button>
-    {:else}
-      <button class="option" on:click={() => handleChange(option.label)}>{option.label}</button>
-    {/if}
-  {/each}
-  </div>
+<div>
+  <div class="base">
+    {#each options as option}
+      {#if option.value === dynamicPrecision}
+        <button bind:this={selectedElement} class="option dynamic" on:click={() => handleChange(option.label)}>{option.label}</button>
+      {:else if option.value === precision}
+        <button bind:this={selectedElement} class="option selected" on:click={() => handleChange(option.label)}>{option.label}</button>
+      {:else}
+        <button class="option" on:click={() => handleChange(option.label)}>{option.label}</button>
+      {/if}
+    {/each}
+    </div>
+</div>
 
 <style>
   span {
     margin-bottom: -20px;
   }
   .small-caps {
-    text-align: center;
+    width: 100%;
+    /* text-align: center; */
   }
   .base {
     /* border: 2px solid #ccc; */
@@ -66,11 +69,11 @@
     padding: 4px;
     justify-content: flex-start;
     align-items: center;
-    /* height: 42px; */
+    height: 42px;
     overflow-x: scroll;
     width: calc(100% + 1rem);
     /* width: 100%; */
-    margin: 1rem 0 1.5rem -0.5rem;
+    margin: 1rem 0 0 -0.5rem;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
