@@ -6,15 +6,20 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
-		interface ToolPin {
+		interface Pin {
 			id: string;
+			changedAt: number;
 			toolType: 'ratio' | 'layout';
 			toolId: string;
 		}
 
-		interface RatioBaseline {
+		interface Tool {
 			id: string;
+			changedAt: number;
 			label: string;
+		}
+
+		interface RatioBaseline extends Tool {
 			factors: FactorBaseline[] | [];
 			userConversionRate?: string;
 		}
@@ -28,9 +33,7 @@ declare global {
 			factors: Factor[];
 		}
 
-		interface FactorBaseline {
-			id: string;
-			label: string;
+		interface FactorBaseline extends Tool {
 			value: string;
 		}
 
@@ -47,9 +50,7 @@ declare global {
 			precision: string;
 		}
 
-		interface LayoutBaseline {
-			id: string;
-			label: string;
+		interface LayoutBaseline extends Tool {
 			span: number;
 			padding: [number, number];
 			targetSpacing: number;

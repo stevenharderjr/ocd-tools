@@ -1,19 +1,17 @@
 <script lang="ts">
+  import { round, type Precision } from '$lib/utils/round';
   import { createEventDispatcher, onMount } from 'svelte';
+	import { precisionByDecimals } from './utils/MeasurementConverter';
   const dispatch = createEventDispatcher();
 
-  export let id: string = '';
-  export let value: number;
-  export let min: number;
-  export let max: number;
-  export let progressBar = false;
   let elementWidth = 100;
-  $: range = max - min;
-  $: rate = 1 / (elementWidth / range) * 2;
 
+  export let sensitivity = [1, 1];
   let base: HTMLButtonElement;
   let slider;
-  let origin: number | [number, number];
+  let origin: [number, number];
+  let h = 0;
+  let v = 0;
   let direction = 0;
   // let end: [number, number];
   let innerWidth: number;
@@ -22,13 +20,13 @@
 
   function dragStart(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
-    origin = x;
+    origin = [x, y];
+    // dispatch('update', { precision: 1 });
   }
 
   function dragEnd(event: DragEvent) {
-    const { screenX: x, screenY: y } = event;
     direction = 0;
-    dispatch('reset', { id, value });
+    dispatch('reset', { delta: [h, v], precision: undefined });
   }
 
   function touchStart(event: TouchEvent) {
@@ -41,55 +39,57 @@
     direction = 0;
     horizontalTouchMove = false;
     verticalTouchMove = false;
-    dispatch('reset', { id, value });
+    dispatch('reset', { delta: [h, v] });
   }
 
   function handleTouchMove(event: TouchEvent) {
     if (verticalTouchMove) return;
     const [{ clientX: x, clientY: y }] = event.touches;
     const [originX, originY] = (origin as [number, number]);
-    const changeH = x - originX;
+    const [h, v] = sensitivity;
+    const deltaH = (x - originX) / h;
+    const deltaV = (y - originY) / v;
 
     // try to prevent horizontal input from interfering with vertical scrolling
-    if (!horizontalTouchMove) {
-      const changeV = y - originY;
-      if (Math.abs(changeV) > Math.abs(changeH)) return verticalTouchMove = true;
-    }
+    if (!horizontalTouchMove && Math.abs(deltaV) > Math.abs(deltaH)) return verticalTouchMove = true;
 
     horizontalTouchMove = true;
     event.stopPropagation();
     event.preventDefault();
-    const change = ~~(changeH * rate);
-    let newValue = value + change;
-    if (newValue === value) return;
-    if (newValue > max) newValue = max;
-    if (newValue < min) newValue = min;
-    if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = [x, y];
 
-    dispatch('update', { id, value: newValue });
+    dispatch('update', { delta: [deltaH, deltaV] });
   }
 
   function handleDrag(event: DragEvent) {
     const { screenX: x, screenY: y } = event;
     if (x < 1) return;
-    const change = ~~((x - (origin as number)) * rate);
-    let newValue = value + change;
-    if (newValue === value) return;
-    if (newValue > max) newValue = max;
-    if (newValue < min) newValue = min;
-    if ((newValue > value && direction < 1) || (newValue < value && direction > -1)) origin = x;
 
-    dispatch('update', { id, value: newValue });
+    const [h, v] = sensitivity;
+    const [originX, originY] = origin;
+    const deltaX = (x - originX) / h;
+    const deltaY = (y - originY) / v;
+
+    dispatch('update', [deltaX, deltaY]);
   }
 
   function increment() {
-    const newValue = value + 1;
-    if (newValue <= max) dispatch('update', { id, value: newValue });
+    const [h, v] = value;
+    const [s] = sensitivity;
+    const preciseValue = round(h, s);
+    const deltaH = preciseValue > h ? preciseValue : round(h + (1 / h), h);
+    if (deltaH <= max) dispatch('update', { id, delta: [deltaH, v] });
   }
 
   function decrement() {
-    const newValue = value - 1;
-    if (newValue >= min) dispatch('update', { id, value: newValue });
+    const [h, v] = value;
+    const preciseValue = round(h, sensitivity[0]);
+    const newValue = preciseValue < h ? preciseValue : round(h - (1 / h), h);
+    if (newValue[0] >= min) dispatch('update', { id, delta: [newValue });
+  }
+
+  function precisionFromPixels(pixels: number) {
+    const decimals = 4 - Math.min(Math.round(pixels / precisionStep), 4);
+    return precisionByDecimals[decimals];
   }
 
   onMount(() => {
@@ -100,8 +100,19 @@
 <button bind:this={base} class="base" on:mousedown|self|stopPropagation>
   <div class="visible-body">
     {#if progressBar}
-      <div class="progress-bar" style={`height:${(100 / range) * value - 8}%`}></div>
+      <div class="progress-bar" style={`height:${(100 / span) * value - 8}%`}></div>
     {/if}
+    <div class="thumb-tab" aria-hidden={true}>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+      <div class="vertical-line"></div>
+    </div>
   </div>
   <button class="minus" on:click|stopPropagation={decrement}>
     –
@@ -123,10 +134,12 @@
   }
   .visible-body {
     position: absolute;
-    top: 5px;
+    /* top: 5px;
+    bottom: 5px; */
+    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 5px;
     border-radius: 8px;
     /* background: linear-gradient(to right, #ccc, #eee, #ccc); */
     background: #eee;
@@ -135,15 +148,50 @@
     pointer-events: none;
     display: flex;
     align-items: center;
+    justify-content: center;
     overflow: hidden;
+  }
+  .thumb-tab {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 0;
+    opacity: 0.9;
+  }
+  .thumb-tab div:nth-child(1), .thumb-tab div:nth-child(9) {
+    opacity: 0.1;
+  }
+  .thumb-tab div:nth-child(2), .thumb-tab div:nth-child(8) {
+    opacity: 0.2;
+  }
+  .thumb-tab div:nth-child(3), .thumb-tab div:nth-child(7) {
+    opacity: 0.3;
+  }
+  .thumb-tab div:nth-child(4), .thumb-tab div:nth-child(6) {
+    opacity: 0.4;
+  }
+  .thumb-tab div:nth-child(5) {
+    opacity: 0.5;
+  }
+  .vertical-line {
+    background: #888;
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
   }
   .base {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 12fr 1fr;
     justify-content: space-between;
-    width: 100%;
+    /* width: calc(100% + 1rem); */
     /* width: 100%; */
+    /* margin: 1rem 0 1rem -0.5rem; */
+    margin: 1rem 0;
   }
   .progress-bar {
     position: absolute;
@@ -157,13 +205,13 @@
   .plus, .minus {
     line-height: 42px;
     opacity: 0.5;
-    width: 42px;
+    width: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   .minus {
-    justify-self: flex-start;
+    /* justify-self: flex-start; */
     padding-bottom: 3px;
     font-size: 1.5rem;
   }
@@ -171,11 +219,10 @@
     padding-bottom: 5px;
     font-size: 1.7rem;
     font-weight: 300;
-    justify-self: flex-end;
+    /* justify-self: flex-end; */
   }
   .slider {
     opacity: 0;
-    background: transparent;
     width: 100%;
   }
 </style>

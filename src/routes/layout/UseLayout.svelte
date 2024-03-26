@@ -184,7 +184,7 @@
 
         <!-- <LayoutPrecision precision={temp.precision} {dynamicPrecision} on:update /> -->
 
-        <LayoutPoints {points} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:update={update} on:copy={handleShare} />
+        <LayoutPoints {points} {dynamicPrecision} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:update={update} on:copy={handleShare} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>
@@ -219,6 +219,7 @@
 
 <style>
   .factors {
+    padding-top: 1.5rem;
     /* padding: 2rem 0.25rem; */
     /* padding-left: 0.5rem; */
   }
@@ -238,6 +239,7 @@
 	}
   .shrink {
     margin-bottom: -24px;
+    padding: 0 4px;
   }
   .row {
     display: flex;

@@ -11,6 +11,7 @@
 
   export let points: number[];
   export let precision: 1 | 2 | 4 | 8 | 16 | 32 | 64 = 8;
+  export let dynamicPrecision;
   export let alignment: 'even' | 'simple' = 'even';
 
   const alignmentOptions: [ToggleOption, ToggleOption] = [
@@ -53,7 +54,7 @@
   </button>
 </div>
 <!-- <div class="breakout"> -->
-  <LayoutPrecision {precision} on:update />
+  <LayoutPrecision {precision} {dynamicPrecision} on:update />
 <!-- </div> -->
 <ul>
   {#each points as point, i}

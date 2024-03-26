@@ -399,7 +399,7 @@ export function wordify(decimalInches: number, options?: MeasurementOptions) {
 	return result;
 }
 
-export function inches(saeMeasurement: string, displayOptions: MeasurementOptions) {
+export function inches(saeMeasurement: string, displayOptions?: MeasurementOptions) {
 	return measurement.parse(saeMeasurement, displayOptions)?.numeric;
 }
 

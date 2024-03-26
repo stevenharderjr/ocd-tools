@@ -17,7 +17,6 @@
   let selectedElement: HTMLButtonElement;
   let dummyElement: HTMLButtonElement;
 
-  // const options = Object.values(precisionByDecimals).map(precision => ({ label: +precision > 1 ? '1/' + precision : '1', value: precision }));
   const options = [
     { label: '1"', value: 1 },
     { label: '1/2"', value: 2 },

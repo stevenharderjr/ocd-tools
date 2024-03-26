@@ -138,6 +138,33 @@ export const newLayout = () => ({
 	measurement: ''
 });
 
+export const pins = writable<App.Pin[]>([
+	{
+		id: '0',
+		toolType: 'ratio',
+		toolId: '1',
+		changedAt: 0
+	},
+	{
+		id: '1',
+		toolType: 'ratio',
+		toolId: '0',
+		changedAt: 0
+	},
+	{
+		id: '2',
+		toolType: 'layout',
+		toolId: '0',
+		changedAt: 0
+	},
+	{
+		id: '3',
+		toolType: 'layout',
+		toolId: '1',
+		changedAt: 0
+	}
+]);
+
 export const toasts = writable([]);
 
 export const blur = writable(false);
