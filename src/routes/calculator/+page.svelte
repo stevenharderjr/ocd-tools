@@ -2,7 +2,7 @@
   import { inches, sae, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
   import Toast from '../../toast';
 
-  export let inputValue = '80085';
+  export let inputValue = '';
   export let operativeValue = '5318008';
   export let operation = '+';
   export let precision: MeasurementPrecision = 1;
@@ -27,7 +27,18 @@
 <div class="backdrop">
   <div class="floating calculator-body">
     <div class="calculator-display">
-      <span class="calculator-input">{inputValue}"</span>
+      <div class="display-input">
+        {#if inputValue}
+          <button class="input-button">
+            <img src="x-circle.svg" />
+          </button>
+        {:else if operativeValue}
+          <button class="input-button">
+            <img src="arrow-left-circle.svg"/>
+          </button>
+        {/if}
+        <span class="calculator-input">{inputValue || '0'}"</span>
+      </div>
       <div class="display-info">
         {#if clipboard}
           <span><img src="clipboard.svg" />{clipboard}</span>
@@ -41,27 +52,28 @@
       <button class="inverted"><img src="refresh.svg" /></button>
       <button class="inverted"><img src="copy.svg" /></button>
       <button class="inverted"><img src="clipboard.svg" /></button>
-      {#if inputValue}
+      <!-- {#if inputValue}
         <button class="inverted"><img src="delete.svg" /></button>
       {:else}
         <button class="inverted"><img src="arrow-left.svg" /></button>
-      {/if}
+      {/if} -->
+      <button class="inverted">÷</button>
       <button>7</button>
       <button>8</button>
       <button>9</button>
-      <button class="inverted">÷</button>
+      <button class="inverted">×</button>
       <button>4</button>
       <button>5</button>
       <button>6</button>
-      <button class="inverted">×</button>
+      <button class="inverted">−</button>
       <button>1</button>
       <button>2</button>
       <button>3</button>
-      <button class="inverted">−</button>
+      <button class="inverted">+</button>
       <button class="inverted">/</button>
       <button>0</button>
       <button class="inverted"><img src="space.svg"/></button>
-      <button class="inverted">+</button>
+      <button class="inverted">=</button>
     </div>
   </div>
 </div>
@@ -88,7 +100,7 @@
     padding: 1rem;
     margin-bottom: 6rem;
     background: #eee;
-    border-radius: 12px 12px 48px 48px;
+    border-radius: 12px 12px 18px 18px;
     max-width: var(--column-width);
   }
 
@@ -111,6 +123,20 @@
     margin-bottom: 1.5rem;
     background: #ddd;
     box-shadow: inset 0 1px 3px #999;
+  }
+
+  .display-input {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .display-input img {
+    width: 32px;
+    height: 32px;
+    margin-left: -24px;
   }
 
   .display-info {
@@ -160,13 +186,13 @@
   }
 
   .inverted {
-    filter: invert(1);
     background: #999;
+    filter: invert(1);
   }
 
 	button {
     pointer-events: auto;
-		border-radius: 9999px;
+		border-radius: 12px;
 		background: #fff;
 		width: 4rem;
 		height: 4rem;
@@ -182,6 +208,13 @@
 		backdrop-filter: blur(4px);
 		pointer-events: auto;
 	}
+
+  .input-button {
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    opacity: 0.7;
+  }
 
 	svg {
 		width: 33%;
