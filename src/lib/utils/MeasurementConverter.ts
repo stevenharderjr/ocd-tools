@@ -43,6 +43,9 @@ const verbalDenominators: { [K in MeasurementPrecision]?: string } = {
 	64: 'sixty-fourth'
 };
 
+const superscript = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
+const subscript = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+
 const defaultOptions: MeasurementOptions = {
 	precision: 16,
 	decimals: 4,
@@ -81,6 +84,8 @@ export class MeasurementConverter {
 
 		this._cycleFractions = this._cycleFractions.bind(this);
 		this._optionsMatch = this._optionsMatch.bind(this);
+		this._superscript = this._superscript.bind(this);
+		this._subscript = this._subscript.bind(this);
 	}
 
 	options(options: MeasurementOptions) {
@@ -279,7 +284,8 @@ export class MeasurementConverter {
 	}
 
 	stringify(measurement: Measurement, optionOverrides?: MeasurementOptions): string {
-		const { options, _optionsMatch, _cachedStrings, _cachedOverrides } = this;
+		const { options, _optionsMatch, _cachedStrings, _cachedOverrides, _subscript, _superscript } =
+			this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedStrings.get(measurement);
@@ -295,6 +301,11 @@ export class MeasurementConverter {
 
 		// eslint-disable-next-line prefer-const
 		let { feet, inches, fraction } = measurement;
+		// let fraction = '';
+		// if (uglyFraction) {
+		// 	const [numerator, denominator] = uglyFraction.split('/');
+		// 	fraction = _superscript(numerator) + '⁄' + _subscript(denominator);
+		// }
 		if (feet && !measureFeet) {
 			inches += feet * 12;
 			feet = 0;
@@ -381,31 +392,65 @@ export class MeasurementConverter {
 			(caching === newCachingOption || newCachingOption === undefined)
 		);
 	}
+
+	_subscript(number: string | number) {
+		const digits = number + '';
+		let result = '';
+
+		let i = digits.length;
+		if (i > 0) {
+			while (i--) {
+				const digit = subscript[+digits[i]];
+				result = digit + result;
+			}
+			return result;
+		}
+		return digits;
+	}
+
+	_superscript(number: string | number) {
+		const digits = number + '';
+		let result = '';
+
+		let i = digits.length;
+		if (i > 0) {
+			while (i--) {
+				const digit = superscript[+digits[i]];
+				result = digit + result;
+			}
+			return result;
+		}
+		return digits;
+	}
 }
 
-export const measurement = new MeasurementConverter();
+export const convert = new MeasurementConverter();
+
+export function measurement(decimalInches: number, optionOverrides?: MeasurementOptions) {
+	return convert.fromDecimalInches(decimalInches, optionOverrides);
+}
 
 export function formatter(optionOverrides?: MeasurementOptions): (decimalInches: number) => string {
 	return (decimalInches: number) =>
-		measurement.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
+		convert.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
 }
 
 export function sae(decimalInches: number, displayOptions?: MeasurementOptions) {
-	return measurement.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
+	return convert.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
 }
 
 export function wordify(decimalInches: number, options?: MeasurementOptions) {
-	const result = measurement.verbalize(measurement.fromDecimalInches(decimalInches, options)!);
+	const result = convert.verbalize(convert.fromDecimalInches(decimalInches, options)!);
 	return result;
 }
 
 export function inches(saeMeasurement: string, displayOptions?: MeasurementOptions) {
-	return measurement.parse(saeMeasurement, displayOptions)?.numeric;
+	return convert.parse(saeMeasurement, displayOptions)?.numeric;
 }
 
 export function measurer(
 	optionOverrides?: MeasurementOptions
 ): (decimalInches: number) => Measurement {
 	return (decimalInches: number) =>
-		measurement.fromDecimalInches(decimalInches, optionOverrides) || ({} as Measurement);
+		convert.fromDecimalInches(decimalInches, optionOverrides) || ({} as Measurement);
 }

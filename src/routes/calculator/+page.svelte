@@ -80,34 +80,34 @@
 			</div>
 		</div>
 		<div class="calculator-buttons">
-			<button><img src="refresh.svg" /></button>
-			<button><img src="copy.svg" /></button>
-			<button><img src="clipboard.svg" /></button>
+			<button id="refresh" title="refresh"><img src="refresh.svg" /></button>
+			<button id="copy" title="copy"><img src="copy.svg" /></button>
+			<button id="paste" title="paste"><img src="clipboard.svg" /></button>
 			{#if inputValue}
-				<button><img src="delete.svg" /></button>
+				<button id="backspace" title="delete"><img src="delete.svg" /></button>
 			{:else}
-				<button><img src="arrow-left.svg" /></button>
+				<button id="back" title="back"><img src="arrow-left.svg" /></button>
 			{/if}
-			<button id="^" class="inverted" style="font-size: 1.25rem;">^</button>
-			<button id="√" class="inverted" style="font-size: 1.25rem;">√</button>
-			<button class="inverted">'</button>
-			<button class="inverted">÷</button>
-			<button>7</button>
-			<button>8</button>
-			<button>9</button>
-			<button class="inverted">×</button>
-			<button>4</button>
-			<button>5</button>
-			<button>6</button>
-			<button class="inverted">−</button>
-			<button>1</button>
-			<button>2</button>
-			<button>3</button>
-			<button class="inverted">+</button>
-			<button class="inverted">/</button>
-			<button>0</button>
-			<button class="inverted"><img src="space.svg" /></button>
-			<button class="inverted">=</button>
+			<button id="^" title="exponent" class="inverted" style="font-size: 1.25rem;">^</button>
+			<button id="√" title="square root" class="inverted" style="font-size: 1.25rem;">√</button>
+			<button id="'" title="foot symbol" class="inverted">'</button>
+			<button id="÷" class="inverted">÷</button>
+			<button id="7">7</button>
+			<button id="8">8</button>
+			<button id="9">9</button>
+			<button id="×" class="inverted">×</button>
+			<button id="4">4</button>
+			<button id="5">5</button>
+			<button id="6">6</button>
+			<button id="−" class="inverted">−</button>
+			<button id="1">1</button>
+			<button id="2">2</button>
+			<button id="3">3</button>
+			<button id="+" class="inverted">+</button>
+			<button id="⁄" title="value to numerator (create fraction)" class="inverted">⁄</button>
+			<button id="0">0</button>
+			<button id=" " class="inverted"><img src="space.svg" /></button>
+			<button id="=" class="inverted">=</button>
 		</div>
 	</div>
 </div>
