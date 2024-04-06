@@ -1,9 +1,9 @@
 <script lang="ts">
-	export let fraction: String;
-	$: [numerator, denominator] = fraction?.split('/') || [];
+	export let numerator: number | undefined;
+	export let denominator: number | undefined;
 </script>
 
-{#if fraction?.length}
+{#if denominator}
 	<div class="box">
 		<div class="numerator">{numerator}</div>
 		<svg class="divider" aria-hidden="true" viewBox="0 0 1 1">

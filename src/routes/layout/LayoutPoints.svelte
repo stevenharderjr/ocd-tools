@@ -3,6 +3,7 @@
 	import Toast from '../../toast';
 	import BinarySelect from '$lib/BinarySelect.svelte';
 	import LayoutPrecision from './LayoutPrecision.svelte';
+	import Measurement from '$lib/Measurement.svelte';
 	import type { ToggleOption } from '$lib/BinarySelect.svelte';
 	import type AlignmentOptions from '$lib/BinarySelect.svelte';
 	import { sae, measurement, type Measurement } from '$lib/utils/MeasurementConverter';
@@ -58,21 +59,11 @@
 <LayoutPrecision {precision} {dynamicPrecision} on:update />
 <!-- </div> -->
 <ul>
-	{#each measurements as measurement, i}
+	{#each points as point, i}
 		<li>
 			<label for={`point ${i}`}>
 				<input id={`point ${i}`} type="checkbox" />
-				{#if !measurement.readable}
-					{'0"'}
-				{:else if measurement.feet}
-					{measurement.feet}' {measurement.fraction
-						? measurement.inches + ' ' + measurement.fraction
-						: measurement.inches}"
-				{:else}
-					{measurement.fraction
-						? measurement.inches + ' ' + measurement.fraction
-						: measurement.inches}"
-				{/if}
+				<Measurement decimalInches={point} {precision} />
 			</label>
 		</li>
 	{/each}

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import PrecisionSelect from '$lib/PrecisionSelect.svelte';
 	import { inches, sae, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
+	import { round } from '$lib/utils/round';
 	import Toast from '../../toast';
 
 	export let inputValue = '';
@@ -7,12 +9,17 @@
 	export let operation = '+';
 	export let precision: MeasurementPrecision = 1;
 	export let clipboard = '3.141593';
+	let numerator, denominator;
+	const maxInputLength = 10;
+
+	$: inputNumeric = round(inputValue, denominator);
 
 	const buttonAction = {
 		refresh: () => {
 			inputValue = '';
 			operativeValue = '';
 			operation = '';
+			return true;
 		},
 		copy: () => {
 			clipboard = inputValue;
@@ -20,20 +27,24 @@
 		paste: () => {
 			if (!clipboard) return Toast.add('Clipboard is empty.');
 			inputValue = clipboard;
+			return true;
 		},
 		back: () => {
 			inputValue = operativeValue;
 			operation = '';
 			operativeValue = '';
+			return true;
 		},
 		backspace: () => {
 			inputValue = inputValue.slice(0, inputValue.length - 1);
+			return true;
 		},
 		"'": () => {
 			if (!inputValue) return Toast.add('Cannot specify zero as a foot measurement.');
 			if (inputValue.indexOf("'") > -1)
 				return Toast.add('A foot measurement is already specified.');
 			inputValue += "'";
+			return true;
 		}
 	};
 
@@ -52,6 +63,14 @@
 					? (o / i, { precision })
 					: Toast.add({ message: 'Cannot divide by zero.', replace: true });
 		}
+	}
+
+	function handleButtonPress({ currentTarget: { id } }) {
+		if (buttonAction[id]?.()) return;
+		if (isNaN(id)) {
+			operation = id;
+			return operate();
+		} else if (inputValue.length < maxInputLength) inputValue += id;
 	}
 </script>
 
@@ -72,7 +91,7 @@
 			</div>
 			<div class="display-info">
 				{#if clipboard}
-					<span><img src="clipboard.svg" />{clipboard}</span>
+					<span><img src="clipboard.svg" alt="clipboard" />{clipboard}</span>
 				{/if}
 				{#if operativeValue}
 					<span class="input-history">{operativeValue} {operation}</span>
@@ -80,60 +99,101 @@
 			</div>
 		</div>
 		<div class="calculator-buttons">
-			<button id="refresh" title="refresh"><img src="refresh.svg" /></button>
-			<button id="copy" title="copy"><img src="copy.svg" /></button>
-			<button id="paste" title="paste"><img src="clipboard.svg" /></button>
+			<button on:click={handleButtonPress} aria-label="refresh" id="refresh" title="refresh"
+				><img src="refresh.svg" alt="arrows circling counter clockwise" /></button
+			>
+			<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
+				><img src="copy.svg" alt="stacked squares" /></button
+			>
+			<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
+				><img src="clipboard.svg" alt="clipboard" /></button
+			>
 			{#if inputValue}
-				<button id="backspace" title="delete"><img src="delete.svg" /></button>
+				<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
+					><img src="delete.svg" alt="backspace" /></button
+				>
 			{:else}
-				<button id="back" title="back"><img src="arrow-left.svg" /></button>
+				<button on:click={handleButtonPress} aria-label="back" id="back" title="back"
+					><img src="arrow-left.svg" alt="left arrow" /></button
+				>
 			{/if}
-			<button id="^" title="exponent" class="inverted" style="font-size: 1.25rem;">^</button>
-			<button id="√" title="square root" class="inverted" style="font-size: 1.25rem;">√</button>
-			<button id="'" title="foot symbol" class="inverted">'</button>
-			<button id="÷" class="inverted">÷</button>
-			<button id="7">7</button>
-			<button id="8">8</button>
-			<button id="9">9</button>
-			<button id="×" class="inverted">×</button>
-			<button id="4">4</button>
-			<button id="5">5</button>
-			<button id="6">6</button>
-			<button id="−" class="inverted">−</button>
-			<button id="1">1</button>
-			<button id="2">2</button>
-			<button id="3">3</button>
-			<button id="+" class="inverted">+</button>
-			<button id="⁄" title="value to numerator (create fraction)" class="inverted">⁄</button>
-			<button id="0">0</button>
-			<button id=" " class="inverted"><img src="space.svg" /></button>
-			<button id="=" class="inverted">=</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="exponent"
+				id="^"
+				title="exponent"
+				class="inverted"
+				style="font-size: 1.25rem;">^</button
+			>
+			<button
+				on:click={handleButtonPress}
+				aria-label="square root"
+				id="√"
+				title="square root"
+				class="inverted"
+				style="font-size: 1.25rem;">√</button
+			>
+			<button
+				on:click={handleButtonPress}
+				aria-label="foot symbol"
+				id="'"
+				title="foot symbol"
+				class="inverted">'</button
+			>
+			<button on:click={handleButtonPress} aria-label="divide" id="÷" class="inverted">÷</button>
+			<button on:click={handleButtonPress} aria-label="7" id="7">7</button>
+			<button on:click={handleButtonPress} aria-label="8" id="8">8</button>
+			<button on:click={handleButtonPress} aria-label="9" id="9">9</button>
+			<button on:click={handleButtonPress} aria-label="multiply" id="×" class="inverted">×</button>
+			<button on:click={handleButtonPress} aria-label="4" id="4">4</button>
+			<button on:click={handleButtonPress} aria-label="5" id="5">5</button>
+			<button on:click={handleButtonPress} aria-label="6" id="6">6</button>
+			<button on:click={handleButtonPress} aria-label="subtract" id="−" class="inverted">−</button>
+			<button on:click={handleButtonPress} aria-label="1" id="1">1</button>
+			<button on:click={handleButtonPress} aria-label="2" id="2">2</button>
+			<button on:click={handleButtonPress} aria-label="3" id="3">3</button>
+			<button on:click={handleButtonPress} aria-label="add" id="+" class="inverted">+</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="⁄"
+				id="⁄"
+				title="value to numerator (create fraction)"
+				class="inverted">⁄</button
+			>
+			<button on:click={handleButtonPress} aria-label="0" id="0">0</button>
+			<button on:click={handleButtonPress} aria-label="space" id=" " class="inverted"
+				><img src="space.svg" alt="space bar" /></button
+			>
+			<button on:click={handleButtonPress} aria-label="equals" id="=" class="inverted">=</button>
 		</div>
 	</div>
 </div>
 
 <style>
 	.backdrop {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
 		width: 100%;
-		align-items: space-between;
-		justify-content: flex-end;
 		overflow-x: hidden;
 		overflow-y: scroll;
+		background: #000;
 	}
 
 	.calculator-body {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		/* top: 50vh; */
+		/* transform: translate(0, -50%); */
 		pointer-events: none;
 		z-index: 4;
 		display: flex;
 		flex-direction: column;
-		justify-content: flex-end;
-		align-self: center;
 		padding: 1rem;
-		margin-bottom: 6rem;
-		background: #eee;
+		background: #ccc;
 		border-radius: 12px 12px 18px 18px;
 		max-width: var(--column-width);
 	}
@@ -145,7 +205,6 @@
 		justify-content: flex-start;
 
 		color: #000;
-		background: #ccc;
 		padding: 4px 8px;
 		border-radius: 8px;
 		height: 6rem;
@@ -155,7 +214,7 @@
 		/* width: calc(100vw - 32px); */
 		max-width: calc(var(--column-width) - 32px);
 		margin-bottom: 1.5rem;
-		background: #ddd;
+		background: #eee;
 		box-shadow: inset 0 1px 3px #999;
 	}
 

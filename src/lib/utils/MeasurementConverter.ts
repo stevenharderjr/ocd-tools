@@ -5,7 +5,8 @@ export interface Measurement {
 	numeric: number;
 	inches: number;
 	feet: number;
-	fraction: string;
+	numerator?: number;
+	denominator?: number;
 	readable?: string;
 }
 
@@ -72,7 +73,8 @@ export class MeasurementConverter {
 			numeric: 0,
 			feet: 0,
 			inches: 0,
-			fraction: '',
+			numerator: 0,
+			denominator: 0,
 			readable: '0"'
 		};
 
@@ -137,8 +139,8 @@ export class MeasurementConverter {
 			inches = Math.floor(numeric % 12);
 		} else inches = Math.floor(numeric);
 
-		const fraction = _cycleFractions(numeric % 1);
-		const result: Measurement = { numeric, fixed, feet, inches, fraction };
+		const [numerator, denominator] = _cycleFractions(numeric % 1);
+		const result: Measurement = { numeric, fixed, feet, inches, numerator, denominator };
 		result.readable = stringify(result);
 
 		if (reset) options(reset);
@@ -284,8 +286,7 @@ export class MeasurementConverter {
 	}
 
 	stringify(measurement: Measurement, optionOverrides?: MeasurementOptions): string {
-		const { options, _optionsMatch, _cachedStrings, _cachedOverrides, _subscript, _superscript } =
-			this;
+		const { options, _optionsMatch, _cachedStrings, _cachedOverrides } = this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedStrings.get(measurement);
@@ -300,7 +301,7 @@ export class MeasurementConverter {
 		const { feet: measureFeet, zeros, commas } = this._options;
 
 		// eslint-disable-next-line prefer-const
-		let { feet, inches, fraction } = measurement;
+		let { feet, inches, numerator, denominator } = measurement;
 		// let fraction = '';
 		// if (uglyFraction) {
 		// 	const [numerator, denominator] = uglyFraction.split('/');
@@ -314,12 +315,12 @@ export class MeasurementConverter {
 		if (commas) {
 			if (feet > 1000) feet = prettyBigNumber(feet);
 			if (inches > 1000) inches = prettyBigNumber(inches);
-			if (!(inches || fraction || feet)) return '';
+			if (!(inches || denominator || feet)) return '';
 		}
 
 		let f = measureFeet && (feet || zeros) ? feet + "'" : '';
 		let i = inches ? inches + '' : '';
-		if (fraction) i += i ? ' ' + fraction : fraction;
+		if (denominator) i += i ? ' ' + numerator + '/' + denominator : '';
 		if (zeros && !i) i = '0';
 		if (i) i += '"';
 		if (i && f) f += ' ';
@@ -336,20 +337,19 @@ export class MeasurementConverter {
 
 	verbalize(measurement: Measurement): string {
 		const phraseComponents = [];
-		const { feet, inches, fraction } = measurement;
+		const { feet, inches, numerator, denominator } = measurement;
 		let index = 0;
 
-		if (feet === 0 && inches === 0 && fraction === '') return 'zero inches';
+		if (feet === 0 && inches === 0 && !denominator) return 'zero inches';
 
 		if (feet) phraseComponents[index++] = feet + ' foot';
 		phraseComponents[index++] = inches ? inches + '' : 'zero';
 
-		if (fraction) {
-			const [numerator, denominator] = fraction.split('/');
-			let beginning = (numerator === '1' ? (denominator === '8' ? 'an' : 'a') : numerator) + ' ';
+		if (denominator) {
+			let beginning = (numerator === 1 ? (denominator === 8 ? 'an' : 'a') : numerator) + ' ';
 			let ending =
 				verbalDenominators[denominator as unknown as MeasurementPrecision] +
-				(numerator === '1' ? '' : 's');
+				(numerator === 1 ? '' : 's');
 			if (feet || inches) {
 				beginning = ' and ' + beginning;
 			} else ending = ' of an inch';
@@ -361,7 +361,7 @@ export class MeasurementConverter {
 		return phraseComponents.join(' ');
 	}
 
-	_cycleFractions(decimal: number): string {
+	_cycleFractions(decimal: number): [number, number] | [] {
 		let denominator = this._options.precision || 16;
 		let numerator = Math.round(decimal * denominator);
 		while (numerator % 2 === 0 && denominator % 2 === 0) {
@@ -369,7 +369,7 @@ export class MeasurementConverter {
 			denominator /= 2;
 		}
 
-		return denominator > 1 ? numerator + '/' + denominator : '';
+		return denominator > 1 ? [numerator, denominator] : [];
 	}
 
 	_optionsMatch(optionOverrides?: MeasurementOptions) {
