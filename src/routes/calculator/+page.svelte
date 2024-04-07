@@ -1,18 +1,55 @@
 <script lang="ts">
 	import { inches, sae, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
+	import { round } from '$lib/utils/round';
 	import Toast from '../../toast';
 
 	export let inputValue = '';
-	export let operativeValue = '5318008';
-	export let operation = '+';
-	export let precision: MeasurementPrecision = 1;
-	export let clipboard = '3.141593';
+	export let precision: MeasurementPrecision = 16;
+	let holdover = false;
+	let priorInput = '';
+	let currentExpression: string[] = [];
+	let priorExpressions: Array<string[]> = [];
+	let priorExpression = '';
+	let repeatValue = '';
+	let operativeValue: string = '';
+	let operator = '';
+	let clipboard = '';
+	let numerator, denominator;
+	const maxInputLength = 10;
+	const options = { caching: false };
+	let negative = false;
+	let history = '';
+	let lastChar,
+		inputContainsInches,
+		inputHasTrailingSpace,
+		footIndex,
+		inputHasExtraSpace,
+		inputEval,
+		priorOperation;
+
+	$: {
+		lastChar = inputValue.slice(-1);
+		inputContainsInches = lastChar === '"';
+		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
+		inputHasTrailingSpace = inputEval.slice(-1) === ' ';
+		footIndex = inputValue.indexOf("'");
+		// $: lastSpaceIndex = inputEval.lastIndexOf(' ');
+		inputHasExtraSpace =
+			inputHasTrailingSpace ||
+			(!denominator && inputContainsInches && inputEval.lastIndexOf(' ') > footIndex + 1);
+		priorExpression = (priorExpressions[0] || currentExpression).join(' ');
+		console.log(priorExpression);
+	}
 
 	const buttonAction = {
 		refresh: () => {
 			inputValue = '';
 			operativeValue = '';
-			operation = '';
+			operator = '';
+			repeatValue = '';
+			priorExpressions = [];
+			currentExpression = [];
+			return true;
 		},
 		copy: () => {
 			clipboard = inputValue;
@@ -20,43 +57,128 @@
 		paste: () => {
 			if (!clipboard) return Toast.add('Clipboard is empty.');
 			inputValue = clipboard;
+			return true;
 		},
 		back: () => {
-			inputValue = operativeValue;
-			operation = '';
+			inputValue = operativeValue || '';
+			operator = '';
 			operativeValue = '';
+			return true;
+		},
+		space: () => {
+			if (!inputValue) return false;
+			const evalLastChar = inputEval.slice(-1);
+			if (evalLastChar === ' ') return false;
+
+			inputValue = inputEval + (inputContainsInches ? ' "' : ' ');
+			return true;
 		},
 		backspace: () => {
-			inputValue = inputValue.slice(0, inputValue.length - 1);
+			let newInputValue = inputEval.slice(0, -1);
+			if (newInputValue.slice(-1) === ' ') newInputValue = newInputValue.slice(0, -1);
+
+			inputValue = newInputValue;
+			currentExpression[2] = newInputValue;
+			return true;
 		},
 		"'": () => {
-			if (!inputValue) return Toast.add('Cannot specify zero as a foot measurement.');
-			if (inputValue.indexOf("'") > -1)
-				return Toast.add('A foot measurement is already specified.');
-			inputValue += "'";
-		}
+			if (!inputValue) return Toast.add('No need to specify a foot measurement of zero.');
+			if (footIndex > -1)
+				return Toast.add(
+					`Foot measurement is already specified (${inputValue.slice(0, footIndex)}').`
+				);
+			if (inputHasTrailingSpace) inputValue = inputEval.slice(0, -1);
+			inputValue = inputEval + "'";
+			currentExpression[2] = inputValue;
+			return true;
+		},
+		'=': evaluate
 	};
 
-	function operate() {
-		const i = inches(inputValue) || 0;
-		const o = inches(operativeValue) || 0;
-		switch (operation) {
-			case '+':
-				return sae(i + o, { precision });
-			case '-':
-				return sae(o - i, { precision });
-			case '×':
-				return sae(o * i, { precision });
-			case '÷':
-				return i > 0
-					? (o / i, { precision })
-					: Toast.add({ message: 'Cannot divide by zero.', replace: true });
+	function handleButtonPress({ currentTarget: { id } }) {
+		const action = buttonAction[id];
+		if (action) return action();
+
+		if (isNaN(id)) return switchOperator(id);
+
+		// must be a number input
+		if (holdover) {
+			holdover = false;
+			inputValue = '';
+			lastChar = '';
+			repeatValue = '';
 		}
+
+		if (inputValue.length < maxInputLength) {
+			if (lastChar === "'") inputValue += ' ' + id;
+			else if (lastChar === '"') inputValue = inputValue.slice(0, -1) + id + '"';
+			else inputValue += id;
+			currentExpression[2] = sae(inches(inputValue || 0), options);
+		}
+	}
+
+	function switchOperator(id: string) {
+		repeatValue = operator === id ? '' : inputValue;
+		// console.log({ inputValue, inputEval, id });
+		if (!inputEval && id === '-') negative = !negative;
+
+		holdover = true;
+		operator = id;
+		operativeValue = sae(inches(inputValue || '0'), options) || '0"';
+		repeatValue = inputValue;
+		currentExpression = [operativeValue, operator];
+	}
+
+	function evaluate(): Boolean {
+		console.log(currentExpression.join(' '));
+		let result = 0;
+		const i = inches(repeatValue || inputValue || '0', options);
+		const o = inches(operativeValue || '0', options);
+		const expression = `(${o})${operator}(${i})`;
+		console.log(expression);
+		result = eval(expression);
+		if (isNaN(result)) {
+			Toast.add({ message: 'Invalid operation.', replace: true });
+			currentExpression = [];
+			operator = '';
+			return false;
+		}
+		const formattedResult = sae(result, options);
+		const formattedInput = sae(i, options);
+		priorExpressions = [
+			[operativeValue, operator, formattedInput, '=', formattedResult],
+			...priorExpressions
+		];
+		operativeValue = '';
+		repeatValue = formattedInput;
+		inputValue = formattedResult;
+		holdover = true;
+		currentExpression = [];
+		negative = false;
+		return true;
+	}
+
+	function format(string: String) {
+		if (!string) return '0"';
+		const lastChar = string.slice(-1);
+		if (lastChar === "'" || lastChar === '"') return string;
+		inputValue = inputValue ? string + '"' : '';
+		return string + '"';
+	}
+
+	function handleCopy() {
+		console.log(currentExpression.join(' '));
+		// navigator.clipboard.writeText(currentExpression)
 	}
 </script>
 
 <div class="backdrop">
 	<div class="floating calculator-body">
+		<ul class="ticker-tape">
+			{#each priorExpressions as expression}
+				<li>{expression.join(' ')}</li>
+			{/each}
+		</ul>
 		<div class="calculator-display">
 			<div class="display-input">
 				<!-- {#if inputValue}
@@ -68,71 +190,126 @@
 						<img src="arrow-left-circle.svg" />
 					</button>
 				{/if} -->
-				<span class="calculator-input">{inputValue || '0'}"</span>
+				<span class="calculator-input">{format(inputValue)}</span>
+				{#if negative}
+					<span class="calculator-input">-</span>
+				{/if}
 			</div>
 			<div class="display-info">
-				{#if clipboard}
-					<span><img src="clipboard.svg" />{clipboard}</span>
-				{/if}
-				{#if operativeValue}
-					<span class="input-history">{operativeValue} {operation}</span>
-				{/if}
+				<span><img src="clipboard.svg" alt="clipboard" />{clipboard}</span>
+				<span class="input-history"
+					>{currentExpression.length ? currentExpression.join(' ') : priorExpression}</span
+				>
 			</div>
 		</div>
 		<div class="calculator-buttons">
-			<button id="refresh" title="refresh"><img src="refresh.svg" /></button>
-			<button id="copy" title="copy"><img src="copy.svg" /></button>
-			<button id="paste" title="paste"><img src="clipboard.svg" /></button>
+			<button on:click={handleButtonPress} aria-label="refresh" id="refresh" title="refresh"
+				><img src="refresh.svg" alt="arrows circling counter clockwise" /></button
+			>
+			<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
+				><img src="copy.svg" alt="stacked squares" /></button
+			>
+			<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
+				><img src="clipboard.svg" alt="clipboard" /></button
+			>
 			{#if inputValue}
-				<button id="backspace" title="delete"><img src="delete.svg" /></button>
+				<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
+					><img src="delete.svg" alt="backspace" /></button
+				>
 			{:else}
-				<button id="back" title="back"><img src="arrow-left.svg" /></button>
+				<button on:click={handleButtonPress} aria-label="back" id="back" title="back"
+					><img src="arrow-left.svg" alt="left arrow" /></button
+				>
 			{/if}
-			<button id="^" title="exponent" class="inverted" style="font-size: 1.25rem;">^</button>
-			<button id="√" title="square root" class="inverted" style="font-size: 1.25rem;">√</button>
-			<button id="'" title="foot symbol" class="inverted">'</button>
-			<button id="÷" class="inverted">÷</button>
-			<button id="7">7</button>
-			<button id="8">8</button>
-			<button id="9">9</button>
-			<button id="×" class="inverted">×</button>
-			<button id="4">4</button>
-			<button id="5">5</button>
-			<button id="6">6</button>
-			<button id="−" class="inverted">−</button>
-			<button id="1">1</button>
-			<button id="2">2</button>
-			<button id="3">3</button>
-			<button id="+" class="inverted">+</button>
-			<button id="⁄" title="value to numerator (create fraction)" class="inverted">⁄</button>
-			<button id="0">0</button>
-			<button id=" " class="inverted"><img src="space.svg" /></button>
-			<button id="=" class="inverted">=</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="exponent"
+				id="**"
+				title="exponent"
+				class="inverted"
+				style="font-size: 1.25rem;">^</button
+			>
+			<button
+				on:click={handleButtonPress}
+				aria-label="square root"
+				id="√"
+				title="square root"
+				class="inverted"
+				style="font-size: 1.25rem;">√</button
+			>
+			<button
+				on:click={handleButtonPress}
+				aria-label="foot symbol"
+				id="'"
+				title="foot symbol"
+				class="inverted">'</button
+			>
+			<button on:click={handleButtonPress} aria-label="divide" id="/" class="inverted">÷</button>
+			<button on:click={handleButtonPress} aria-label="7" id="7">7</button>
+			<button on:click={handleButtonPress} aria-label="8" id="8">8</button>
+			<button on:click={handleButtonPress} aria-label="9" id="9">9</button>
+			<button on:click={handleButtonPress} aria-label="multiply" id="*" class="inverted">×</button>
+			<button on:click={handleButtonPress} aria-label="4" id="4">4</button>
+			<button on:click={handleButtonPress} aria-label="5" id="5">5</button>
+			<button on:click={handleButtonPress} aria-label="6" id="6">6</button>
+			<button on:click={handleButtonPress} aria-label="subtract" id="-" class="inverted">−</button>
+			<button on:click={handleButtonPress} aria-label="1" id="1">1</button>
+			<button on:click={handleButtonPress} aria-label="2" id="2">2</button>
+			<button on:click={handleButtonPress} aria-label="3" id="3">3</button>
+			<button on:click={handleButtonPress} aria-label="add" id="+" class="inverted">+</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="⁄"
+				id="⁄"
+				title="value to numerator (create fraction)"
+				class="inverted">⁄</button
+			>
+			<button on:click={handleButtonPress} aria-label="0" id="0">0</button>
+			<button on:click={handleButtonPress} aria-label="space" id="space" class="inverted"
+				><img src="space.svg" alt="space bar" /></button
+			>
+			<button on:click={handleButtonPress} aria-label="equals" id="=" class="inverted">=</button>
 		</div>
 	</div>
 </div>
 
 <style>
 	.backdrop {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
 		width: 100%;
-		align-items: space-between;
-		justify-content: flex-end;
 		overflow-x: hidden;
 		overflow-y: scroll;
 	}
 
+	.ticker-tape {
+		position: absolute;
+		bottom: 100%;
+		left: 2rem;
+		right: 2rem;
+		background: #fff;
+		max-height: fit-content;
+		display: table-cell;
+		text-align: right;
+		align-items: flex-end;
+		color: #000;
+		padding: 1rem;
+	}
+
 	.calculator-body {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		/* top: 50vh; */
+		/* transform: translate(0, -50%); */
 		pointer-events: none;
 		z-index: 4;
 		display: flex;
 		flex-direction: column;
-		justify-content: flex-end;
-		align-self: center;
 		padding: 1rem;
-		margin-bottom: 6rem;
 		background: #eee;
 		border-radius: 12px 12px 18px 18px;
 		max-width: var(--column-width);
@@ -145,7 +322,6 @@
 		justify-content: flex-start;
 
 		color: #000;
-		background: #ccc;
 		padding: 4px 8px;
 		border-radius: 8px;
 		height: 6rem;
@@ -155,7 +331,7 @@
 		/* width: calc(100vw - 32px); */
 		max-width: calc(var(--column-width) - 32px);
 		margin-bottom: 1.5rem;
-		background: #ddd;
+		background: #ccc;
 		box-shadow: inset 0 1px 3px #999;
 	}
 

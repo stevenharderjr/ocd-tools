@@ -90,7 +90,7 @@ export class MeasurementConverter {
 
 	options(options: MeasurementOptions) {
 		const { precision, decimals, caching } = options;
-		// if (caching == false) console.warn('MeasurementConverter CACHING DISABLED');
+		if (caching == false) console.warn('MeasurementConverter CACHING DISABLED');
 
 		if (precision !== undefined && decimals === undefined)
 			options.decimals = decimalsByPrecision[precision] as MeasurementDecimals;
@@ -132,10 +132,13 @@ export class MeasurementConverter {
 		const fixed = Number(string).toFixed(decimals);
 		const numeric = +fixed;
 
+		const negative = numeric < 0;
+		const trim = negative ? Math.ceil : Math.floor;
+
 		if (measureFeet) {
-			feet = Math.floor(numeric / 12);
-			inches = Math.floor(numeric % 12);
-		} else inches = Math.floor(numeric);
+			feet = trim(numeric / 12);
+			inches = trim(numeric % 12);
+		} else inches = trim(numeric);
 
 		const fraction = _cycleFractions(numeric % 1);
 		const result: Measurement = { numeric, fixed, feet, inches, fraction };
@@ -173,8 +176,14 @@ export class MeasurementConverter {
 			readable: ''
 		};
 
-		let i = inputValue.length;
-		if (i < 1) return;
+		let inputEval = inputValue;
+		const negative = inputEval[0] === '-';
+		console.log({ negative });
+		if (negative) inputValue = inputValue.slice(1, inputValue.length);
+		if (inputEval.slice(-1) === '"') inputEval = inputEval.slice(0, -1);
+
+		let i = inputEval.length;
+		if (i < 1) throw new Error('Cannot parse empty string');
 
 		let digits = '';
 		let segment: 'feet' | 'inches' | 'fraction' = 'inches';
@@ -248,7 +257,7 @@ export class MeasurementConverter {
 			feet = 0;
 		}
 
-		if (numerator && !denominator) return undefined;
+		// if (numerator && !denominator) return undefined;
 
 		if (numerator && denominator) {
 			result.fraction = numerator + '/' + denominator;
@@ -280,6 +289,14 @@ export class MeasurementConverter {
 		_cachedMeasurements.set(inputValue, result);
 		_cachedOverrides.set(inputValue, optionOverrides);
 
+		if (negative) {
+			const { numeric, fixed, feet, inches } = result;
+			result.numeric = -numeric;
+			result.fixed = '-' + fixed;
+			result.inches = -inches;
+			result.feet = -feet;
+		}
+
 		return result;
 	}
 
@@ -301,6 +318,9 @@ export class MeasurementConverter {
 
 		// eslint-disable-next-line prefer-const
 		let { feet, inches, fraction } = measurement;
+		let negative = feet < 0 || inches < 0;
+		feet = Math.abs(feet);
+		inches = Math.abs(inches);
 		// let fraction = '';
 		// if (uglyFraction) {
 		// 	const [numerator, denominator] = uglyFraction.split('/');
@@ -331,7 +351,7 @@ export class MeasurementConverter {
 		_cachedStrings.set(measurement, result);
 		_cachedOverrides.set(measurement, optionOverrides);
 
-		return result;
+		return (negative ? '-' : '') + result;
 	}
 
 	verbalize(measurement: Measurement): string {
