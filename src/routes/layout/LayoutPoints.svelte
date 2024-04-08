@@ -39,7 +39,9 @@
 
 	$: pointCount = points.length;
 	$: displayOptions = { precision };
-	$: measurements = points.map((point) => converter(point, displayOptions)) as Measurement[];
+	$: measurements = points.map((point) =>
+		converter.fromDecimalInches(point, displayOptions)
+	) as Measurement[];
 </script>
 
 <div class="row">
