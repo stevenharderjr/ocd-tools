@@ -8,6 +8,7 @@
 <div class="backdrop">
   <section class="tool-list">
     <ToolCard title="Ratioizer" description="Keeps sets of values and allows dynamic adjustments without changing proportions between them." href="/ratioizer" />
+    <ToolCard title="SAE Calculator" description="Perform basic calculations on SAE measurements." href="calculator" />
     <ToolCard title="Layout Equalizer" description="Plot padding and equal spacing while accounting for material width." href="layout" />
     <ToolCard title="Feature Testing" description="Try out experimental features and UI components." href="test" />
   </section>

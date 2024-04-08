@@ -19,6 +19,7 @@ export interface MeasurementOptions {
 	commas?: boolean;
 	zeros?: boolean;
 	caching?: boolean;
+	compactFractions?: boolean;
 }
 
 export const precisionByDecimals = [1, 2, 4, 8, 16, 32, 64];
@@ -42,6 +43,9 @@ const verbalDenominators: { [K in MeasurementPrecision]?: string } = {
 	32: 'thirty-second',
 	64: 'sixty-fourth'
 };
+
+const superscript = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
+const subscript = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
 
 const defaultOptions: MeasurementOptions = {
 	precision: 16,
@@ -81,11 +85,13 @@ export class MeasurementConverter {
 
 		this._cycleFractions = this._cycleFractions.bind(this);
 		this._optionsMatch = this._optionsMatch.bind(this);
+		this._superscript = this._superscript.bind(this);
+		this._subscript = this._subscript.bind(this);
 	}
 
 	options(options: MeasurementOptions) {
 		const { precision, decimals, caching } = options;
-		// if (caching == false) console.warn('MeasurementConverter CACHING DISABLED');
+		if (caching == false) console.warn('MeasurementConverter CACHING DISABLED');
 
 		if (precision !== undefined && decimals === undefined)
 			options.decimals = decimalsByPrecision[precision] as MeasurementDecimals;
@@ -99,15 +105,16 @@ export class MeasurementConverter {
 		inputValue: number | string,
 		optionOverrides?: MeasurementOptions
 	): Measurement | void {
-		if (!inputValue || isNaN(+inputValue)) return undefined;
 		const {
 			options,
 			_optionsMatch,
 			_cachedMeasurements,
 			_cachedOverrides,
 			_cycleFractions,
-			stringify
+			stringify,
+			_empty
 		} = this;
+		if (!inputValue || isNaN(+inputValue)) return _empty;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
@@ -127,10 +134,13 @@ export class MeasurementConverter {
 		const fixed = Number(string).toFixed(decimals);
 		const numeric = +fixed;
 
+		const negative = numeric < 0;
+		const trim = negative ? Math.ceil : Math.floor;
+
 		if (measureFeet) {
-			feet = Math.floor(numeric / 12);
-			inches = Math.floor(numeric % 12);
-		} else inches = Math.floor(numeric);
+			feet = trim(numeric / 12);
+			inches = trim(numeric % 12);
+		} else inches = trim(numeric);
 
 		const fraction = _cycleFractions(numeric % 1);
 		const result: Measurement = { numeric, fixed, feet, inches, fraction };
@@ -168,8 +178,16 @@ export class MeasurementConverter {
 			readable: ''
 		};
 
-		let i = inputValue.length;
-		if (i < 1) return;
+		let inputEval = inputValue + '';
+
+		const negative = inputEval[0] === '-';
+		// the negative symbol interferes with parsing, so remove it for now and add it back in when necessary
+		if (negative) inputValue = inputValue.slice(1, inputValue.length);
+		// remove any trailing inch symbol, since that can also interfere with parsing
+		if (inputEval.slice(-1) === '"') inputEval = inputEval.slice(0, -1);
+
+		let i = inputEval.length;
+		if (i < 1) return result;
 
 		let digits = '';
 		let segment: 'feet' | 'inches' | 'fraction' = 'inches';
@@ -204,6 +222,7 @@ export class MeasurementConverter {
 					case ',':
 						continue;
 					default:
+						console.log({ char });
 						throw new Error('invalid input (valid characters are \', ", /, 0-9');
 				}
 
@@ -243,7 +262,7 @@ export class MeasurementConverter {
 			feet = 0;
 		}
 
-		if (numerator && !denominator) return undefined;
+		// if (numerator && !denominator) return undefined;
 
 		if (numerator && denominator) {
 			result.fraction = numerator + '/' + denominator;
@@ -275,11 +294,20 @@ export class MeasurementConverter {
 		_cachedMeasurements.set(inputValue, result);
 		_cachedOverrides.set(inputValue, optionOverrides);
 
+		if (negative) {
+			const { numeric, fixed, feet, inches } = result;
+			result.numeric = -numeric;
+			result.fixed = '-' + fixed;
+			result.inches = -inches;
+			result.feet = -feet;
+		}
+
 		return result;
 	}
 
 	stringify(measurement: Measurement, optionOverrides?: MeasurementOptions): string {
-		const { options, _optionsMatch, _cachedStrings, _cachedOverrides } = this;
+		const { options, _optionsMatch, _cachedStrings, _cachedOverrides, _subscript, _superscript } =
+			this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedStrings.get(measurement);
@@ -291,10 +319,19 @@ export class MeasurementConverter {
 			reset = { ...this._options };
 			options(optionOverrides);
 		}
-		const { feet: measureFeet, zeros, commas } = this._options;
+		const { feet: measureFeet, zeros, commas, compactFractions } = this._options;
 
 		// eslint-disable-next-line prefer-const
 		let { feet, inches, fraction } = measurement;
+		let negative = feet < 0 || inches < 0;
+		feet = Math.abs(feet);
+		inches = Math.abs(inches);
+
+		if (fraction && compactFractions) {
+			const [numerator, denominator] = fraction.split('/');
+			fraction = _superscript(numerator) + '⁄' + _subscript(denominator);
+		}
+
 		if (feet && !measureFeet) {
 			inches += feet * 12;
 			feet = 0;
@@ -320,7 +357,7 @@ export class MeasurementConverter {
 		_cachedStrings.set(measurement, result);
 		_cachedOverrides.set(measurement, optionOverrides);
 
-		return result;
+		return (negative ? '-' : '') + result;
 	}
 
 	verbalize(measurement: Measurement): string {
@@ -369,43 +406,79 @@ export class MeasurementConverter {
 			feet: newFeetOption,
 			commas: newCommasOption,
 			zeros: newZerosOption,
-			caching: newCachingOption
+			caching: newCachingOption,
+			compactFractions: newCompactFractions
 		} = optionOverrides;
-		const { decimals, precision, feet, commas, zeros, caching } = this._options;
+		const { decimals, precision, feet, commas, zeros, caching, compactFractions } = this._options;
 		return (
 			(decimals === newDecimalsOption || newDecimalsOption === undefined) &&
 			(precision === newPrecisionOption || newPrecisionOption === undefined) &&
 			(feet === newFeetOption || newFeetOption === undefined) &&
 			(commas === newCommasOption || newCommasOption === undefined) &&
 			(zeros === newZerosOption || newZerosOption === undefined) &&
-			(caching === newCachingOption || newCachingOption === undefined)
+			(caching === newCachingOption || newCachingOption === undefined) &&
+			(compactFractions === newCompactFractions || newCompactFractions === undefined)
 		);
+	}
+
+	_subscript(number: string | number) {
+		const digits = number + '';
+		let result = '';
+
+		let i = digits.length;
+		if (i > 0) {
+			while (i--) {
+				const digit = subscript[+digits[i]];
+				result = digit + result;
+			}
+			return result;
+		}
+		return digits;
+	}
+
+	_superscript(number: string | number) {
+		const digits = number + '';
+		let result = '';
+
+		let i = digits.length;
+		if (i > 0) {
+			while (i--) {
+				const digit = superscript[+digits[i]];
+				result = digit + result;
+			}
+			return result;
+		}
+		return digits;
 	}
 }
 
-export const measurement = new MeasurementConverter();
+export const converter = new MeasurementConverter();
+
+export function measure(decimalInches: number, optionOverrides?: MeasurementOptions) {
+	return converter.fromDecimalInches(decimalInches, optionOverrides);
+}
 
 export function formatter(optionOverrides?: MeasurementOptions): (decimalInches: number) => string {
 	return (decimalInches: number) =>
-		measurement.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
+		converter.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
 }
 
 export function sae(decimalInches: number, displayOptions?: MeasurementOptions) {
-	return measurement.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
+	return converter.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
 }
 
 export function wordify(decimalInches: number, options?: MeasurementOptions) {
-	const result = measurement.verbalize(measurement.fromDecimalInches(decimalInches, options)!);
+	const result = converter.verbalize(converter.fromDecimalInches(decimalInches, options)!);
 	return result;
 }
 
-export function inches(saeMeasurement: string, displayOptions: MeasurementOptions) {
-	return measurement.parse(saeMeasurement, displayOptions)?.numeric;
+export function inches(saeNotation: string, displayOptions?: MeasurementOptions) {
+	return converter.parse(saeNotation, displayOptions)?.numeric;
 }
 
 export function measurer(
 	optionOverrides?: MeasurementOptions
 ): (decimalInches: number) => Measurement {
 	return (decimalInches: number) =>
-		measurement.fromDecimalInches(decimalInches, optionOverrides) || ({} as Measurement);
+		converter.fromDecimalInches(decimalInches, optionOverrides) || ({} as Measurement);
 }

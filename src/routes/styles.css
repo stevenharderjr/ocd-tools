@@ -1,5 +1,5 @@
 * {
-	line-height: 1.4rem;
+	/* line-height: 1.4rem; */
 	user-select: none;
 	-webkit-user-select: none;
 }
@@ -26,6 +26,10 @@ li,
 span,
 input {
 	font-weight: 300;
+}
+
+ul {
+	list-style-type: none;
 }
 
 button,

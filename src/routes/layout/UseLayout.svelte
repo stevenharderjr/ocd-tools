@@ -53,7 +53,6 @@
 
   function resetRange({ detail: { id, value, precision }}: { detail: { id: string, value: number, precision: MeasurementPrecision }}) {
     const [min, max] = getUsableRangeWithPrecision(value, { precision });
-    console.log({ min, max });
     dynamicPrecision = precision;
   }
 
@@ -185,7 +184,7 @@
 
         <!-- <LayoutPrecision precision={temp.precision} {dynamicPrecision} on:update /> -->
 
-        <LayoutPoints {points} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:update={update} on:copy={handleShare} />
+        <LayoutPoints {points} {dynamicPrecision} precision={temp.precision} alignment={temp.alignment} on:cue={cueAudio} on:update={update} on:copy={handleShare} />
         <!-- <input type="range" min={inches(span)} -->
       </section>
     </div>
@@ -219,6 +218,11 @@
   </li>
 
 <style>
+  .factors {
+    padding-top: 1.5rem;
+    /* padding: 2rem 0.25rem; */
+    /* padding-left: 0.5rem; */
+  }
   .inline-modal {
     z-index: 5;
     scroll-margin-top: 20vh;
@@ -235,13 +239,14 @@
 	}
   .shrink {
     margin-bottom: -24px;
+    padding: 0 4px;
   }
   .row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 1.5rem;
-    margin-right: -0.5rem;
+    /* margin-right: -0.5rem; */
   }
   .audio-controls {
     position: sticky;

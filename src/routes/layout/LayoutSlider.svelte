@@ -156,10 +156,12 @@
   }
   .visible-body {
     position: absolute;
-    top: 5px;
+    /* top: 5px;
+    bottom: 5px; */
+    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 5px;
     border-radius: 8px;
     /* background: linear-gradient(to right, #ccc, #eee, #ccc); */
     background: #eee;
@@ -208,9 +210,10 @@
     display: grid;
     grid-template-columns: 1fr 12fr 1fr;
     justify-content: space-between;
-    width: calc(100% + 1rem);
+    /* width: calc(100% + 1rem); */
     /* width: 100%; */
-    margin: 1rem 0 1rem -0.5rem;
+    /* margin: 1rem 0 1rem -0.5rem; */
+    margin: 1rem 0;
   }
   .progress-bar {
     position: absolute;
