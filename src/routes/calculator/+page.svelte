@@ -73,6 +73,7 @@
 		copy: () => {
 			if (!inputValue) return Toast.add('There is nothing to copy.');
 			clipboard = inputValue;
+			navigator.clipboard.writeText(inputValue);
 		},
 		paste: () => {
 			if (!clipboard) return Toast.add('Clipboard is empty.');
