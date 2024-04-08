@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { inches, sae, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
+	import {
+		inches,
+		converter,
+		sae,
+		type MeasurementPrecision
+	} from '$lib/utils/MeasurementConverter';
 	import { round } from '$lib/utils/round';
 	import Toast from '../../toast';
 
@@ -16,7 +21,7 @@
 	let clipboard = '';
 	let numerator, denominator;
 	const maxInputLength = 10;
-	const options = { caching: false };
+	const options = { precision: 16 };
 	let negative = false;
 	let history = '';
 	let lastChar,
@@ -37,9 +42,23 @@
 		inputHasExtraSpace =
 			inputHasTrailingSpace ||
 			(!denominator && inputContainsInches && inputEval.lastIndexOf(' ') > footIndex + 1);
-		priorExpression = (priorExpressions[0] || currentExpression).join(' ');
-		console.log(priorExpression);
+		priorExpression = (priorExpressions[priorExpressions.length - 1] || currentExpression).join(
+			' '
+		);
 	}
+
+	const operatorCrossref = {
+		'+': '+',
+		'-': '−',
+		'*': '×',
+		'/': '÷',
+		'−': '-',
+		'×': '*',
+		'÷': '/',
+		'^': '**',
+		'**': '²',
+		'√': '√'
+	};
 
 	const buttonAction = {
 		refresh: () => {
@@ -52,6 +71,7 @@
 			return true;
 		},
 		copy: () => {
+			if (!inputValue) return Toast.add('There is nothing to copy.');
 			clipboard = inputValue;
 		},
 		paste: () => {
@@ -60,40 +80,107 @@
 			return true;
 		},
 		back: () => {
-			inputValue = operativeValue || '';
+			let i = priorExpressions.length;
+			if (!i) return;
+			let recall = '';
+			while (i--) {
+				const expression = priorExpressions.pop();
+				if (!expression) continue;
+				const [x, o, y, , z] = expression;
+				console.log({ x, y, z });
+				if (z && z !== inputValue) {
+					recall = z;
+					currentExpression = expression;
+					break;
+				}
+				if (y && y !== inputValue) {
+					recall = y;
+					currentExpression = [x, o];
+					operator = o;
+					break;
+				}
+				if (x && x !== inputValue) {
+					recall = x;
+					currentExpression = [];
+					break;
+				}
+			}
+			priorExpressions = recall ? [...priorExpressions] : [];
+			inputValue = recall;
 			operator = '';
 			operativeValue = '';
 			return true;
 		},
 		space: () => {
-			if (!inputValue) return false;
+			if (!inputValue) return Toast.add('Specify a value before adding space.');
 			const evalLastChar = inputEval.slice(-1);
-			if (evalLastChar === ' ') return false;
+			if (evalLastChar === ' ') return Toast.add('Single spaces only.');
 
 			inputValue = inputEval + (inputContainsInches ? ' "' : ' ');
 			return true;
 		},
 		backspace: () => {
-			let newInputValue = inputEval.slice(0, -1);
-			if (newInputValue.slice(-1) === ' ') newInputValue = newInputValue.slice(0, -1);
-
-			inputValue = newInputValue;
-			currentExpression[2] = newInputValue;
+			inputValue = '';
+			repeatValue = '';
+			currentExpression =
+				currentExpression.length > 3
+					? [operativeValue, operator, inputValue, '=', inputValue]
+					: [operativeValue, operator, inputValue];
 			return true;
 		},
 		"'": () => {
 			if (!inputValue) return Toast.add('No need to specify a foot measurement of zero.');
-			if (footIndex > -1)
+			const trimmedInput = trimTrailingSpaces(inputValue);
+			const [feet, otherStuff] = trimmedInput.split("'");
+			if (otherStuff?.length)
 				return Toast.add(
-					`Foot measurement is already specified (${inputValue.slice(0, footIndex)}').`
+					feet
+						? `Foot measurement is already specified (${inputValue.slice(0, footIndex)}').`
+						: 'Only whole numbers can be converted between feet and inches.'
 				);
-			if (inputHasTrailingSpace) inputValue = inputEval.slice(0, -1);
-			inputValue = inputEval + "'";
-			currentExpression[2] = inputValue;
+
+			const length = feet?.length;
+			if (length)
+				inputValue = feet.slice(-1) === '"' ? feet.slice(0, length - 1) + "'" : feet + '"';
+			const converted = converter.parse(inputValue, options)?.readable || '';
+
+			let [x, o, y] = currentExpression;
+			currentExpression = y ? [x, o, converted] : [converted];
 			return true;
+		},
+		'**': () => {
+			switchOperator('**');
+			evaluate();
+		},
+		'√': () => {
+			switchOperator('√');
+			evaluate();
 		},
 		'=': evaluate
 	};
+
+	function overwriteSegment(overwrite: string, existing: string, index: number) {
+		let result = '';
+		try {
+			result =
+				existing.slice(0, index) +
+				overwrite +
+				existing.slice(index + overwrite.length, existing.length);
+		} catch (err) {
+			console.log(err);
+		}
+		return result;
+	}
+
+	function trimTrailingSpaces(str: string) {
+		if (!str) return '';
+		let i = str.length;
+		while (i--) {
+			const char = str[i];
+			if (char !== ' ') return str.slice(0, i + 1);
+		}
+		return str;
+	}
 
 	function handleButtonPress({ currentTarget: { id } }) {
 		const action = buttonAction[id];
@@ -111,9 +198,10 @@
 
 		if (inputValue.length < maxInputLength) {
 			if (lastChar === "'") inputValue += ' ' + id;
-			else if (lastChar === '"') inputValue = inputValue.slice(0, -1) + id + '"';
+			else if (lastChar === '"')
+				inputValue = inputValue.slice(0, -1) + id + (operator !== '**' ? '"' : '');
 			else inputValue += id;
-			currentExpression[2] = sae(inches(inputValue || 0), options);
+			currentExpression[2] = operator !== '**' ? sae(inches(inputValue || 0), options) : inputValue;
 		}
 	}
 
@@ -126,31 +214,39 @@
 		operator = id;
 		operativeValue = sae(inches(inputValue || '0'), options) || '0"';
 		repeatValue = inputValue;
-		currentExpression = [operativeValue, operator];
+		currentExpression = [operativeValue, operatorCrossref[operator]];
 	}
 
 	function evaluate(): Boolean {
-		console.log(currentExpression.join(' '));
 		let result = 0;
-		const i = inches(repeatValue || inputValue || '0', options);
+		const i = operator === '**' ? 2 : inches(repeatValue || inputValue || '0', options);
 		const o = inches(operativeValue || '0', options);
 		const expression = `(${o})${operator}(${i})`;
-		console.log(expression);
-		result = eval(expression);
-		if (isNaN(result)) {
+		result = operator === '√' ? Math.sqrt(o) : eval(expression);
+		if (isNaN(result) || (!i && operator === '/')) {
 			Toast.add({ message: 'Invalid operation.', replace: true });
-			currentExpression = [];
-			operator = '';
+			currentExpression = [sae(o || 0, options), operator];
+			holdover = true;
 			return false;
 		}
 		const formattedResult = sae(result, options);
 		const formattedInput = sae(i, options);
 		priorExpressions = [
-			[operativeValue, operator, formattedInput, '=', formattedResult],
-			...priorExpressions
+			...priorExpressions,
+			operator === '√'
+				? ['√', operativeValue, '', '=', formattedResult]
+				: operator === '**'
+					? [operativeValue, '²', , '=', formattedResult]
+					: [
+							operativeValue,
+							operatorCrossref[operator],
+							operator === '*' ? i : formattedInput,
+							'=',
+							formattedResult
+						]
 		];
-		operativeValue = '';
 		repeatValue = formattedInput;
+		operativeValue = formattedResult;
 		inputValue = formattedResult;
 		holdover = true;
 		currentExpression = [];
@@ -196,10 +292,10 @@
 				{/if}
 			</div>
 			<div class="display-info">
-				<span><img src="clipboard.svg" alt="clipboard" />{clipboard}</span>
-				<span class="input-history"
-					>{currentExpression.length ? currentExpression.join(' ') : priorExpression}</span
+				<span class={clipboard ? '' : 'transparent'}
+					><img src="clipboard.svg" alt="clipboard" />{clipboard}</span
 				>
+				<span class="input-history">{currentExpression.join(' ')}</span>
 			</div>
 		</div>
 		<div class="calculator-buttons">
@@ -223,19 +319,19 @@
 			{/if}
 			<button
 				on:click={handleButtonPress}
-				aria-label="exponent"
-				id="**"
-				title="exponent"
-				class="inverted"
-				style="font-size: 1.25rem;">^</button
-			>
-			<button
-				on:click={handleButtonPress}
 				aria-label="square root"
 				id="√"
 				title="square root"
 				class="inverted"
 				style="font-size: 1.25rem;">√</button
+			>
+			<button
+				on:click={handleButtonPress}
+				aria-label="exponent"
+				id="**"
+				title="exponent"
+				class="inverted"
+				style="font-size: 1.25rem;">^</button
 			>
 			<button
 				on:click={handleButtonPress}
@@ -274,11 +370,16 @@
 </div>
 
 <style>
+	.transparent {
+		opacity: 0 !important;
+	}
+
 	.backdrop {
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		height: 100%;
+		height: fit-content;
+		min-height: 100%;
 		width: 100%;
 		overflow-x: hidden;
 		overflow-y: scroll;
@@ -290,12 +391,18 @@
 		left: 2rem;
 		right: 2rem;
 		background: #fff;
-		max-height: fit-content;
 		display: table-cell;
 		text-align: right;
-		align-items: flex-end;
-		color: #000;
-		padding: 1rem;
+		color: #666;
+		padding: 0 1rem;
+		max-height: 500vh;
+		transition: max-height 0.5s ease-in;
+	}
+	.ticker-tape li {
+		margin-bottom: 0.5rem;
+	}
+	.ticker-tape li:first-child {
+		margin-top: 1rem;
 	}
 
 	.calculator-body {
@@ -322,9 +429,9 @@
 		justify-content: flex-start;
 
 		color: #000;
-		padding: 4px 8px;
+		padding: 0 8px;
 		border-radius: 8px;
-		height: 6rem;
+		height: 5rem;
 		/* margin: 8px; */
 		grid-column: 1/5;
 		width: 100%;
@@ -338,9 +445,10 @@
 	.display-input {
 		display: flex;
 		flex-direction: row-reverse;
-		gap: 1rem;
 		justify-content: space-between;
 		width: 100%;
+		/* background: #f006; */
+		height: 3.75rem;
 	}
 
 	.display-input img {
@@ -350,6 +458,8 @@
 	}
 
 	.display-info {
+		position: relative;
+		top: 8px;
 		display: flex;
 		text-align: left;
 		font-size: 1rem;
@@ -369,7 +479,7 @@
 
 	.calculator-input {
 		text-align: right;
-		font-size: 4rem;
+		font-size: 3rem;
 		line-height: 4rem;
 	}
 

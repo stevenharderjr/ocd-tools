@@ -5,7 +5,7 @@
 	import LayoutPrecision from './LayoutPrecision.svelte';
 	import type { ToggleOption } from '$lib/BinarySelect.svelte';
 	import type AlignmentOptions from '$lib/BinarySelect.svelte';
-	import { sae, measurement, type Measurement } from '$lib/utils/MeasurementConverter';
+	import { sae, converter, type Measurement } from '$lib/utils/MeasurementConverter';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -39,7 +39,7 @@
 
 	$: pointCount = points.length;
 	$: displayOptions = { precision };
-	$: measurements = points.map((point) => measurement(point, displayOptions)) as Measurement[];
+	$: measurements = points.map((point) => converter(point, displayOptions)) as Measurement[];
 </script>
 
 <div class="row">

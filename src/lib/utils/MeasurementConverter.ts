@@ -19,6 +19,7 @@ export interface MeasurementOptions {
 	commas?: boolean;
 	zeros?: boolean;
 	caching?: boolean;
+	compactFractions?: boolean;
 }
 
 export const precisionByDecimals = [1, 2, 4, 8, 16, 32, 64];
@@ -104,15 +105,16 @@ export class MeasurementConverter {
 		inputValue: number | string,
 		optionOverrides?: MeasurementOptions
 	): Measurement | void {
-		if (!inputValue || isNaN(+inputValue)) return undefined;
 		const {
 			options,
 			_optionsMatch,
 			_cachedMeasurements,
 			_cachedOverrides,
 			_cycleFractions,
-			stringify
+			stringify,
+			_empty
 		} = this;
+		if (!inputValue || isNaN(+inputValue)) return _empty;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
@@ -176,14 +178,16 @@ export class MeasurementConverter {
 			readable: ''
 		};
 
-		let inputEval = inputValue;
+		let inputEval = inputValue + '';
+
 		const negative = inputEval[0] === '-';
-		console.log({ negative });
+		// the negative symbol interferes with parsing, so remove it for now and add it back in when necessary
 		if (negative) inputValue = inputValue.slice(1, inputValue.length);
+		// remove any trailing inch symbol, since that can also interfere with parsing
 		if (inputEval.slice(-1) === '"') inputEval = inputEval.slice(0, -1);
 
 		let i = inputEval.length;
-		if (i < 1) throw new Error('Cannot parse empty string');
+		if (i < 1) return result;
 
 		let digits = '';
 		let segment: 'feet' | 'inches' | 'fraction' = 'inches';
@@ -218,6 +222,7 @@ export class MeasurementConverter {
 					case ',':
 						continue;
 					default:
+						console.log({ char });
 						throw new Error('invalid input (valid characters are \', ", /, 0-9');
 				}
 
@@ -314,18 +319,19 @@ export class MeasurementConverter {
 			reset = { ...this._options };
 			options(optionOverrides);
 		}
-		const { feet: measureFeet, zeros, commas } = this._options;
+		const { feet: measureFeet, zeros, commas, compactFractions } = this._options;
 
 		// eslint-disable-next-line prefer-const
 		let { feet, inches, fraction } = measurement;
 		let negative = feet < 0 || inches < 0;
 		feet = Math.abs(feet);
 		inches = Math.abs(inches);
-		// let fraction = '';
-		// if (uglyFraction) {
-		// 	const [numerator, denominator] = uglyFraction.split('/');
-		// 	fraction = _superscript(numerator) + '⁄' + _subscript(denominator);
-		// }
+
+		if (fraction && compactFractions) {
+			const [numerator, denominator] = fraction.split('/');
+			fraction = _superscript(numerator) + '⁄' + _subscript(denominator);
+		}
+
 		if (feet && !measureFeet) {
 			inches += feet * 12;
 			feet = 0;
@@ -400,16 +406,18 @@ export class MeasurementConverter {
 			feet: newFeetOption,
 			commas: newCommasOption,
 			zeros: newZerosOption,
-			caching: newCachingOption
+			caching: newCachingOption,
+			compactFractions: newCompactFractions
 		} = optionOverrides;
-		const { decimals, precision, feet, commas, zeros, caching } = this._options;
+		const { decimals, precision, feet, commas, zeros, caching, compactFractions } = this._options;
 		return (
 			(decimals === newDecimalsOption || newDecimalsOption === undefined) &&
 			(precision === newPrecisionOption || newPrecisionOption === undefined) &&
 			(feet === newFeetOption || newFeetOption === undefined) &&
 			(commas === newCommasOption || newCommasOption === undefined) &&
 			(zeros === newZerosOption || newZerosOption === undefined) &&
-			(caching === newCachingOption || newCachingOption === undefined)
+			(caching === newCachingOption || newCachingOption === undefined) &&
+			(compactFractions === newCompactFractions || newCompactFractions === undefined)
 		);
 	}
 
@@ -444,33 +452,33 @@ export class MeasurementConverter {
 	}
 }
 
-export const convert = new MeasurementConverter();
+export const converter = new MeasurementConverter();
 
-export function measurement(decimalInches: number, optionOverrides?: MeasurementOptions) {
-	return convert.fromDecimalInches(decimalInches, optionOverrides);
+export function measure(decimalInches: number, optionOverrides?: MeasurementOptions) {
+	return converter.fromDecimalInches(decimalInches, optionOverrides);
 }
 
 export function formatter(optionOverrides?: MeasurementOptions): (decimalInches: number) => string {
 	return (decimalInches: number) =>
-		convert.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
+		converter.fromDecimalInches(decimalInches, optionOverrides)?.readable || '';
 }
 
 export function sae(decimalInches: number, displayOptions?: MeasurementOptions) {
-	return convert.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
+	return converter.fromDecimalInches(decimalInches, displayOptions)?.readable || '';
 }
 
 export function wordify(decimalInches: number, options?: MeasurementOptions) {
-	const result = convert.verbalize(convert.fromDecimalInches(decimalInches, options)!);
+	const result = converter.verbalize(converter.fromDecimalInches(decimalInches, options)!);
 	return result;
 }
 
-export function inches(saeMeasurement: string, displayOptions?: MeasurementOptions) {
-	return convert.parse(saeMeasurement, displayOptions)?.numeric;
+export function inches(saeNotation: string, displayOptions?: MeasurementOptions) {
+	return converter.parse(saeNotation, displayOptions)?.numeric;
 }
 
 export function measurer(
 	optionOverrides?: MeasurementOptions
 ): (decimalInches: number) => Measurement {
 	return (decimalInches: number) =>
-		convert.fromDecimalInches(decimalInches, optionOverrides) || ({} as Measurement);
+		converter.fromDecimalInches(decimalInches, optionOverrides) || ({} as Measurement);
 }

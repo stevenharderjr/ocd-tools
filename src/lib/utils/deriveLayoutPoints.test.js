@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { points } from './deriveLayoutPoints';
-import { convert, decimalsByPrecision } from './MeasurementConverter';
+import { converter, decimalsByPrecision } from './MeasurementConverter';
 
 // const layout = {
 // 	span: 78.5,
@@ -9,7 +9,7 @@ import { convert, decimalsByPrecision } from './MeasurementConverter';
 // 	alignment: 'simple'
 // };
 
-convert.options({ precision: 8, feet: false, caching: false });
+converter.options({ precision: 8, feet: false, caching: false });
 const layout = randomLayout();
 
 function randomLayout() {
@@ -38,7 +38,7 @@ function overloadLayout(layout) {
 test('returns an array of measurements', () => {
 	const measurements = points(layout);
 	expect(Array.isArray(measurements)).toEqual(true);
-	measurements.forEach((point) => expect(convert.fromDecimalInches(point)).not.toBe(undefined));
+	measurements.forEach((point) => expect(converter.fromDecimalInches(point)).not.toBe(undefined));
 });
 
 // test('returns correct number of points', () => {
