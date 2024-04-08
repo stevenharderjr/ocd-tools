@@ -81,35 +81,43 @@
 			return true;
 		},
 		back: () => {
-			let i = priorExpressions.length;
-			if (!i) return;
-			let recall = '';
-			while (i--) {
-				const expression = priorExpressions.pop();
-				if (!expression) continue;
-				const [x, o, y, , z] = expression;
-				console.log({ x, y, z });
-				if (z && z !== inputValue) {
-					recall = z;
-					currentExpression = expression;
-					break;
-				}
-				if (y && y !== inputValue) {
-					recall = y;
-					currentExpression = [x, o];
-					operator = o;
-					break;
-				}
-				if (x && x !== inputValue) {
-					recall = x;
-					currentExpression = [];
-					break;
-				}
-			}
-			priorExpressions = recall ? [...priorExpressions] : [];
-			inputValue = recall;
-			operator = '';
-			operativeValue = '';
+			if (!priorExpressions.length) return;
+			priorExpressions.pop();
+			priorExpressions = [...priorExpressions];
+			currentExpression = [];
+			const priorExpression = priorExpressions[priorExpressions.length - 1];
+			inputValue = priorExpression[4];
+			operativeValue = inputValue;
+			holdover = true;
+			// let i = priorExpressions.length;
+			// if (!i) return;
+			// let recall = '';
+			// while (i--) {
+			// 	const expression = priorExpressions.pop();
+			// 	if (!expression) continue;
+			// 	const [x, o, y, , z] = expression;
+			// 	console.log({ x, y, z });
+			// 	if (z && z !== inputValue) {
+			// 		recall = z;
+			// 		currentExpression = expression;
+			// 		break;
+			// 	}
+			// 	if (y && y !== inputValue) {
+			// 		recall = y;
+			// 		currentExpression = [x, o];
+			// 		operator = o;
+			// 		break;
+			// 	}
+			// 	if (x && x !== inputValue) {
+			// 		recall = x;
+			// 		currentExpression = [];
+			// 		break;
+			// 	}
+			// }
+			// priorExpressions = recall ? [...priorExpressions] : [];
+			// inputValue = recall;
+			// operator = '';
+			// operativeValue = '';
 			return true;
 		},
 		space: () => {
@@ -400,6 +408,8 @@
 		transition: max-height 0.5s ease-in;
 	}
 	.ticker-tape li {
+		user-select: text;
+		pointer-events: auto;
 		margin-bottom: 0.5rem;
 	}
 	.ticker-tape li:first-child {

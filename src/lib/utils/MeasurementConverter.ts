@@ -155,7 +155,8 @@ export class MeasurementConverter {
 	}
 
 	parse(inputValue: string, optionOverrides?: MeasurementOptions): Measurement | void {
-		const { options, stringify, _optionsMatch, _cachedMeasurements, _cachedOverrides } = this;
+		const { options, stringify, _optionsMatch, _cachedMeasurements, _cachedOverrides, _empty } =
+			this;
 
 		if (this._options.caching) {
 			const cachedResult = _cachedMeasurements.get(inputValue);
@@ -168,15 +169,7 @@ export class MeasurementConverter {
 			options(optionOverrides);
 		}
 		const { decimals, feet: measureFeet, precision } = this._options;
-
-		const result = {
-			numeric: 0,
-			fixed: '',
-			feet: 0,
-			inches: 0,
-			fraction: '',
-			readable: ''
-		};
+		const result = { ..._empty };
 
 		let inputEval = inputValue + '';
 
