@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BinarySelect from '$lib/BinarySelect.svelte';
 	import {
 		inches,
 		converter,
@@ -20,7 +21,7 @@
 	let operator = '';
 	let clipboard = '';
 	let numerator, denominator;
-	const maxInputLength = 10;
+	const maxInputLength = 16;
 	const options = { precision: 16 };
 	let negative = false;
 	let history = '';
@@ -32,7 +33,12 @@
 		inputEval,
 		priorOperation;
 
+	$: formattedInput = format(inputValue);
+	$: inputLength = formattedInput.length;
+	$: displayTextSize =
+		inputLength < 9 ? 4 : (maxInputLength - inputLength) / (maxInputLength - 9) + 2;
 	$: {
+		console.log(displayTextSize);
 		lastChar = inputValue.slice(-1);
 		inputContainsInches = lastChar === '"';
 		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
@@ -295,7 +301,9 @@
 						<img src="arrow-left-circle.svg" />
 					</button>
 				{/if} -->
-				<span class="calculator-input">{format(inputValue)}</span>
+				<span class="calculator-input" style={`font-size:${displayTextSize}rem;`}
+					>{formattedInput}</span
+				>
 				{#if negative}
 					<span class="calculator-input">-</span>
 				{/if}
@@ -442,7 +450,7 @@
 		color: #000;
 		padding: 0 8px;
 		border-radius: 8px;
-		height: 5rem;
+		height: 6rem;
 		/* margin: 8px; */
 		grid-column: 1/5;
 		width: 100%;
@@ -459,7 +467,7 @@
 		justify-content: space-between;
 		width: 100%;
 		/* background: #f006; */
-		height: 3.75rem;
+		height: 4rem;
 	}
 
 	.display-input img {
@@ -470,7 +478,6 @@
 
 	.display-info {
 		position: relative;
-		top: 8px;
 		display: flex;
 		text-align: left;
 		font-size: 1rem;
@@ -490,7 +497,7 @@
 
 	.calculator-input {
 		text-align: right;
-		font-size: 3rem;
+		font-size: 4rem;
 		line-height: 4rem;
 	}
 
