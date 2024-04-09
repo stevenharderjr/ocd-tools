@@ -10,6 +10,8 @@
 	import Toast from '../../toast';
 
 	export let inputValue = '';
+	export let numerator: number | undefined;
+	export let denominator: number | undefined;
 	export let precision: MeasurementPrecision = 16;
 	let holdover = false;
 	let priorInput = '';
@@ -20,7 +22,6 @@
 	let operativeValue: string = '';
 	let operator = '';
 	let clipboard = '';
-	let numerator, denominator;
 	const maxInputLength = 16;
 	const options = { precision: 16 };
 	let negative = false;
@@ -29,6 +30,7 @@
 		inputContainsInches,
 		inputHasTrailingSpace,
 		footIndex,
+		slashIndex,
 		inputHasExtraSpace,
 		inputEval,
 		priorOperation;
@@ -43,6 +45,7 @@
 		inputContainsInches = lastChar === '"';
 		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
 		inputHasTrailingSpace = inputEval.slice(-1) === ' ';
+		slashIndex = inputValue.indexOf('/');
 		footIndex = inputValue.indexOf("'");
 		// $: lastSpaceIndex = inputEval.lastIndexOf(' ');
 		inputHasExtraSpace =
@@ -171,6 +174,16 @@
 			switchOperator('√');
 			evaluate();
 		},
+		'⁄': () => {
+			const lastChar = inputValue.slice(-1);
+			const lastCharEval = inputEval.slice(-1);
+			console.log({ lastChar, lastCharEval });
+			if ((!lastChar && !lastCharEval) || lastCharEval === '0' || lastChar === "'")
+				return Toast.add('Fraction requires a numerator.');
+			if (slashIndex !== -1) return Toast.add('Fraction is already specified.');
+			inputEval += '/';
+			inputValue = format(inputEval);
+		},
 		'=': evaluate
 	};
 
@@ -272,7 +285,7 @@
 	function format(string: String) {
 		if (!string) return '0"';
 		const lastChar = string.slice(-1);
-		if (lastChar === "'" || lastChar === '"') return string;
+		if (lastChar === "'" || lastChar === '"' || lastChar === '/') return string;
 		inputValue = inputValue ? string + '"' : '';
 		return string + '"';
 	}

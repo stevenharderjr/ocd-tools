@@ -338,8 +338,8 @@ export class MeasurementConverter {
 
 		let f = measureFeet && (feet || zeros) ? feet + "'" : '';
 		let i = inches ? inches + '' : '';
-		if (fraction) i += i ? ' ' + fraction : fraction;
 		if (zeros && !i) i = '0';
+		if (fraction) i += i ? ' ' + fraction : fraction;
 		if (i) i += '"';
 		if (i && f) f += ' ';
 
