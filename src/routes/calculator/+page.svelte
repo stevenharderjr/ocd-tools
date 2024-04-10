@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BinarySelect from '$lib/BinarySelect.svelte';
 	import {
 		inches,
 		converter,
@@ -9,6 +10,8 @@
 	import Toast from '../../toast';
 
 	export let inputValue = '';
+	export let numerator: number | undefined;
+	export let denominator: number | undefined;
 	export let precision: MeasurementPrecision = 16;
 	let holdover = false;
 	let priorInput = '';
@@ -19,8 +22,7 @@
 	let operativeValue: string = '';
 	let operator = '';
 	let clipboard = '';
-	let numerator, denominator;
-	const maxInputLength = 10;
+	const maxInputLength = 16;
 	const options = { precision: 16 };
 	let negative = false;
 	let history = '';
@@ -28,15 +30,24 @@
 		inputContainsInches,
 		inputHasTrailingSpace,
 		footIndex,
+		slashIndex,
 		inputHasExtraSpace,
 		inputEval,
-		priorOperation;
+		priorOperation,
+		inputIsMeasurement;
 
+	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
+	$: formattedInput = inputIsMeasurement ? format(inputValue) : inputValue;
+	$: inputLength = formattedInput.length;
+	$: displayTextSize =
+		inputLength < 9 ? 4 : (maxInputLength - inputLength) / (maxInputLength - 9) + 2;
 	$: {
+		console.log(displayTextSize);
 		lastChar = inputValue.slice(-1);
 		inputContainsInches = lastChar === '"';
 		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
 		inputHasTrailingSpace = inputEval.slice(-1) === ' ';
+		slashIndex = inputValue.indexOf('/');
 		footIndex = inputValue.indexOf("'");
 		// $: lastSpaceIndex = inputEval.lastIndexOf(' ');
 		inputHasExtraSpace =
@@ -73,6 +84,7 @@
 		copy: () => {
 			if (!inputValue) return Toast.add('There is nothing to copy.');
 			clipboard = inputValue;
+			navigator.clipboard.writeText(inputValue);
 		},
 		paste: () => {
 			if (!clipboard) return Toast.add('Clipboard is empty.');
@@ -80,35 +92,43 @@
 			return true;
 		},
 		back: () => {
-			let i = priorExpressions.length;
-			if (!i) return;
-			let recall = '';
-			while (i--) {
-				const expression = priorExpressions.pop();
-				if (!expression) continue;
-				const [x, o, y, , z] = expression;
-				console.log({ x, y, z });
-				if (z && z !== inputValue) {
-					recall = z;
-					currentExpression = expression;
-					break;
-				}
-				if (y && y !== inputValue) {
-					recall = y;
-					currentExpression = [x, o];
-					operator = o;
-					break;
-				}
-				if (x && x !== inputValue) {
-					recall = x;
-					currentExpression = [];
-					break;
-				}
-			}
-			priorExpressions = recall ? [...priorExpressions] : [];
-			inputValue = recall;
-			operator = '';
-			operativeValue = '';
+			if (!priorExpressions.length) return;
+			priorExpressions.pop();
+			priorExpressions = [...priorExpressions];
+			currentExpression = [];
+			const priorExpression = priorExpressions[priorExpressions.length - 1];
+			inputValue = priorExpression[4];
+			operativeValue = inputValue;
+			holdover = true;
+			// let i = priorExpressions.length;
+			// if (!i) return;
+			// let recall = '';
+			// while (i--) {
+			// 	const expression = priorExpressions.pop();
+			// 	if (!expression) continue;
+			// 	const [x, o, y, , z] = expression;
+			// 	console.log({ x, y, z });
+			// 	if (z && z !== inputValue) {
+			// 		recall = z;
+			// 		currentExpression = expression;
+			// 		break;
+			// 	}
+			// 	if (y && y !== inputValue) {
+			// 		recall = y;
+			// 		currentExpression = [x, o];
+			// 		operator = o;
+			// 		break;
+			// 	}
+			// 	if (x && x !== inputValue) {
+			// 		recall = x;
+			// 		currentExpression = [];
+			// 		break;
+			// 	}
+			// }
+			// priorExpressions = recall ? [...priorExpressions] : [];
+			// inputValue = recall;
+			// operator = '';
+			// operativeValue = '';
 			return true;
 		},
 		space: () => {
@@ -124,11 +144,12 @@
 			repeatValue = '';
 			currentExpression =
 				currentExpression.length > 3
-					? [operativeValue, operator, inputValue, '=', inputValue]
-					: [operativeValue, operator, inputValue];
+					? [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval, '=', inputValue]
+					: [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval];
 			return true;
 		},
 		"'": () => {
+			if (!inputIsMeasurement) return Toast.add('Just use an integer.');
 			if (!inputValue) return Toast.add('No need to specify a foot measurement of zero.');
 			const trimmedInput = trimTrailingSpaces(inputValue);
 			const [feet, otherStuff] = trimmedInput.split("'");
@@ -155,6 +176,16 @@
 		'√': () => {
 			switchOperator('√');
 			evaluate();
+		},
+		'⁄': () => {
+			const lastChar = inputValue.slice(-1);
+			const lastCharEval = inputEval.slice(-1);
+			console.log({ lastChar, lastCharEval });
+			if ((!lastChar && !lastCharEval) || lastCharEval === '0' || lastChar === "'")
+				return Toast.add('Fraction requires a numerator.');
+			if (slashIndex !== -1) return Toast.add('Fraction is already specified.');
+			inputEval += '/';
+			inputValue = format(inputEval);
 		},
 		'=': evaluate
 	};
@@ -257,7 +288,7 @@
 	function format(string: String) {
 		if (!string) return '0"';
 		const lastChar = string.slice(-1);
-		if (lastChar === "'" || lastChar === '"') return string;
+		if (lastChar === "'" || lastChar === '"' || lastChar === '/') return string;
 		inputValue = inputValue ? string + '"' : '';
 		return string + '"';
 	}
@@ -286,7 +317,9 @@
 						<img src="arrow-left-circle.svg" />
 					</button>
 				{/if} -->
-				<span class="calculator-input">{format(inputValue)}</span>
+				<span class="calculator-input" style={`font-size:${displayTextSize}rem;`}
+					>{formattedInput}</span
+				>
 				{#if negative}
 					<span class="calculator-input">-</span>
 				{/if}
@@ -399,6 +432,8 @@
 		transition: max-height 0.5s ease-in;
 	}
 	.ticker-tape li {
+		user-select: text;
+		pointer-events: auto;
 		margin-bottom: 0.5rem;
 	}
 	.ticker-tape li:first-child {
@@ -431,7 +466,7 @@
 		color: #000;
 		padding: 0 8px;
 		border-radius: 8px;
-		height: 5rem;
+		height: 6rem;
 		/* margin: 8px; */
 		grid-column: 1/5;
 		width: 100%;
@@ -448,7 +483,7 @@
 		justify-content: space-between;
 		width: 100%;
 		/* background: #f006; */
-		height: 3.75rem;
+		height: 4rem;
 	}
 
 	.display-input img {
@@ -459,7 +494,6 @@
 
 	.display-info {
 		position: relative;
-		top: 8px;
 		display: flex;
 		text-align: left;
 		font-size: 1rem;
@@ -479,7 +513,7 @@
 
 	.calculator-input {
 		text-align: right;
-		font-size: 3rem;
+		font-size: 4rem;
 		line-height: 4rem;
 	}
 

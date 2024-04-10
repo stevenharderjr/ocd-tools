@@ -134,8 +134,8 @@ test('should convert foot measurement into decimal inches', () => {
 	expect(converter.parse("1'", options).feet).toEqual(1);
 });
 
-test('should return undefined when called without arguments', () => {
-	expect(converter.fromDecimalInches()).toEqual(undefined);
+test('should return empty measurement when called without arguments', () => {
+	expect(converter.fromDecimalInches().numeric).toEqual(0);
 });
 
 test('numeric value respects decimals option', () => {
