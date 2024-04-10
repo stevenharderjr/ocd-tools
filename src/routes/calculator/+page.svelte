@@ -33,9 +33,11 @@
 		slashIndex,
 		inputHasExtraSpace,
 		inputEval,
-		priorOperation;
+		priorOperation,
+		inputIsMeasurement;
 
-	$: formattedInput = format(inputValue);
+	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
+	$: formattedInput = inputIsMeasurement ? format(inputValue) : inputValue;
 	$: inputLength = formattedInput.length;
 	$: displayTextSize =
 		inputLength < 9 ? 4 : (maxInputLength - inputLength) / (maxInputLength - 9) + 2;
@@ -142,11 +144,12 @@
 			repeatValue = '';
 			currentExpression =
 				currentExpression.length > 3
-					? [operativeValue, operator, inputValue, '=', inputValue]
-					: [operativeValue, operator, inputValue];
+					? [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval, '=', inputValue]
+					: [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval];
 			return true;
 		},
 		"'": () => {
+			if (!inputIsMeasurement) return Toast.add('Just use an integer.');
 			if (!inputValue) return Toast.add('No need to specify a foot measurement of zero.');
 			const trimmedInput = trimTrailingSpaces(inputValue);
 			const [feet, otherStuff] = trimmedInput.split("'");
