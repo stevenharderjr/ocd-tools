@@ -375,19 +375,40 @@
 				title="foot symbol"
 				class="inverted">'</button
 			>
-			<button on:click={handleButtonPress} aria-label="divide" id="/" class="inverted">÷</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="divide"
+				id="/"
+				class={operator === '/' ? 'highlighted' : 'inverted'}>÷</button
+			>
 			<button on:click={handleButtonPress} aria-label="7" id="7">7</button>
 			<button on:click={handleButtonPress} aria-label="8" id="8">8</button>
 			<button on:click={handleButtonPress} aria-label="9" id="9">9</button>
-			<button on:click={handleButtonPress} aria-label="multiply" id="*" class="inverted">×</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="multiply"
+				id="*"
+				class={operator === '*' ? 'highlighted' : 'inverted'}>×</button
+			>
 			<button on:click={handleButtonPress} aria-label="4" id="4">4</button>
 			<button on:click={handleButtonPress} aria-label="5" id="5">5</button>
 			<button on:click={handleButtonPress} aria-label="6" id="6">6</button>
-			<button on:click={handleButtonPress} aria-label="subtract" id="-" class="inverted">−</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="subtract"
+				id="-"
+				class={operator === '-' ? 'highlighted' : 'inverted'}>−</button
+			>
 			<button on:click={handleButtonPress} aria-label="1" id="1">1</button>
 			<button on:click={handleButtonPress} aria-label="2" id="2">2</button>
 			<button on:click={handleButtonPress} aria-label="3" id="3">3</button>
-			<button on:click={handleButtonPress} aria-label="add" id="+" class="inverted">+</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="add"
+				id="+"
+				class={operator === '+' ? 'highlighted' : 'inverted'}>+</button
+			>
+			<button on:click={handleButtonPress} aria-label="0" id="0">0</button>
 			<button
 				on:click={handleButtonPress}
 				aria-label="⁄"
@@ -395,7 +416,6 @@
 				title="value to numerator (create fraction)"
 				class="inverted">⁄</button
 			>
-			<button on:click={handleButtonPress} aria-label="0" id="0">0</button>
 			<button on:click={handleButtonPress} aria-label="space" id="space" class="inverted"
 				><img src="space.svg" alt="space bar" /></button
 			>
@@ -544,6 +564,11 @@
 
 	.inverted {
 		background: #999;
+		filter: invert(1);
+	}
+
+	.highlighted {
+		background: #666;
 		filter: invert(1);
 	}
 
