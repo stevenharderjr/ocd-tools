@@ -238,6 +238,7 @@
 	}
 
 	function switchOperator(id: string) {
+		if (operativeValue && !holdover) evaluate();
 		repeatValue = operator === id ? '' : inputValue;
 		// console.log({ inputValue, inputEval, id });
 		if (!inputEval && id === '-') negative = !negative;
@@ -495,6 +496,7 @@
 
 	.display-info {
 		position: relative;
+		top: -3px;
 		display: flex;
 		text-align: left;
 		font-size: 1rem;
