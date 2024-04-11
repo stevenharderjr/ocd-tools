@@ -7,6 +7,7 @@
 		type MeasurementPrecision
 	} from '$lib/utils/MeasurementConverter';
 	import { round } from '$lib/utils/round';
+	import { visualWidth } from '$lib/utils/visualWidth';
 	import Toast from '../../toast';
 
 	export let inputValue = '';
@@ -38,11 +39,11 @@
 
 	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
 	$: formattedInput = inputIsMeasurement ? format(inputValue) : inputValue;
-	$: inputLength = formattedInput.length;
+	$: visualInputWidth = visualWidth(formattedInput);
 	$: displayTextSize =
-		inputLength < 9 ? 4 : (maxInputLength - inputLength) / (maxInputLength - 9) + 2;
+		visualInputWidth < 9 ? 4 : (maxInputLength - visualInputWidth) / (maxInputLength - 10) + 2;
 	$: {
-		console.log(displayTextSize);
+		console.log({ visualInputWidth, displayTextSize });
 		lastChar = inputValue.slice(-1);
 		inputContainsInches = lastChar === '"';
 		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
