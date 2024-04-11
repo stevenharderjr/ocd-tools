@@ -32,6 +32,7 @@
 		inputHasTrailingSpace,
 		footIndex,
 		slashIndex,
+		partialFraction,
 		inputHasExtraSpace,
 		inputEval,
 		priorOperation,
@@ -134,6 +135,7 @@
 		},
 		space: () => {
 			if (!inputValue) return Toast.add('Specify a value before adding space.');
+			if (slashIndex > -1) return Toast.add('Cannot add space after a fraction.');
 			const evalLastChar = inputEval.slice(-1);
 			if (evalLastChar === ' ') return Toast.add('Single spaces only.');
 
@@ -233,7 +235,13 @@
 			else if (lastChar === '"')
 				inputValue = inputValue.slice(0, -1) + id + (operator !== '**' ? '"' : '');
 			else inputValue += id;
-			currentExpression[2] = operator !== '**' ? sae(inches(inputValue || 0), options) : inputValue;
+			const i = inches(inputValue || '0');
+			currentExpression[2] =
+				operator !== '**'
+					? operator === '*' || operator === '/'
+						? i
+						: sae(i, options)
+					: inputValue;
 		}
 	}
 
@@ -414,7 +422,7 @@
 				aria-label="⁄"
 				id="⁄"
 				title="value to numerator (create fraction)"
-				class="inverted">⁄</button
+				class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</button
 			>
 			<button on:click={handleButtonPress} aria-label="space" id="space" class="inverted"
 				><img src="space.svg" alt="space bar" /></button
