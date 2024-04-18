@@ -1,5 +1,7 @@
 <script lang="ts">
-	import BinarySelect from '$lib/BinarySelect.svelte';
+	import PrecisionModal from './CalculatorPrecision.svelte';
+	import CalculatorButtonGroup from '$lib/CalculatorButtonGroup.svelte';
+	import { buttons } from './buttons';
 	import {
 		inches,
 		converter,
@@ -7,12 +9,15 @@
 		type MeasurementPrecision
 	} from '$lib/utils/MeasurementConverter';
 	import { round } from '$lib/utils/round';
+	import { visualWidth } from '$lib/utils/visualWidth';
 	import Toast from '../../toast';
 
 	export let inputValue = '';
 	export let numerator: number | undefined;
 	export let denominator: number | undefined;
 	export let precision: MeasurementPrecision = 16;
+	let showPrecisionModal = false;
+	let modalCoordinates = [0, 0];
 	let holdover = false;
 	let priorInput = '';
 	let currentExpression: string[] = [];
@@ -22,8 +27,8 @@
 	let operativeValue: string = '';
 	let operator = '';
 	let clipboard = '';
-	const maxInputLength = 16;
-	const options = { precision: 16 };
+	const maxInputLength = 15;
+	const inputSizeThreshold = 9;
 	let negative = false;
 	let history = '';
 	let lastChar,
@@ -31,18 +36,23 @@
 		inputHasTrailingSpace,
 		footIndex,
 		slashIndex,
+		partialFraction,
 		inputHasExtraSpace,
 		inputEval,
 		priorOperation,
 		inputIsMeasurement;
 
+	$: options = { precision };
 	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
 	$: formattedInput = inputIsMeasurement ? format(inputValue) : inputValue;
-	$: inputLength = formattedInput.length;
+	$: visualInputWidth = visualWidth(formattedInput);
 	$: displayTextSize =
-		inputLength < 9 ? 4 : (maxInputLength - inputLength) / (maxInputLength - 9) + 2;
+		visualInputWidth < inputSizeThreshold
+			? 4
+			: (maxInputLength - visualInputWidth) / (maxInputLength - inputSizeThreshold) + 2;
 	$: {
-		console.log(displayTextSize);
+		console.log({ precision });
+		console.log({ visualInputWidth, displayTextSize });
 		lastChar = inputValue.slice(-1);
 		inputContainsInches = lastChar === '"';
 		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
@@ -91,48 +101,52 @@
 			inputValue = clipboard;
 			return true;
 		},
-		back: () => {
-			if (!priorExpressions.length) return;
-			priorExpressions.pop();
-			priorExpressions = [...priorExpressions];
-			currentExpression = [];
-			const priorExpression = priorExpressions[priorExpressions.length - 1];
-			inputValue = priorExpression[4];
-			operativeValue = inputValue;
-			holdover = true;
-			// let i = priorExpressions.length;
-			// if (!i) return;
-			// let recall = '';
-			// while (i--) {
-			// 	const expression = priorExpressions.pop();
-			// 	if (!expression) continue;
-			// 	const [x, o, y, , z] = expression;
-			// 	console.log({ x, y, z });
-			// 	if (z && z !== inputValue) {
-			// 		recall = z;
-			// 		currentExpression = expression;
-			// 		break;
-			// 	}
-			// 	if (y && y !== inputValue) {
-			// 		recall = y;
-			// 		currentExpression = [x, o];
-			// 		operator = o;
-			// 		break;
-			// 	}
-			// 	if (x && x !== inputValue) {
-			// 		recall = x;
-			// 		currentExpression = [];
-			// 		break;
-			// 	}
-			// }
-			// priorExpressions = recall ? [...priorExpressions] : [];
-			// inputValue = recall;
-			// operator = '';
-			// operativeValue = '';
-			return true;
+		settings: (event) => {
+			togglePrecisionModal(event);
 		},
+		// back: () => {
+		// 	if (!priorExpressions.length) return;
+		// 	priorExpressions.pop();
+		// 	priorExpressions = [...priorExpressions];
+		// 	currentExpression = [];
+		// 	const priorExpression = priorExpressions[priorExpressions.length - 1];
+		// 	inputValue = priorExpression[4];
+		// 	operativeValue = inputValue;
+		// 	holdover = true;
+		// 	// let i = priorExpressions.length;
+		// 	// if (!i) return;
+		// 	// let recall = '';
+		// 	// while (i--) {
+		// 	// 	const expression = priorExpressions.pop();
+		// 	// 	if (!expression) continue;
+		// 	// 	const [x, o, y, , z] = expression;
+		// 	// 	console.log({ x, y, z });
+		// 	// 	if (z && z !== inputValue) {
+		// 	// 		recall = z;
+		// 	// 		currentExpression = expression;
+		// 	// 		break;
+		// 	// 	}
+		// 	// 	if (y && y !== inputValue) {
+		// 	// 		recall = y;
+		// 	// 		currentExpression = [x, o];
+		// 	// 		operator = o;
+		// 	// 		break;
+		// 	// 	}
+		// 	// 	if (x && x !== inputValue) {
+		// 	// 		recall = x;
+		// 	// 		currentExpression = [];
+		// 	// 		break;
+		// 	// 	}
+		// 	// }
+		// 	// priorExpressions = recall ? [...priorExpressions] : [];
+		// 	// inputValue = recall;
+		// 	// operator = '';
+		// 	// operativeValue = '';
+		// 	return true;
+		// },
 		space: () => {
 			if (!inputValue) return Toast.add('Specify a value before adding space.');
+			if (slashIndex > -1) return Toast.add('Cannot add space after a fraction.');
 			const evalLastChar = inputEval.slice(-1);
 			if (evalLastChar === ' ') return Toast.add('Single spaces only.');
 
@@ -213,9 +227,10 @@
 		return str;
 	}
 
-	function handleButtonPress({ currentTarget: { id } }) {
+	function handleButtonPress(event) {
+		const id = event.currentTarget.id;
 		const action = buttonAction[id];
-		if (action) return action();
+		if (action) return action(event);
 
 		if (isNaN(id)) return switchOperator(id);
 
@@ -232,11 +247,18 @@
 			else if (lastChar === '"')
 				inputValue = inputValue.slice(0, -1) + id + (operator !== '**' ? '"' : '');
 			else inputValue += id;
-			currentExpression[2] = operator !== '**' ? sae(inches(inputValue || 0), options) : inputValue;
+			const i = inches(inputValue || '0');
+			currentExpression[2] =
+				operator !== '**'
+					? operator === '*' || operator === '/'
+						? i
+						: sae(i, options)
+					: inputValue;
 		}
 	}
 
 	function switchOperator(id: string) {
+		if (operativeValue && !holdover) evaluate();
 		repeatValue = operator === id ? '' : inputValue;
 		// console.log({ inputValue, inputEval, id });
 		if (!inputEval && id === '-') negative = !negative;
@@ -266,12 +288,12 @@
 			...priorExpressions,
 			operator === '√'
 				? ['√', operativeValue, '', '=', formattedResult]
-				: operator === '**'
+				: operator === '**' || (operator === '*' && i === o)
 					? [operativeValue, '²', , '=', formattedResult]
 					: [
 							operativeValue,
 							operatorCrossref[operator],
-							operator === '*' ? i : formattedInput,
+							operator === '*' || operator === '/' ? i : formattedInput,
 							'=',
 							formattedResult
 						]
@@ -293,6 +315,21 @@
 		return string + '"';
 	}
 
+	function togglePrecisionModal({ clientX, clientY }) {
+		console.log(
+			`should ${showPrecisionModal ? 'hide' : 'show'} precision modal at [${clientX}, ${clientY}].`
+		);
+		modalCoordinates = [clientX, clientY];
+		showPrecisionModal = !showPrecisionModal;
+	}
+
+	function handlePrecisionUpdate({ detail: { value } }) {
+		console.log(`precision should change to ${value > 1 ? '1/' + value : value}`);
+		// precision = detail;
+		precision = value;
+		showPrecisionModal = false;
+	}
+
 	function handleCopy() {
 		console.log(currentExpression.join(' '));
 		// navigator.clipboard.writeText(currentExpression)
@@ -300,7 +337,7 @@
 </script>
 
 <div class="backdrop">
-	<div class="floating calculator-body">
+	<div class="calculator-body">
 		<ul class="ticker-tape">
 			{#each priorExpressions as expression}
 				<li>{expression.join(' ')}</li>
@@ -332,23 +369,35 @@
 			</div>
 		</div>
 		<div class="calculator-buttons">
-			<button on:click={handleButtonPress} aria-label="refresh" id="refresh" title="refresh"
-				><img src="refresh.svg" alt="arrows circling counter clockwise" /></button
-			>
-			<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
-				><img src="copy.svg" alt="stacked squares" /></button
-			>
-			<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
-				><img src="clipboard.svg" alt="clipboard" /></button
-			>
-			{#if inputValue}
-				<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
-					><img src="delete.svg" alt="backspace" /></button
-				>
+			{#if showPrecisionModal}
+				<PrecisionModal
+					coordinates={modalCoordinates}
+					selected={precision}
+					on:change={handlePrecisionUpdate}
+				/>
 			{:else}
-				<button on:click={handleButtonPress} aria-label="back" id="back" title="back"
-					><img src="arrow-left.svg" alt="left arrow" /></button
+				<button
+					on:click={handleButtonPress}
+					aria-label="reset/clear"
+					id="refresh"
+					title="reset/clear"
+					><img src="refresh.svg" alt="arrows circling counter clockwise" /></button
 				>
+				<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
+					><img src="copy.svg" alt="stacked squares" /></button
+				>
+				<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
+					><img src="clipboard.svg" alt="clipboard" /></button
+				>
+				{#if inputValue}
+					<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
+						><img src="delete.svg" alt="backspace" /></button
+					>
+				{:else}
+					<button on:click={handleButtonPress} aria-label="settings" id="settings" title="settings"
+						><img src="settings.svg" alt="gear" /></button
+					>
+				{/if}
 			{/if}
 			<button
 				on:click={handleButtonPress}
@@ -373,32 +422,63 @@
 				title="foot symbol"
 				class="inverted">'</button
 			>
-			<button on:click={handleButtonPress} aria-label="divide" id="/" class="inverted">÷</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="divide"
+				id="/"
+				class={operator === '/' ? 'highlighted' : 'inverted'}>÷</button
+			>
 			<button on:click={handleButtonPress} aria-label="7" id="7">7</button>
 			<button on:click={handleButtonPress} aria-label="8" id="8">8</button>
 			<button on:click={handleButtonPress} aria-label="9" id="9">9</button>
-			<button on:click={handleButtonPress} aria-label="multiply" id="*" class="inverted">×</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="multiply"
+				id="*"
+				class={operator === '*' ? 'highlighted' : 'inverted'}>×</button
+			>
 			<button on:click={handleButtonPress} aria-label="4" id="4">4</button>
 			<button on:click={handleButtonPress} aria-label="5" id="5">5</button>
 			<button on:click={handleButtonPress} aria-label="6" id="6">6</button>
-			<button on:click={handleButtonPress} aria-label="subtract" id="-" class="inverted">−</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="subtract"
+				id="-"
+				class={operator === '-' ? 'highlighted' : 'inverted'}>−</button
+			>
 			<button on:click={handleButtonPress} aria-label="1" id="1">1</button>
 			<button on:click={handleButtonPress} aria-label="2" id="2">2</button>
 			<button on:click={handleButtonPress} aria-label="3" id="3">3</button>
-			<button on:click={handleButtonPress} aria-label="add" id="+" class="inverted">+</button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="add"
+				id="+"
+				class={operator === '+' ? 'highlighted' : 'inverted'}>+</button
+			>
+			<button on:click={handleButtonPress} aria-label="0" id="0">0</button>
 			<button
 				on:click={handleButtonPress}
 				aria-label="⁄"
 				id="⁄"
 				title="value to numerator (create fraction)"
-				class="inverted">⁄</button
+				class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</button
 			>
-			<button on:click={handleButtonPress} aria-label="0" id="0">0</button>
 			<button on:click={handleButtonPress} aria-label="space" id="space" class="inverted"
 				><img src="space.svg" alt="space bar" /></button
 			>
 			<button on:click={handleButtonPress} aria-label="equals" id="=" class="inverted">=</button>
 		</div>
+	</div>
+	<div class="nav-container">
+		<a href="/" title="return to dashboard">
+			<!-- svelte-ignore a11y-missing-attribute -->
+			<img height="16px" width="16px" src="arrow-left.svg" aria-hidden={true} />
+		</a>
+		<!-- <button on:click={addRatio} title="add new ratio" disabled={!!edit}>
+			<svg aria-hidden="true" viewBox="0 0 1 1">
+				<path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
+			</svg>
+		</button> -->
 	</div>
 </div>
 
@@ -410,7 +490,8 @@
 	.backdrop {
 		position: relative;
 		display: flex;
-		flex-direction: column;
+		flex-direction: column-reverse;
+		align-items: center;
 		height: fit-content;
 		min-height: 100%;
 		width: 100%;
@@ -441,19 +522,15 @@
 	}
 
 	.calculator-body {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
 		/* top: 50vh; */
 		/* transform: translate(0, -50%); */
-		pointer-events: none;
-		z-index: 4;
 		display: flex;
 		flex-direction: column;
-		padding: 1rem;
-		background: #eee;
-		border-radius: 12px 12px 18px 18px;
+		justify-content: center;
+		padding-bottom: 16rem;
+		/* background: #f006; */
+		/* border-radius: 12px 12px 18px 18px; */
+		width: 100%;
 		max-width: var(--column-width);
 	}
 
@@ -463,18 +540,19 @@
 		align-items: flex-end;
 		justify-content: flex-start;
 
-		color: #000;
+		/* color: #000; */
 		padding: 0 8px;
-		border-radius: 8px;
+		/* border-radius: 8px; */
 		height: 6rem;
 		/* margin: 8px; */
 		grid-column: 1/5;
 		width: 100%;
 		/* width: calc(100vw - 32px); */
-		max-width: calc(var(--column-width) - 32px);
-		margin-bottom: 1.5rem;
-		background: #ccc;
-		box-shadow: inset 0 1px 3px #999;
+		margin-bottom: 0.5rem;
+		/* background: #ccc;
+		box-shadow: inset 0 1px 3px #999; */
+		width: 100%;
+		max-width: var(---column-width);
 	}
 
 	.display-input {
@@ -482,7 +560,7 @@
 		flex-direction: row-reverse;
 		justify-content: space-between;
 		width: 100%;
-		/* background: #f006; */
+		background: #f006;
 		height: 4rem;
 	}
 
@@ -494,6 +572,7 @@
 
 	.display-info {
 		position: relative;
+		top: -3px;
 		display: flex;
 		text-align: left;
 		font-size: 1rem;
@@ -517,20 +596,18 @@
 		line-height: 4rem;
 	}
 
+	.button-base {
+		padding: 4px;
+	}
 	.calculator-buttons {
 		display: grid;
 		align-self: flex-end;
 		justify-items: center;
+		align-self: center;
 		grid-template-columns: 1fr 1fr 1fr 1fr;
-		gap: 8px;
 		pointer-events: none;
 		max-width: 100%;
-		width: min-content;
-		padding: 0 17px 17px 18px;
-		/* padding-right: 17px;
-    padding-bottom: 18px; */
-		/* padding: 0 0 0 17px; */
-		/* background: #f006; */
+		width: 100%;
 	}
 
 	img {
@@ -544,12 +621,20 @@
 		filter: invert(1);
 	}
 
+	.highlighted {
+		background: #666;
+		filter: invert(1);
+	}
+
+	.button-gap {
+	}
+
 	button {
 		pointer-events: auto;
 		border-radius: 12px;
 		background: #fff;
-		width: 4rem;
-		height: 4rem;
+		width: calc(var(--column-width) / 4);
+		height: calc(var(--column-width) / 4);
 		max-width: 21vw;
 		max-height: 21vw;
 		display: flex;
@@ -576,6 +661,57 @@
 	}
 
 	path {
+		vector-effect: non-scaling-stroke;
+		stroke-width: 2px;
+		stroke: #000c;
+	}
+
+	.nav-container {
+		pointer-events: none;
+		z-index: 4;
+		position: absolute;
+		display: flex;
+		justify-content: space-between;
+		align-self: center;
+		align-items: flex-end;
+		gap: 1rem;
+		padding: 0 1.5rem;
+		bottom: 1.5rem;
+		pointer-events: none;
+		max-width: 100%;
+		width: var(--column-width);
+	}
+
+	.nav-container img {
+		filter: invert(0.1);
+		height: 1.25rem;
+		width: 1.25rem;
+	}
+
+	.nav-container button,
+	a {
+		pointer-events: auto;
+		border-radius: 9999px;
+		background: #fffc;
+		width: 3rem;
+		height: 3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		touch-action: manipulation;
+		font-size: 2rem;
+		box-shadow: 0 0 4px 2px #0003;
+		backdrop-filter: blur(4px);
+		pointer-events: auto;
+	}
+
+	.nav-container svg {
+		width: 33%;
+		height: 33%;
+	}
+
+	.nav-container path {
 		vector-effect: non-scaling-stroke;
 		stroke-width: 2px;
 		stroke: #000c;

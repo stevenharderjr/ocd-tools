@@ -6,6 +6,24 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
+		type ButtonType = 'operator' | 'input' | 'action';
+		interface Img {
+			src: string;
+			alt: string;
+		}
+
+		interface Button {
+			id: string;
+			type: ButtonType;
+			img?: Img;
+			label?: string;
+			title: string;
+			inverted?: boolean;
+			highlighted?: boolean;
+			class?: string;
+			style?: string;
+		}
+
 		interface Pin {
 			id: string;
 			changedAt: number;
