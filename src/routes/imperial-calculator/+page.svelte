@@ -42,7 +42,7 @@
 		priorOperation,
 		inputIsMeasurement;
 
-	Toast.add(`Haptic feedback ${navigator.vibrate ? 'enabled' : 'disabled'}.`);
+	// Toast.add(`Haptic feedback ${navigator.vibrate ? 'enabled' : 'disabled'}.`);
 
 	$: options = { precision };
 	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
