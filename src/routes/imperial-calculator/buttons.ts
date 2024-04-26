@@ -1,9 +1,12 @@
 export const buttons: App.Button[] = [
 	{
-		id: 'refresh',
+		id: 'settings',
 		type: 'action',
-		title: 'reset/clear',
-		img: { src: 'refresh.svg', alt: 'arrows turning counter clockwise' }
+		title: 'settings',
+		img: {
+			src: 'settings.svg',
+			alt: 'gear'
+		}
 	},
 	{
 		type: 'action',
@@ -18,11 +21,17 @@ export const buttons: App.Button[] = [
 		img: { src: 'clipboard.svg', alt: 'clipboard' }
 	},
 	{
-		id: 'backspace',
+		id: 'refresh',
 		type: 'action',
-		title: 'backspace',
-		img: { src: 'delete.svg', alt: 'backspace' }
+		title: 'reset/clear',
+		img: { src: 'refresh.svg', alt: 'arrows turning counter clockwise' }
 	},
+	// {
+	// 	id: 'backspace',
+	// 	type: 'action',
+	// 	title: 'backspace',
+	// 	img: { src: 'delete.svg', alt: 'backspace' }
+	// },
 	{
 		id: '√',
 		type: 'operator',

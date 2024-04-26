@@ -99,6 +99,8 @@
 		paste: () => {
 			if (!clipboard) return Toast.add('Clipboard is empty.');
 			inputValue = clipboard;
+			holdover = false;
+			currentExpression.push(clipboard);
 			return true;
 		},
 		settings: (event) => {
@@ -154,8 +156,8 @@
 			return true;
 		},
 		backspace: () => {
-			inputValue = '';
-			repeatValue = '';
+			const newInputValue = inputEval.slice(0, inputEval.length - 1);
+			inputValue = newInputValue ? format(newInputValue) : '';
 			currentExpression =
 				currentExpression.length > 3
 					? [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval, '=', inputValue]
@@ -226,7 +228,7 @@
 		return str;
 	}
 
-	function handleButtonPress({ detail: id }) {
+	function handleButtonPress({ currentTarget: { id } }) {
 		// const id = event.currentTarget.id;
 		const action = buttonAction[id];
 		if (action) return action(event);
@@ -257,7 +259,10 @@
 	}
 
 	function switchOperator(id: string) {
-		if (operativeValue && !holdover) evaluate();
+		if (operativeValue && !holdover && operator !== '**') {
+			console.log('skip operator change');
+			evaluate();
+		}
 		repeatValue = operator === id ? '' : inputValue;
 		// console.log({ inputValue, inputEval, id });
 		if (!inputEval && id === '-') negative = !negative;
@@ -333,6 +338,8 @@
 		console.log(currentExpression.join(' '));
 		// navigator.clipboard.writeText(currentExpression)
 	}
+
+	function handleClear() {}
 </script>
 
 <div class="backdrop">
@@ -367,7 +374,91 @@
 				<span class="input-history">{currentExpression.join(' ')}</span>
 			</div>
 		</div>
-		<CalculatorButtonGroup {buttons} on:click={handleButtonPress} />
+		<!-- <CalculatorButtonGroup
+			{buttons}
+			clearMethod={inputValue && !holdover ? 'backspace' : 'refresh'}
+			on:click={handleButtonPress}
+		/> -->
+		<div class="calculator-buttons">
+			{#if showPrecisionModal}
+				<PrecisionModal
+					coordinates={modalCoordinates}
+					selected={precision}
+					on:change={handlePrecisionUpdate}
+				/>
+			{:else}
+				<button on:click={handleButtonPress} aria-label="settings" id="settings" title="settings"
+					><span><img src="settings.svg" alt="gear" /></span></button
+				>
+				<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
+					><span><img src="copy.svg" alt="stacked squares" /></span></button
+				>
+				<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
+					><span><img src="clipboard.svg" alt="clipboard" /></span></button
+				>
+				{#if inputValue && !holdover}
+					<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
+						><span><img src="delete.svg" alt="backspace" /></span></button
+					>
+				{:else}
+					<button
+						on:click={handleButtonPress}
+						aria-label="reset/clear"
+						id="refresh"
+						title="reset/clear"
+						><span><img src="refresh.svg" alt="arrows circling counter clockwise" /></span></button
+					>
+				{/if}
+			{/if}
+			<button
+				on:click={handleButtonPress}
+				aria-label="square root"
+				id="√"
+				title="square root"
+				style="font-size: 1.25rem;"><span class="inverted">√</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="exponent" id="**" title="exponent"
+				><span class="inverted" style="font-size: 1.25rem;">^</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="foot symbol" id="'" title="foot symbol"
+				><span class="inverted">'</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="divide" id="/"
+				><span class={operator === '/' ? 'highlighted' : 'inverted'}>÷</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="7" id="7"><span>7</span></button>
+			<button on:click={handleButtonPress} aria-label="8" id="8"><span>8</span></button>
+			<button on:click={handleButtonPress} aria-label="9" id="9"><span>9</span></button>
+			<button on:click={handleButtonPress} aria-label="multiply" id="*"
+				><span class={operator === '*' ? 'highlighted' : 'inverted'}>×</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="4" id="4"><span>4</span></button>
+			<button on:click={handleButtonPress} aria-label="5" id="5"><span>5</span></button>
+			<button on:click={handleButtonPress} aria-label="6" id="6"><span>6</span></button>
+			<button on:click={handleButtonPress} aria-label="subtract" id="-"
+				><span class={operator === '-' ? 'highlighted' : 'inverted'}>−</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="1" id="1"><span>1</span></button>
+			<button on:click={handleButtonPress} aria-label="2" id="2"><span>2</span></button>
+			<button on:click={handleButtonPress} aria-label="3" id="3"><span>3</span></button>
+			<button on:click={handleButtonPress} aria-label="add" id="+"
+				><span class={operator === '+' ? 'highlighted' : 'inverted'}>+</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="0" id="0"><span>0</span></button>
+			<button
+				on:click={handleButtonPress}
+				aria-label="⁄"
+				id="⁄"
+				title="value to numerator (create fraction)"
+				><span class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</span></button
+			>
+			<button on:click={handleButtonPress} aria-label="space" id="space"
+				><span class="inverted"><img src="space.svg" alt="space bar" /></span></button
+			>
+			<button on:click={handleButtonPress} aria-label="equals" id="="
+				><span class="inverted">=</span></button
+			>
+		</div>
 	</div>
 </div>
 
@@ -529,12 +620,22 @@
 
 	button {
 		pointer-events: auto;
-		border-radius: 12px;
-		background: #fff;
+		max-width: calc(100vw / 4);
+		max-height: calc(100vw / 4);
+		background: none;
+		border: none;
+		padding: 4px;
 		width: calc(var(--column-width) / 4);
 		height: calc(var(--column-width) / 4);
-		max-width: 21vw;
-		max-height: 21vw;
+	}
+
+	button span {
+		height: 100%;
+		width: 100%;
+		pointer-events: auto;
+		/* border-radius: 12px; */
+		border-radius: 100%;
+		background: #fff;
 		display: flex;
 		align-items: center;
 		justify-content: center;
