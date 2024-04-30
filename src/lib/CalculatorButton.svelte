@@ -41,7 +41,8 @@
 		height: 100%;
 		width: 100%;
 		pointer-events: auto;
-		border-radius: 12px;
+		/* border-radius: 12px; */
+		border-radius: 100%;
 		background: #fff;
 		display: flex;
 		align-items: center;
