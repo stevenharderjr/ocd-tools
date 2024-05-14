@@ -190,13 +190,20 @@
 			evaluate();
 		},
 		'√': () => {
+			console.log(inputEval);
+			if (inputEval.slice(-1) === ' ') return;
 			switchOperator('√');
 			evaluate();
 		},
 		'⁄': () => {
 			const lastChar = inputValue.slice(-1);
 			const lastCharEval = inputEval.slice(-1);
-			if ((!lastChar && !lastCharEval) || lastCharEval === '0' || lastChar === "'")
+			if (
+				(!lastChar && !lastCharEval) ||
+				lastCharEval === '0' ||
+				lastChar === "'" ||
+				lastCharEval === ' '
+			)
 				return Toast.add('Fraction requires a numerator.');
 			if (slashIndex !== -1) return Toast.add('Fraction is already specified.');
 			inputEval += '/';
