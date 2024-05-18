@@ -33,6 +33,7 @@ declare global {
 
 		interface Tool {
 			id: string;
+			createdAt: number;
 			changedAt: number;
 			label: string;
 		}
