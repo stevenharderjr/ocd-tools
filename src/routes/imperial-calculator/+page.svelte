@@ -1,11 +1,13 @@
 <script lang="ts">
-	import PrecisionModal from './CalculatorPrecision.svelte';
+	import PrecisionSelect from './PrecisionSelect.svelte';
 	import CalculatorButtonGroup from '$lib/CalculatorButtonGroup.svelte';
 	import { buttons } from './buttons';
 	import {
 		inches,
 		converter,
 		sae,
+		precisionByDecimals,
+		decimalsByPrecision,
 		type MeasurementPrecision
 	} from '$lib/utils/MeasurementConverter';
 	import { round } from '$lib/utils/round';
@@ -31,6 +33,7 @@
 	const inputSizeThreshold = 9;
 	let negative = false;
 	let history = '';
+	let options = { precision };
 	let lastChar,
 		inputContainsInches,
 		inputHasTrailingSpace,
@@ -44,7 +47,6 @@
 
 	// Toast.add(`Haptic feedback ${navigator.vibrate ? 'enabled' : 'disabled'}.`);
 
-	$: options = { precision };
 	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
 	$: formattedInput = inputIsMeasurement ? format(inputValue) : inputValue;
 	$: visualInputWidth = visualWidth(formattedInput);
@@ -282,6 +284,7 @@
 	}
 
 	function evaluate(): Boolean {
+		console.log({ precision }, options);
 		let result = 0;
 		const i = operator === '**' ? 2 : inches(repeatValue || inputValue || '0', options);
 		const o = inches(operativeValue || '0', options);
@@ -334,11 +337,9 @@
 		showPrecisionModal = !showPrecisionModal;
 	}
 
-	function handlePrecisionUpdate({ detail: { value } }) {
-		console.log(`precision should change to ${value > 1 ? '1/' + value : value}`);
-		// precision = detail;
-		precision = value;
-		showPrecisionModal = false;
+	function updatePrecision({ currentTarget: { value: index } }) {
+		precision = precisionByDecimals[index] as MeasurementPrecision;
+		options = { precision };
 	}
 
 	function handleCopy() {
@@ -367,11 +368,17 @@
 						<img src="arrow-left-circle.svg" />
 					</button>
 				{/if} -->
-				<span class="calculator-input" style={`font-size:${displayTextSize}rem;`}
-					>{formattedInput}</span
-				>
-				{#if negative}
-					<span class="calculator-input">-</span>
+				{#if showPrecisionModal}
+					<span class="display-precision"
+						>Precision: {precision > 1 ? '1/' + precision : precision}"</span
+					>
+				{:else}
+					<span class="calculator-input" style={`font-size:${displayTextSize}rem;`}
+						>{formattedInput}</span
+					>
+					{#if negative}
+						<span class="calculator-input">-</span>
+					{/if}
 				{/if}
 			</div>
 			<div class="display-info">
@@ -388,22 +395,17 @@
 		/> -->
 		<div class="calculator-buttons">
 			{#if showPrecisionModal}
-				<PrecisionModal
-					coordinates={modalCoordinates}
-					selected={precision}
-					on:change={handlePrecisionUpdate}
-				/>
+				<div>
+					<PrecisionSelect
+						value={decimalsByPrecision[precision] || 1}
+						on:input={updatePrecision}
+						on:change={togglePrecisionModal}
+					/>
+				</div>
 			{:else}
-				<button on:click={handleButtonPress} aria-label="settings" id="settings" title="settings"
-					><span><img src="settings.svg" alt="gear" /></span></button
-				>
-				<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
-					><span><img src="copy.svg" alt="stacked squares" /></span></button
-				>
-				<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
-					><span><img src="clipboard.svg" alt="clipboard" /></span></button
-				>
-				{#if inputValue && !holdover}
+				{#if !inputValue}
+					<button><a href="/"><img src="arrow-left.svg" /></a></button>
+				{:else if !holdover}
 					<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
 						><span><img src="delete.svg" alt="backspace" /></span></button
 					>
@@ -416,6 +418,15 @@
 						><span><img src="refresh.svg" alt="arrows circling counter clockwise" /></span></button
 					>
 				{/if}
+				<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
+					><span><img src="copy.svg" alt="stacked squares" /></span></button
+				>
+				<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
+					><span><img src="clipboard.svg" alt="clipboard" /></span></button
+				>
+				<button on:click={handleButtonPress} aria-label="settings" id="settings" title="settings"
+					><span><img src="settings.svg" alt="gear" /></span></button
+				>
 			{/if}
 			<button
 				on:click={handleButtonPress}
@@ -460,7 +471,9 @@
 				><span class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</span></button
 			>
 			<button on:click={handleButtonPress} aria-label="space" id="space"
-				><span class="inverted"><img src="space.svg" alt="space bar" /></span></button
+				><span class={inputHasTrailingSpace ? 'highlighted' : 'inverted'}
+					><img src="space.svg" alt="space bar" /></span
+				></button
 			>
 			<button on:click={handleButtonPress} aria-label="equals" id="="
 				><span class="inverted">=</span></button
@@ -516,6 +529,15 @@
 	}
 	.ticker-tape li:first-child {
 		margin-top: 1rem;
+	}
+	.display-precision {
+		position: relative;
+		font-size: 1.75rem;
+		align-self: flex-end;
+		text-align: left;
+		width: 100%;
+		top: 12px;
+		left: 12px;
 	}
 
 	.calculator-body {
@@ -595,6 +617,7 @@
 	.button-base {
 		padding: 4px;
 	}
+
 	.calculator-buttons {
 		display: grid;
 		align-self: flex-end;
@@ -606,10 +629,26 @@
 		width: 100%;
 	}
 
+	.calculator-buttons div {
+		grid-column: 1 / 5;
+		width: 100%;
+		max-height: calc(100vw / 4);
+		background: none;
+		border: none;
+		padding: 4px 12px;
+		height: calc(var(--column-width) / 4);
+		display: flex;
+	}
+
 	img {
 		/* filter: invert(0.1); */
-		height: 1.25rem;
-		width: 1.25rem;
+		height: 1.5rem;
+		width: 1.5rem;
+	}
+
+	a img {
+		height: 1.75rem;
+		width: 1.75rem;
 	}
 
 	.inverted {
@@ -620,9 +659,6 @@
 	.highlighted {
 		background: #666;
 		filter: invert(1);
-	}
-
-	.button-gap {
 	}
 
 	button {
@@ -636,7 +672,8 @@
 		height: calc(var(--column-width) / 4);
 	}
 
-	button span {
+	button span,
+	button a {
 		height: 100%;
 		width: 100%;
 		pointer-events: auto;
