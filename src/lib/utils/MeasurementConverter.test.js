@@ -102,7 +102,7 @@ test('parser respects zeros option', () => {
 	expect(feet).toEqual(0);
 	expect(inches).toEqual(0);
 	expect(fraction).toEqual('1/2');
-	expect(readable).toEqual('0\' 1/2"');
+	expect(readable).toEqual('0\' 0 1/2"');
 });
 
 test('parser respects zeros option', () => {
