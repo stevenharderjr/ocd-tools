@@ -184,3 +184,12 @@ test('decimal fraction should return one eighth', () => {
 test('decimal should return nearest sixteenth', () => {
 	expect(converter._cycleFractions(0.1225)).toEqual('1/8');
 });
+
+test('initial options persist after being overridden', () => {
+	converter.options({ precision: 16 });
+	const resultWithoutOverride = converter.fromDecimalInches(1.03);
+	const resultWithOverride = converter.fromDecimalInches(1.03, { precision: 16 });
+	console.log({ resultWithoutOverride, resultWithOverride });
+	expect(resultWithoutOverride.readable).toEqual('1 1/16"');
+	expect(resultWithOverride.readable).toEqual('1 1/16"');
+});

@@ -9,6 +9,14 @@ export interface Measurement {
 	readable?: string;
 }
 
+export interface MeasurementComponents {
+	feet: number;
+	inches: number;
+	numerator?: number;
+	denominator?: number;
+	negative?: boolean;
+}
+
 export type MeasurementPrecision = 0 | 1 | 2 | 4 | 8 | 16 | 32 | 64;
 type MeasurementDecimals = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -99,6 +107,12 @@ export class MeasurementConverter {
 			options.precision = precisionByDecimals[decimals] as MeasurementPrecision;
 
 		this._options = { ...this._options, ...options };
+	}
+
+	toDecimalInches(measurement: MeasurementComponents): number {
+		const { negative, feet, inches, numerator = 0, denominator = 1 } = measurement;
+
+		return (feet * 12 + inches + numerator / denominator) * (negative ? -1 : 1);
 	}
 
 	fromDecimalInches(

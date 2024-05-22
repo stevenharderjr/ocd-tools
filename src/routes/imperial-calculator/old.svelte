@@ -1,51 +1,25 @@
 <script lang="ts">
-	import PrecisionSelect from './PrecisionSelect.svelte';
+	import PrecisionModal from './CalculatorPrecision.svelte';
 	import CalculatorButtonGroup from '$lib/CalculatorButtonGroup.svelte';
 	import { buttons } from './buttons';
-<<<<<<< HEAD
 	import {
 		inches,
 		converter,
 		sae,
-		precisionByDecimals,
-		decimalsByPrecision,
 		type MeasurementPrecision
 	} from '$lib/utils/MeasurementConverter';
-=======
-	import { converter, type MeasurementPrecision } from '$lib/utils/MeasurementConverter';
->>>>>>> 85ded6b (prepping new input paradigm)
 	import { round } from '$lib/utils/round';
 	import { visualWidth } from '$lib/utils/visualWidth';
 	import Toast from '../../toast';
 	import { onMount } from 'svelte';
 
-	type NumericString = `${number}` | '';
-	export let currentInput: NumericString = '';
-	export let inches = 0;
-	export let feet = 0;
-	export let numerator = 0;
-	export let denominator = 0;
-	export let denomination: '' | "'" | '"' = '"';
-	export let operator = '';
-	export let clipboard = undefined;
+	export let inputValue = '';
+	export let numerator: number | undefined;
+	export let denominator: number | undefined;
 	export let precision: MeasurementPrecision = 16;
-	const maxInputLength = 12;
-	const maxIntegerDigits = 8;
-	const maxDecimalDigits = 8;
-	const inputSizeThreshold = 8;
-	let negative = +currentInput < 0;
-	let numericValue = 0;
-	let operativeValue = undefined;
-	let repeatValue = undefined;
-	let currentExpression: any = [];
-	let priorExpressions: any = [];
-	let priorDenomination = '';
-	let holdover = empty();
-	let decimal = false;
-	let trailingSpace = false;
-	let fraction = numerator && denominator;
+	let foot = 0;
+	let inch = 0;
 	let showPrecisionModal = false;
-<<<<<<< HEAD
 	let modalCoordinates = [0, 0];
 	let holdover = false;
 	let priorInput = '';
@@ -55,12 +29,13 @@
 	let repeatValue = '';
 	let operativeValue: string = '';
 	let operator = '';
+	let denomination: '' | '"' | "'" = '"';
 	let clipboard = '';
-	const maxInputLength = 15;
-	const inputSizeThreshold = 9;
+	const maxInputLength = 12;
+	const inputSizeThreshold = 8;
 	let negative = false;
 	let history = '';
-	let options = { precision };
+	let backdrop;
 	let lastChar,
 		inputContainsInches,
 		inputHasTrailingSpace,
@@ -74,62 +49,28 @@
 
 	// Toast.add(`Haptic feedback ${navigator.vibrate ? 'enabled' : 'disabled'}.`);
 
+	$: options = { precision };
 	$: inputIsMeasurement = holdover || (operator !== '*' && operator !== '/');
 	$: formattedInput = inputIsMeasurement ? format(inputValue) : inputValue;
 	$: visualInputWidth = visualWidth(formattedInput);
-=======
-	let denominationLocked = false;
-
-	$: options = { precision };
-	$: isMeasurement = feet || inches || (numerator && denominator);
-	$: numericValue = isMeasurement ? feet * 12 + inches + numerator / denominator : +currentInput;
-	// $: fraction = measurement && numerator && denominator;
-	$: formattedInput = isMeasurement ? formatInput() : currentInput.slice(0, maxDecimalDigits);
-	$: visibleDigits = formattedInput?.length;
-	$: visualInputWidth = visualWidth(formattedInput + denomination);
->>>>>>> 85ded6b (prepping new input paradigm)
 	$: displayTextSize =
 		visualInputWidth < inputSizeThreshold
 			? 4
 			: (maxInputLength - visualInputWidth) / (maxInputLength - inputSizeThreshold) + 2;
-
-	function empty() {
-		return !(feet || inches || numerator || currentInput);
-	}
-
-	function currentValue() {
-		return feet || inches || (numerator && denominator)
-			? { feet, inches, numerator, denominator }
-			: currentInput;
-	}
-
-	function formatInput(tempInput = currentInput, denomination = '') {
-		if (!isMeasurement) return (+tempInput).toFixed(Math.min(maxDecimalDigits, visibleDigits));
-		let result = feet ? feet + "'" : '';
-		if (inches) {
-			if (feet) result += ' ';
-			result += inches;
-		}
-		if (numerator) {
-			if (feet || inches) result += ' ';
-			result += numerator;
-		}
-		if (denominator) {
-			result += '/' + denominator || '';
-		}
-		return result;
-	}
-
-	function cycleDenomination() {
-		if (denominationLocked) return Toast.add('Cannot change denomination');
-		if (denomination === '"') {
-			denomination = "'";
-		} else if (denomination === "'") {
-			denomination = '';
-		} else {
-			denomination = '"';
-		}
-		console.log({ denomination });
+	$: {
+		lastChar = inputValue.slice(-1);
+		inputContainsInches = lastChar === '"';
+		inputEval = inputContainsInches ? inputValue.slice(0, -1) : inputValue;
+		inputHasTrailingSpace = inputEval.slice(-1) === ' ';
+		slashIndex = inputValue.indexOf('/');
+		footIndex = inputValue.indexOf("'");
+		// $: lastSpaceIndex = inputEval.lastIndexOf(' ');
+		inputHasExtraSpace =
+			inputHasTrailingSpace ||
+			(!denominator && inputContainsInches && inputEval.lastIndexOf(' ') > footIndex + 1);
+		priorExpression = (priorExpressions[priorExpressions.length - 1] || currentExpression).join(
+			' '
+		);
 	}
 
 	const operatorCrossref = {
@@ -148,45 +89,29 @@
 	const buttonAction = {
 		refresh: () => {
 			denomination = '"';
-			currentInput = '';
+			inputValue = '';
+			operativeValue = '';
+			operator = '';
+			repeatValue = '';
 			priorExpressions = [];
 			currentExpression = [];
-			operativeValue = undefined;
-			repeatValue = undefined;
 			return true;
 		},
 		copy: () => {
-			return Toast.add('Clipboard disabled.');
-			if (!feet && !inches && !numerator && !currentInput)
-				return Toast.add('There is nothing to copy.');
-			clipboard = { feet, inches, numerator, denominator, currentInput };
-			navigator.clipboard.writeText(
-				feet || inches || numerator
-					? converter.fromDecimalInches(feet * 12 + inches, options)
-					: currentInput
-			);
+			if (!inputValue) return Toast.add('There is nothing to copy.');
+			clipboard = inputValue;
+			navigator.clipboard.writeText(inputValue);
 		},
 		paste: () => {
-			return Toast.add('Clipboard disabled.');
 			if (!clipboard) return Toast.add('Clipboard is empty.');
-			const {
-				feet: clipboardFeet,
-				inches: clipboardInches,
-				numerator: clipboardNumerator,
-				denominator: clipboardDenominator,
-				currentInput: clipboardInput
-			} = clipboard;
-			currentInput = clipboardInput;
-			feet = clipboardFeet;
-			inches = clipboardInches;
-			numerator = clipboardNumerator;
-			denominator = clipboardDenominator;
-			denomination = inches || denominator ? '"' : feet ? "'" : '';
+			inputValue = clipboard;
 			holdover = false;
 			currentExpression.push(clipboard);
 			return true;
 		},
-		menu: togglePrecisionModal,
+		settings: (event) => {
+			togglePrecisionModal(event);
+		},
 		// back: () => {
 		// 	if (!priorExpressions.length) return;
 		// 	priorExpressions.pop();
@@ -228,78 +153,79 @@
 		// 	return true;
 		// },
 		space: () => {
-			if (isMeasurement) return Toast.add('Cannot add spaces to decimal numbers.');
-			if (!currentInput)
-				return Toast.add('Use space to separate feet, inches, and/or fractions of inches.');
-			if (numerator) return Toast.add('Cannot add space after a fraction.');
+			if (!inputValue) return Toast.add('Specify a value before adding space.');
+			if (slashIndex > -1) return Toast.add('Cannot add space after a fraction.');
 			const evalLastChar = inputEval.slice(-1);
-			if (inches) numerator = 0;
-		},
-		backspace: () => {
-			return buttonAction.refresh();
-			const lastChar = currentInput.slice(visibleDigits, 1);
-			console.log({ lastChar });
-			if (decimal) {
-				if (lastChar === '.') decimal = false;
-				visibleDigits--;
+			if (evalLastChar === ' ') return Toast.add('Single spaces only.');
 
-				return;
-			}
-			const newInputValue = inputEval.slice(0, inputEval.length - 1);
-
-			currentInput = newInputValue ? format(newInputValue) : '';
-			currentExpression =
-				currentExpression.length > 3
-					? [
-							operativeValue,
-							operator,
-							inputIsMeasurement ? currentInput : inputEval,
-							'=',
-							currentInput
-						]
-					: [operativeValue, operator, inputIsMeasurement ? currentInput : inputEval];
+			inputValue = inputEval + (inputContainsInches ? ' "' : ' ');
 			return true;
 		},
-		'.': () => {
-			if (decimal) return Toast.add('Number already contains a decimal point.');
-			decimal = true;
-			currentInput += '.';
+		backspace: () => {
+			const newInputValue = inputEval.slice(0, inputEval.length - 1);
+			inputValue = newInputValue ? format(newInputValue) : '';
+			currentExpression =
+				currentExpression.length > 3
+					? [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval, '=', inputValue]
+					: [operativeValue, operator, inputIsMeasurement ? inputValue : inputEval];
+			return true;
 		},
-		"'": cycleDenomination,
+		"'": () => {
+			cycleDenomination();
+			if (!inputIsMeasurement || !inputValue) return;
+			// if (!inputIsMeasurement) return Toast.add('Just use an integer.');
+			// if (!inputValue) return Toast.add('No need to specify a foot measurement of zero.');
+			const trimmedInput = trimTrailingSpaces(inputValue);
+			const [feet, otherStuff] = trimmedInput.split("'");
+			if (otherStuff?.length)
+				return Toast.add(
+					feet
+						? `Foot measurement is already specified (${inputValue.slice(0, footIndex)}').`
+						: 'Only whole numbers can be converted between feet and inches.'
+				);
+
+			const length = feet?.length;
+			if (length)
+				inputValue = feet.slice(-1) === '"' ? feet.slice(0, length - 1) + "'" : feet + '"';
+			const converted = !!denomination
+				? converter.parse(inputValue, options)?.readable || ''
+				: inputValue;
+
+			console.log({ converted });
+			let [x, o, y] = currentExpression;
+			currentExpression = y ? [x, o, converted] : [converted];
+			return true;
+		},
 		'**': () => {
 			switchOperator('**');
 			evaluate();
 		},
 		'√': () => {
-			console.log(inputEval);
-			if (inputEval.slice(-1) === ' ') return;
 			switchOperator('√');
 			evaluate();
 		},
 		'⁄': () => {
-<<<<<<< HEAD
 			const lastChar = inputValue.slice(-1);
 			const lastCharEval = inputEval.slice(-1);
-			if (
-				(!lastChar && !lastCharEval) ||
-				lastCharEval === '0' ||
-				lastChar === "'" ||
-				lastCharEval === ' '
-			)
+			if ((!lastChar && !lastCharEval) || lastCharEval === '0' || lastChar === "'")
 				return Toast.add('Fraction requires a numerator.');
 			if (slashIndex !== -1) return Toast.add('Fraction is already specified.');
 			inputEval += '/';
 			inputValue = format(inputEval);
-=======
-			if (currentInput.indexOf('.'))
-				if (numerator) return Toast.add('Cannot add another fraction.');
-			if (!currentInput) return Toast.add('Fraction requires a numerator.');
-			numerator = +currentInput;
-			currentInput = '';
->>>>>>> 85ded6b (prepping new input paradigm)
 		},
 		'=': evaluate
 	};
+
+	function cycleDenomination() {
+		if (denomination === '"') {
+			denomination = "'";
+		} else if (denomination === "'") {
+			denomination = '';
+		} else {
+			denomination = '"';
+		}
+		console.log({ denomination });
+	}
 
 	function overwriteSegment(overwrite: string, existing: string, index: number) {
 		let result = '';
@@ -324,33 +250,33 @@
 		return str;
 	}
 
-	function handleButtonPress(event) {
-		const id = event.currentTarget.id;
+	function handleButtonPress({ currentTarget: { id } }) {
+		// const id = event.currentTarget.id;
 		const action = buttonAction[id];
 		if (action) return action(event);
 
-		if (isNaN(id)) return switchOperator(id);
+		if (isNaN(id) && id !== '.') return switchOperator(id);
 
 		// must be a number input
 		if (holdover) {
 			holdover = false;
-			currentInput = '';
+			inputValue = '';
+			lastChar = '';
+			repeatValue = '';
 		}
 
-		if (!isMeasurement) {
-			if (decimal) {
-				const decimalDigitCount = currentInput.split('.')[1]?.length;
-				if (decimalDigitCount < maxDecimalDigits) {
-					currentInput += id;
-					visibleDigits++;
-					currentExpression[2] = currentValue() + currentInput + denomination;
-				}
-				return;
-			}
-		}
-
-		if (currentInput.length < maxInputLength) {
-			currentInput += id;
+		if (inputValue.length < maxInputLength) {
+			if (lastChar === "'") inputValue += ' ' + id;
+			else if (lastChar === '"')
+				inputValue = inputValue.slice(0, -1) + id + (operator !== '**' ? '"' : '');
+			else inputValue += id;
+			const i = denomination ? inches(inputValue || '0') : inputValue;
+			currentExpression[2] =
+				operator !== '**'
+					? !denomination || operator === '*' || operator === '/'
+						? i
+						: sae(i, options)
+					: inputValue;
 		}
 	}
 
@@ -359,63 +285,58 @@
 			console.log('skip operator change');
 			evaluate();
 		}
-		const value = currentValue();
-		if (!value && id === '-') negative = !negative;
-		priorDenomination = denomination;
-		denomination = id === '*' || id === '/' ? '' : '"';
-
-		repeatValue = operator === id ? undefined : value;
+		repeatValue = operator === id ? '' : inputValue;
 		// console.log({ inputValue, inputEval, id });
+		if (!inputEval && id === '-') negative = !negative;
 
 		holdover = true;
 		operator = id;
-		operativeValue = value;
-		currentExpression = [operativeValue + priorDenomination, operatorCrossref[operator]];
+		operativeValue = denomination ? sae(inches(inputValue || '0'), options) || '0' : inputValue;
+		repeatValue = inputValue;
+		currentExpression = [operativeValue, operatorCrossref[operator]];
 	}
 
 	function evaluate(): Boolean {
-		console.log({ precision }, options);
 		let result = 0;
-		let i = operator === '**' ? 2 : +currentValue();
-		if (isNaN(i)) i = converter.toDecimalInches(i);
-		const o = isNaN(operativeValue) ? converter.toDecimalInches(operativeValue) : operativeValue;
+		const i =
+			operator === '**'
+				? 2
+				: denomination
+					? inches(repeatValue || inputValue || '0', options)
+					: repeatValue || inputValue;
+		const o = isNaN(operativeValue) ? inches(operativeValue || '0', options) : operativeValue;
 		const expression = `(${o})${operator}(${i})`;
 		console.log({ expression });
 		result = operator === '√' ? Math.sqrt(o) : eval(expression);
-		console.log({ result });
 		if (isNaN(result) || (!i && operator === '/')) {
 			Toast.add({ message: 'Invalid operation.', replace: true });
-			currentExpression = [operativeValue + priorDenomination, operator];
+			currentExpression = [sae(o || 0, options), operator];
 			holdover = true;
 			return false;
 		}
-		const formattedResult = isNaN(currentValue())
-			? result
-			: converter.fromDecimalInches(result, options);
-		console.log(formattedResult);
-		const formattedInput = isNaN(+i) ? converter.fromDecimalInches(i, options) : i;
-		const formattedOperativeValue = isNaN(operativeValue)
-			? converter.fromDecimalInches(converter.toDecimalInches(operativeValue))
-			: operativeValue;
+		const formattedResult = sae(result, options);
+		const formattedInput = sae(i, options);
 		priorExpressions = [
 			...priorExpressions,
 			operator === '√'
-				? ['√', formattedOperativeValue, '', '=', formattedResult]
+				? ['√', operativeValue, '', '=', formattedResult]
 				: operator === '**' || (operator === '*' && i === o)
-					? [formattedOperativeValue, '²', , '=', formattedResult]
+					? [operativeValue, '²', , '=', formattedResult]
 					: [
-							formattedOperativeValue,
+							operativeValue,
 							operatorCrossref[operator],
 							operator === '*' || operator === '/' ? i : formattedInput,
 							'=',
 							formattedResult
 						]
 		];
-		repeatValue = currentValue();
-		operativeValue = result;
+		repeatValue = formattedInput;
+		operativeValue = formattedResult;
+		inputValue = formattedResult;
 		holdover = true;
 		currentExpression = [];
-		negative = result < 0;
+		negative = false;
+		return true;
 	}
 
 	function format(string: String) {
@@ -423,7 +344,7 @@
 		const lastChar = string.slice(-1);
 		if (lastChar === '/') return string;
 		if (lastChar === "'" || lastChar === '"') return string.slice(0, string.length - 1);
-		currentInput = currentInput ? string : '';
+		inputValue = inputValue ? string : '';
 		return string;
 	}
 
@@ -435,9 +356,11 @@
 		showPrecisionModal = !showPrecisionModal;
 	}
 
-	function updatePrecision({ currentTarget: { value: index } }) {
-		precision = precisionByDecimals[index] as MeasurementPrecision;
-		options = { precision };
+	function handlePrecisionUpdate({ detail: { value } }) {
+		console.log(`precision should change to ${value > 1 ? '1/' + value : value}`);
+		// precision = detail;
+		precision = value;
+		showPrecisionModal = false;
 	}
 
 	function handleCopy() {
@@ -470,25 +393,11 @@
 						<img src="arrow-left-circle.svg" />
 					</button>
 				{/if} -->
-<<<<<<< HEAD
-				{#if showPrecisionModal}
-					<span class="display-precision"
-						>Precision: {precision > 1 ? '1/' + precision : precision}"</span
-					>
-				{:else}
-					<span class="calculator-input" style={`font-size:${displayTextSize}rem;`}
-						>{formattedInput}</span
-					>
-					{#if negative}
-						<span class="calculator-input">-</span>
-					{/if}
-=======
 				<span class="calculator-input" style={`font-size:${displayTextSize}rem;`}
-					>{formattedInput || '0'}{denomination || priorDenomination}</span
+					>{formattedInput}{denomination}</span
 				>
 				{#if negative}
 					<span class="calculator-input">-</span>
->>>>>>> 85ded6b (prepping new input paradigm)
 				{/if}
 			</div>
 			<div class="display-info">
@@ -505,30 +414,13 @@
 		/> -->
 		<div class="calculator-buttons">
 			{#if showPrecisionModal}
-				<div>
-					<PrecisionSelect
-						value={decimalsByPrecision[precision] || 1}
-						on:input={updatePrecision}
-						on:change={togglePrecisionModal}
-					/>
-				</div>
+				<PrecisionModal
+					coordinates={modalCoordinates}
+					selected={precision}
+					on:change={handlePrecisionUpdate}
+				/>
 			{:else}
-<<<<<<< HEAD
-				{#if !inputValue}
-					<button><a href="/"><img src="arrow-left.svg" /></a></button>
-				{:else if !holdover}
-=======
-				{#if !currentInput && !priorExpressions.length}
-					<a
-						style="display: block; background: none; outline: none; border: none;"
-						href="/"
-						aria-label="back button"
-						id="back"
-						title="return to dashboard"
-						><span><img src="arrow-left.svg" alt="back arrow" /></span></a
-					>
-				{:else if currentInput && !holdover}
->>>>>>> 85ded6b (prepping new input paradigm)
+				{#if inputValue && !holdover}
 					<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
 						><span><img src="delete.svg" alt="backspace" /></span></button
 					>
@@ -547,13 +439,8 @@
 				<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
 					><span><img src="clipboard.svg" alt="clipboard" /></span></button
 				>
-<<<<<<< HEAD
-				<button on:click={handleButtonPress} aria-label="settings" id="settings" title="settings"
+				<button on:click={togglePrecisionModal} aria-label="settings" id="settings" title="settings"
 					><span><img src="settings.svg" alt="gear" /></span></button
-=======
-				<button on:click={togglePrecisionModal} aria-label="settings" id="menu" title="menu"
-					><span><img src="more-horizontal.svg" alt="ellipsis" /></span></button
->>>>>>> 85ded6b (prepping new input paradigm)
 				>
 			{/if}
 			<button on:click={handleButtonPress} aria-label="square root" id="√" title="square root"
@@ -586,21 +473,6 @@
 			<button on:click={handleButtonPress} aria-label="add" id="+"
 				><span class={operator === '+' ? 'highlighted' : 'inverted'}>+</span></button
 			>
-<<<<<<< HEAD
-			<button on:click={handleButtonPress} aria-label="0" id="0"><span>0</span></button>
-			<button
-				on:click={handleButtonPress}
-				aria-label="⁄"
-				id="⁄"
-				title="value to numerator (create fraction)"
-				><span class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="space" id="space"
-				><span class={inputHasTrailingSpace ? 'highlighted' : 'inverted'}
-					><img src="space.svg" alt="space bar" /></span
-				></button
-			>
-=======
 			{#if denomination}
 				<button on:click={handleButtonPress} aria-label="0" id="0"><span>0</span></button>
 				<button
@@ -608,7 +480,7 @@
 					aria-label="⁄"
 					id="⁄"
 					title="value to numerator (create fraction)"
-					><span class={!holdover && fraction ? 'highlighted' : 'inverted'}>⁄</span></button
+					><span class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</span></button
 				>
 				<button on:click={handleButtonPress} aria-label="space" id="space"
 					><span class="inverted"><img src="space.svg" alt="space bar" /></span></button
@@ -621,7 +493,6 @@
 					><span class="inverted">.</span></button
 				>
 			{/if}
->>>>>>> 85ded6b (prepping new input paradigm)
 			<button on:click={handleButtonPress} aria-label="equals" id="="
 				><span class="inverted">=</span></button
 			>
@@ -678,15 +549,6 @@
 	}
 	.ticker-tape li:first-child {
 		margin-top: 1rem;
-	}
-	.display-precision {
-		position: relative;
-		font-size: 1.75rem;
-		align-self: flex-end;
-		text-align: left;
-		width: 100%;
-		top: 12px;
-		left: 12px;
 	}
 
 	.calculator-body {
@@ -766,7 +628,6 @@
 	.button-base {
 		padding: 4px;
 	}
-
 	.calculator-buttons {
 		display: grid;
 		align-self: flex-end;
@@ -778,26 +639,10 @@
 		width: 100%;
 	}
 
-	.calculator-buttons div {
-		grid-column: 1 / 5;
-		width: 100%;
-		max-height: calc(100vw / 4);
-		background: none;
-		border: none;
-		padding: 4px 12px;
-		height: calc(var(--column-width) / 4);
-		display: flex;
-	}
-
 	img {
 		/* filter: invert(0.1); */
-		height: 1.5rem;
-		width: 1.5rem;
-	}
-
-	a img {
-		height: 1.75rem;
-		width: 1.75rem;
+		height: 1.25rem;
+		width: 1.25rem;
 	}
 
 	.inverted {
@@ -810,20 +655,10 @@
 		filter: invert(1);
 	}
 
-<<<<<<< HEAD
-	button {
-=======
 	.button-gap {
 	}
 
-	:link:focus,
-	:visited:focus {
-		outline: none;
-	}
-
-	button,
-	a {
->>>>>>> 85ded6b (prepping new input paradigm)
+	button {
 		pointer-events: auto;
 		max-width: calc(100vw / 2);
 		max-height: calc(100vw / 4);
@@ -831,18 +666,10 @@
 		border: none;
 		padding: 4px;
 		width: 100%;
-		min-width: calc(var(--column-width) / 4);
-		min-height: calc(var(--column-width) / 4);
 		height: calc(var(--column-width) / 4);
-		box-shadow: none !important;
 	}
 
-	button span,
-<<<<<<< HEAD
-	button a {
-=======
-	a span {
->>>>>>> 85ded6b (prepping new input paradigm)
+	button span {
 		height: 100%;
 		width: 100%;
 		pointer-events: auto;
