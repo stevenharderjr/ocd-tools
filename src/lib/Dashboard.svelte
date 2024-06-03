@@ -8,9 +8,9 @@
 <div class="backdrop">
 	<section class="tool-list">
 		<ToolCard
-			title="Ratioizer"
-			description="Keeps sets of values and allows dynamic adjustments without changing proportions between them."
-			href="/ratioizer"
+			title="Shopping Calculator"
+			description="Applies sales tax and various discounts to running total."
+			href="shopping-calculator"
 		/>
 		<ToolCard
 			title="Imperial Calculator"
@@ -18,14 +18,19 @@
 			href="imperial-calculator"
 		/>
 		<ToolCard
-			title="Time Calculator"
-			description="Apply basic math to time intervals."
-			href="imperial-calculator"
+			title="Ratioizer"
+			description="Keeps sets of values and allows dynamic adjustments without changing proportions between them."
+			href="/ratioizer"
 		/>
 		<ToolCard
 			title="Layout Equalizer"
 			description="Plot padding and equal spacing while accounting for material width."
 			href="layout"
+		/>
+		<ToolCard
+			title="Time Calculator"
+			description="Apply basic math to time intervals."
+			href="imperial-calculator"
 		/>
 		<ToolCard
 			title="Feature Testing"

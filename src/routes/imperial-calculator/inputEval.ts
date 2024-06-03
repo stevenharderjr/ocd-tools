@@ -72,7 +72,6 @@ export function inputEval(input: string): InputEval {
 	if (!input) return defaults;
 	const str = input + '';
 	let i = str.length;
-	const lastIndex = i - 1;
 	let {
 		isValid,
 		isComplete,
@@ -108,6 +107,8 @@ export function inputEval(input: string): InputEval {
 		spaceCount
 	} = defaults;
 
+	lastIndex = i - 1;
+
 	let value = '';
 
 	while (i--) {
@@ -131,33 +132,51 @@ export function inputEval(input: string): InputEval {
 					value = '';
 				}
 				if (isDecimal || spaceCount > 2) isValid = false;
+				if (i === lastIndex) hasTrailingSpace = true;
 				continue;
 			case '"':
 				isMeasurement = true;
 				if (containsInches || isDecimal || value) isValid = false;
 				containsInches = true;
+				if (str[i - 1] === ' ') hasTrailingSpace = true;
 				continue;
 			case "'":
 				isMeasurement = true;
 				if (containsFeet || isDecimal) isValid = false;
 				containsFeet = true;
+				if (str[i - 1] === ' ') hasTrailingSpace = true;
 				continue;
 			case '/':
-				isMeasurement = true;
 				if (containsFractionSlash || str[i - 1] !== ' ' || !value) isValid = false;
 				else slashIndex = i;
 				containsFractionSlash = true;
 				denominator = value;
+				fraction = '/' + denominator;
 				value = '';
 				continue;
 			case '.':
-				if (isDecimal || isMeasurement) isValid = false;
+				if (isDecimal || isMeasurement) {
+					isValid = false;
+					break;
+				}
 				isDecimal = true;
 				decimalIndex = i;
+				decimalSegment = +value;
+				value = '';
 				continue;
 		}
-		if (isNaN(char)) isValid = false;
+		if (isNaN(+char)) isValid = false;
 		else value = char + value;
+	}
+
+	if (!numerator && containsFractionSlash) {
+		numerator = value;
+		fraction = numerator + fraction;
+		isValid = numerator ? isValid : false;
+	}
+
+	if (value && isValid) {
+		if (!isMeasurement) integerSegment = +value;
 	}
 
 	return {
@@ -190,6 +209,8 @@ export function inputEval(input: string): InputEval {
 		inchesIndex,
 		firstSpaceIndex,
 		lastSpaceIndex,
+		integerSegment,
+		decimalSegment,
 		spaceCount
 	};
 }
