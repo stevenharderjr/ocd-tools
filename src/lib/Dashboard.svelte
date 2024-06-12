@@ -9,7 +9,7 @@
 	<section class="tool-list">
 		<ToolCard
 			title="Shopping Calculator"
-			description="Applies sales tax and various discounts to running total."
+			description="Keeps a running total with sales tax and various discounts applied."
 			href="shopping-calculator"
 		/>
 		<ToolCard
