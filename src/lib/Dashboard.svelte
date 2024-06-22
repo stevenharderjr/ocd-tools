@@ -9,7 +9,7 @@
 	<section class="tool-list">
 		<ToolCard
 			title="Shopping Calculator"
-			description="Keeps a running total with sales tax and various discounts applied."
+			description="Keep a running total with sales tax and various discounts applied."
 			href="shopping-calculator"
 		/>
 		<ToolCard
@@ -27,11 +27,11 @@
 			description="Plot padding and equal spacing while accounting for material width."
 			href="layout"
 		/>
-		<ToolCard
+		<!-- <ToolCard
 			title="Time Calculator"
 			description="Apply basic math to time intervals."
 			href="imperial-calculator"
-		/>
+		/> -->
 		<ToolCard
 			title="Feature Testing"
 			description="Try out experimental features and UI components."
