@@ -2,6 +2,17 @@
 // for information about these interfaces
 declare global {
 	namespace App {
+
+		interface ShoppingItem {
+			id: string;
+			label?: string;
+			price: number;
+			quantity: number;
+			taxable?: boolean;
+		}
+
+		type PriceList = ShoppingItem[];
+
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
