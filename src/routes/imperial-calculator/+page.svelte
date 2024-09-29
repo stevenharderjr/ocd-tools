@@ -87,6 +87,7 @@
 			operativeValue = '';
 			operator = '';
 			repeatValue = '';
+			holdover = '';
 			priorExpressions = [];
 			currentExpression = [];
 			return true;
@@ -407,7 +408,7 @@
 					<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
 						><span><img src="delete.svg" alt="backspace" /></span></button
 					>
-				{:else}
+				{:else if holdover}
 					<button
 						on:click={handleButtonPress}
 						aria-label="reset/clear"
@@ -415,6 +416,10 @@
 						title="reset/clear"
 						><span><img src="refresh.svg" alt="arrows circling counter clockwise" /></span></button
 					>
+				{:else}
+					<button aria-label="return to dashboard" id="back" title="back">
+						<a href="/"><img src="arrow-left.svg" alt="left arrow" /></a>
+					</button>
 				{/if}
 			{/if}
 			<button
@@ -425,7 +430,7 @@
 				style="font-size: 1.25rem;"><span class="inverted">√</span></button
 			>
 			<button on:click={handleButtonPress} aria-label="exponent" id="**" title="exponent"
-				><span class="inverted" style="font-size: 1.25rem;">^</span></button
+				><span class="inverted" style="font-size: 1.25rem;">+⁄−</span></button
 			>
 			<button on:click={handleButtonPress} aria-label="foot symbol" id="'" title="foot symbol"
 				><span class="inverted">'</span></button
@@ -636,7 +641,8 @@
 		height: calc(var(--column-width) / 4);
 	}
 
-	button span {
+	button span,
+	button a {
 		height: 100%;
 		width: 100%;
 		pointer-events: auto;

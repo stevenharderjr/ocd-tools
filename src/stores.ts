@@ -165,6 +165,8 @@ export const pins = writable<App.Pin[]>([
 	}
 ]);
 
+export const prices = writable([]);
+
 export const toasts = writable([]);
 
 export const blur = writable(false);
