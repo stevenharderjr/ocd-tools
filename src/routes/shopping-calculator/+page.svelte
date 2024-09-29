@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Toast from '$lib/Toast.svelte';
+	import Item from './Item.svelte';
 	// import { matchLabels, merge } from '$lib/utils/deduplicate';
 	interface Item {
 		price: number;
@@ -22,11 +23,14 @@
 	let duplicateItems = [];
 	let showMergeModal = false;
 	let temp = {};
+	let priceInputElement;
+	let formElement;
 
 	const taxMultiplier = 1.06;
 
 	$: total = items.reduce((acc, current) => acc + +current?.price, 0);
 	$: total *= taxMultiplier;
+	$: lastItem = items[0] || {};
 	$: console.log(items, { total });
 
 	// function addItem() {
@@ -39,26 +43,30 @@
 	// 	} else showMergeModal = true;
 	// }
 
-	function handleSubmit(event) {
-		const [label, price, quantity] = event.target;
-		console.log({
+	function handleSubmit(event: SubmitEvent) {
+		const [label, price] = event.target;
+		let amount = +price.value;
+		amount = amount % 1 ? amount.toFixed(2) : amount;
+		lastItem = {
 			label: label.value,
-			price: price.value,
-			quantity: quantity.value,
-			taxable
-		});
-		items = [
-			{
-				label: label.value,
-				price: price.value,
-				quantity: quantity.value || 1,
-				taxable,
-				discountType: 'pct',
-				discount: 0
-			},
-			...items
-		];
+			price: amount,
+			quantity,
+			taxable,
+			discountType: 'pct',
+			discount: 0
+		};
+		console.log(lastItem);
+		items = [lastItem, ...items];
 		event.target.reset();
+		priceInputElement.focus();
+	}
+
+	function handleUndo() {
+		items = items.slice(1);
+	}
+
+	function handleRepeat() {
+		items = [items[0], ...items];
 	}
 </script>
 
@@ -68,12 +76,22 @@
 
 <div class="item-list">
 	{#each items as item}
-		<span class="list-item">{item.label} ${item.price}</span>
+		<Item price={item.price} />
 	{/each}
 </div>
 
 <div class="input-area">
-	<form on:submit|preventDefault={handleSubmit}>
+	{#if items.length}
+		<div class="mod-buttons">
+			<button on:click|preventDefault={handleUndo}
+				><img src="/minus-circle.svg" />${lastItem.price}</button
+			>
+			<button on:click|preventDefault={handleRepeat}
+				><img src="/plus-circle.svg" />${lastItem.price}</button
+			>
+		</div>
+	{/if}
+	<form bind:this={formElement} on:submit|preventDefault={handleSubmit}>
 		<!-- {#each priceList as item}
 			<span>{item.label} {item.price * item.quantity * } {item.price}</span> -->
 		<section>
@@ -87,10 +105,11 @@
 			<span class="price-input">
 				<span class="dollar-sign">$</span>
 				<input
+					bind:this={priceInputElement}
 					id="price-input"
+					inputmode="decimal"
 					type="number"
 					step="any"
-					autofocus
 					tabindex="1"
 					required
 					min="0.01"
@@ -99,7 +118,7 @@
 			<span class="q-t">
 				<label for="quantity-input">
 					Quantity
-					<input id="quantity-input" type="number" step="1" value="1" min="1" />
+					<input id="quantity-input" type="number" step="1" value={quantity} min="1" />
 				</label>
 			</span>
 			<span class="q-t">
@@ -115,7 +134,7 @@
 					</span>
 				</label>
 			</span>
-			<input type="submit" style="display: none;" />
+			<button id="submit"><img src="/arrow-right.svg" /></button>
 		</section>
 		<!-- <div class="temp">
 			<p>Price: {price}</p>
@@ -125,6 +144,26 @@
 </div>
 
 <style>
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	input[type='number'] {
+		-moz-appearance: textfield;
+	}
+	#price-input {
+		font-size: 2rem;
+		height: 100%;
+		border: 1px solid #0003;
+	}
+	#submit {
+		position: relative;
+		top: -3px;
+	}
 	.display-total {
 		padding: 0.5rem;
 		text-align: right;
@@ -144,35 +183,57 @@
 		justify-content: flex-end;
 		padding: 0.5rem;
 	}
-	.item-list span {
-		align-self: flex-end;
-	}
 	form {
 		display: flex;
 		flex-direction: column;
 		margin: auto;
 		position: relative;
-		width: 100%;
+		/* width: 100%; */
 		bottom: -8px;
 		background: white;
-		padding: 0.5rem 0.75rem 2rem;
+		padding: 0.75rem 0.75rem 2rem;
 		justify-content: stretch;
+		font-size: 2rem;
 	}
 	form section {
 		display: flex;
 		flex-direction: row;
 		align-items: flex-end;
-		gap: 1rem;
+		/* gap: 1rem; */
 		flex-wrap: wrap;
-		justify-content: stretch;
+		justify-content: flex-end;
 		width: 100%;
 	}
 	label {
 		font-size: 0.75rem;
 	}
+	.mod-buttons {
+		display: flex;
+		justify-content: flex-end;
+		justify-self: center;
+		align-self: center;
+	}
+	.mod-buttons button {
+		background: #fff8;
+	}
+	.mod-buttons button img {
+		padding-right: 2px;
+	}
+	button {
+		padding: 0 8px;
+		margin: 0 4px;
+		background: #0003;
+		border-radius: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 40px;
+		min-width: 40px;
+	}
 	.input-area {
 		position: fixed;
 		display: flex;
+		flex-direction: column;
 		/* height: 150px; */
 		width: 100%;
 		bottom: -12px;
@@ -183,6 +244,7 @@
 		display: flex;
 		align-items: center;
 		flex: 3;
+		max-width: 160px;
 	}
 	.price-input input {
 		width: 100%;
@@ -190,6 +252,7 @@
 	}
 	.name-input {
 		flex: 5;
+		display: none;
 	}
 	.name-input input {
 		width: 100%;
@@ -197,14 +260,16 @@
 	.q-t {
 		flex: 1;
 		align-self: baseline;
+		display: none;
 	}
 	.q-t input {
 		width: 100%;
+		display: none;
 	}
 	input[type='checkbox'] {
 		margin-top: 0.5rem;
 	}
-	@media screen and (min-width: 480px) {
+	@media screen and (min-width: 200px) {
 		form {
 			max-width: 480px;
 			border-radius: 8px;

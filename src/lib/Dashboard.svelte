@@ -13,14 +13,14 @@
 			href="shopping-calculator"
 		/>
 		<ToolCard
-			title="Imperial Calculator"
-			description="Perform basic mathematical operations on Imperial (SAE) measurements."
-			href="imperial-calculator"
-		/>
-		<ToolCard
 			title="Ratioizer"
 			description="Keeps sets of values and allows dynamic adjustments without changing proportions between them."
 			href="/ratioizer"
+		/>
+		<ToolCard
+			title="Imperial Calculator"
+			description="Perform basic mathematical operations on Imperial (SAE) measurements."
+			href="imperial-calculator"
 		/>
 		<ToolCard
 			title="Layout Equalizer"
