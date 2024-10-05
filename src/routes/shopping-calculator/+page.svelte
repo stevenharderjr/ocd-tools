@@ -26,6 +26,7 @@
 	let temp = {};
 	let priceInputElement;
 	let formElement;
+	let resetItems = [];
 
 	const taxMultiplier = 1.06;
 
@@ -70,7 +71,13 @@
 	}
 
 	function handleReset() {
+		resetItems = [...items];
 		items = [];
+	}
+
+	function handleRestore() {
+		items = [...resetItems];
+		resetItems = [];
 	}
 
 	onMount(() => {
@@ -156,9 +163,15 @@
 		<!-- svelte-ignore a11y-missing-attribute -->
 		<img height="16px" width="16px" src="arrow-left.svg" aria-hidden={true} />
 	</a>
-	<button on:click={handleReset}>
-		<img src="refresh-ccw.svg" />
-	</button>
+	{#if items.length}
+		<button on:click={handleReset}>
+			<img src="refresh-ccw.svg" />
+		</button>
+	{:else if resetItems.length}
+		<button on:click={handleRestore}>
+			<img src="undo.svg" />
+		</button>
+	{/if}
 </div>
 
 <style>
@@ -338,6 +351,7 @@
 		backdrop-filter: blur(4px);
 		pointer-events: auto;
 	}
+	.nav-container img,
 	.nav-container > img {
 		filter: invert(0.1);
 		height: 1.25rem;
