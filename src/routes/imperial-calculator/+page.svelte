@@ -385,7 +385,7 @@
 		<!-- <CalculatorButtonGroup
 			{buttons}
 			clearMethod={inputValue && !holdover ? 'backspace' : 'refresh'}
-			on:click={handleButtonPress}
+			on:touchstart|preventDefault={handleButtonPress} on:click={handleButtonPress}
 		/> -->
 		<div class="calculator-buttons">
 			{#if showPrecisionModal}
@@ -395,21 +395,38 @@
 					on:change={handlePrecisionUpdate}
 				/>
 			{:else}
-				<button on:click={handleButtonPress} aria-label="settings" id="settings" title="settings"
-					><span><img src="settings.svg" alt="gear" /></span></button
+				<button
+					on:touchstart|preventDefault={handleButtonPress}
+					on:click={handleButtonPress}
+					aria-label="settings"
+					id="settings"
+					title="settings"><span><img src="settings.svg" alt="gear" /></span></button
 				>
-				<button on:click={handleButtonPress} aria-label="copy" id="copy" title="copy"
-					><span><img src="copy.svg" alt="stacked squares" /></span></button
+				<button
+					on:touchstart|preventDefault={handleButtonPress}
+					on:click={handleButtonPress}
+					aria-label="copy"
+					id="copy"
+					title="copy"><span><img src="copy.svg" alt="stacked squares" /></span></button
 				>
-				<button on:click={handleButtonPress} aria-label="paste" id="paste" title="paste"
-					><span><img src="clipboard.svg" alt="clipboard" /></span></button
+				<button
+					on:touchstart|preventDefault={handleButtonPress}
+					on:click={handleButtonPress}
+					aria-label="paste"
+					id="paste"
+					title="paste"><span><img src="clipboard.svg" alt="clipboard" /></span></button
 				>
 				{#if inputValue && !holdover}
-					<button on:click={handleButtonPress} aria-label="backspace" id="backspace" title="delete"
-						><span><img src="delete.svg" alt="backspace" /></span></button
+					<button
+						on:touchstart|preventDefault={handleButtonPress}
+						on:click={handleButtonPress}
+						aria-label="backspace"
+						id="backspace"
+						title="delete"><span><img src="delete.svg" alt="backspace" /></span></button
 					>
 				{:else if holdover}
 					<button
+						on:touchstart|preventDefault={handleButtonPress}
 						on:click={handleButtonPress}
 						aria-label="reset/clear"
 						id="refresh"
@@ -423,52 +440,130 @@
 				{/if}
 			{/if}
 			<button
+				on:touchstart|preventDefault={handleButtonPress}
 				on:click={handleButtonPress}
 				aria-label="square root"
 				id="√"
 				title="square root"
 				style="font-size: 1.25rem;"><span class="inverted">√</span></button
 			>
-			<button on:click={handleButtonPress} aria-label="exponent" id="**" title="exponent"
-				><span class="inverted" style="font-size: 1.25rem;">+⁄−</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="foot symbol" id="'" title="foot symbol"
-				><span class="inverted">'</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="divide" id="/"
-				><span class={operator === '/' ? 'highlighted' : 'inverted'}>÷</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="7" id="7"><span>7</span></button>
-			<button on:click={handleButtonPress} aria-label="8" id="8"><span>8</span></button>
-			<button on:click={handleButtonPress} aria-label="9" id="9"><span>9</span></button>
-			<button on:click={handleButtonPress} aria-label="multiply" id="*"
-				><span class={operator === '*' ? 'highlighted' : 'inverted'}>×</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="4" id="4"><span>4</span></button>
-			<button on:click={handleButtonPress} aria-label="5" id="5"><span>5</span></button>
-			<button on:click={handleButtonPress} aria-label="6" id="6"><span>6</span></button>
-			<button on:click={handleButtonPress} aria-label="subtract" id="-"
-				><span class={operator === '-' ? 'highlighted' : 'inverted'}>−</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="1" id="1"><span>1</span></button>
-			<button on:click={handleButtonPress} aria-label="2" id="2"><span>2</span></button>
-			<button on:click={handleButtonPress} aria-label="3" id="3"><span>3</span></button>
-			<button on:click={handleButtonPress} aria-label="add" id="+"
-				><span class={operator === '+' ? 'highlighted' : 'inverted'}>+</span></button
-			>
-			<button on:click={handleButtonPress} aria-label="0" id="0"><span>0</span></button>
 			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="exponent"
+				id="**"
+				title="exponent"><span class="inverted" style="font-size: 1.25rem;">+⁄−</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="foot symbol"
+				id="'"
+				title="foot symbol"><span class="inverted">'</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="divide"
+				id="/"><span class={operator === '/' ? 'highlighted' : 'inverted'}>÷</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="7"
+				id="7"><span>7</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="8"
+				id="8"><span>8</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="9"
+				id="9"><span>9</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="multiply"
+				id="*"><span class={operator === '*' ? 'highlighted' : 'inverted'}>×</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="4"
+				id="4"><span>4</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="5"
+				id="5"><span>5</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="6"
+				id="6"><span>6</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="subtract"
+				id="-"><span class={operator === '-' ? 'highlighted' : 'inverted'}>−</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="1"
+				id="1"><span>1</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="2"
+				id="2"><span>2</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="3"
+				id="3"><span>3</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="add"
+				id="+"><span class={operator === '+' ? 'highlighted' : 'inverted'}>+</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="0"
+				id="0"><span>0</span></button
+			>
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
 				on:click={handleButtonPress}
 				aria-label="⁄"
 				id="⁄"
 				title="value to numerator (create fraction)"
 				><span class={!holdover && slashIndex > -1 ? 'highlighted' : 'inverted'}>⁄</span></button
 			>
-			<button on:click={handleButtonPress} aria-label="space" id="space"
-				><span class="inverted"><img src="space.svg" alt="space bar" /></span></button
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="space"
+				id="space"><span class="inverted"><img src="space.svg" alt="space bar" /></span></button
 			>
-			<button on:click={handleButtonPress} aria-label="equals" id="="
-				><span class="inverted">=</span></button
+			<button
+				on:touchstart|preventDefault={handleButtonPress}
+				on:click={handleButtonPress}
+				aria-label="equals"
+				id="="><span class="inverted">=</span></button
 			>
 		</div>
 	</div>
@@ -478,7 +573,7 @@
 	<a href="/" title="return to dashboard">
 		<img height="16px" width="16px" src="arrow-left.svg" aria-hidden={true} />
 	</a>
-	<button on:click={addRatio} title="add new ratio" disabled={!!edit}>
+	<button on:touchstart|preventDefault={addRatio} title="add new ratio" disabled={!!edit}>
     <svg aria-hidden="true" viewBox="0 0 1 1">
       <path d="M0,0.5 L1,0.5 M0.5,0 L0.5,1" />
     </svg>
