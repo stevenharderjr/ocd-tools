@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Toast from '$lib/Toast.svelte';
 	import Item from './Item.svelte';
 	// import { matchLabels, merge } from '$lib/utils/deduplicate';
@@ -25,13 +26,14 @@
 	let temp = {};
 	let priceInputElement;
 	let formElement;
+	let resetItems = [];
 
 	const taxMultiplier = 1.06;
 
 	$: total = items.reduce((acc, current) => acc + +current?.price, 0);
 	$: total *= taxMultiplier;
 	$: lastItem = items[0] || {};
-	$: console.log(items, { total });
+	// $: console.log(items, { total });
 
 	// function addItem() {
 	// 	if (!price) return Toast.add('Specify price to add item.');
@@ -55,7 +57,6 @@
 			discountType: 'pct',
 			discount: 0
 		};
-		console.log(lastItem);
 		items = [lastItem, ...items];
 		event.target.reset();
 		priceInputElement.focus();
@@ -68,6 +69,20 @@
 	function handleRepeat() {
 		items = [items[0], ...items];
 	}
+
+	function handleReset() {
+		resetItems = [...items];
+		items = [];
+	}
+
+	function handleRestore() {
+		items = [...resetItems];
+		resetItems = [];
+	}
+
+	onMount(() => {
+		priceInputElement.focus();
+	});
 </script>
 
 <div class="display-total">
@@ -140,6 +155,22 @@
 				><img src="/plus-circle.svg" />${lastItem.price}</button
 			>
 		</div>
+	{/if}
+</div>
+
+<div class="nav-container">
+	<a href="/" title="return to dashboard">
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<img height="16px" width="16px" src="arrow-left.svg" aria-hidden={true} />
+	</a>
+	{#if items.length}
+		<button on:click={handleReset}>
+			<img src="refresh-ccw.svg" />
+		</button>
+	{:else if resetItems.length}
+		<button on:click={handleRestore}>
+			<img src="undo.svg" />
+		</button>
 	{/if}
 </div>
 
@@ -288,6 +319,45 @@
 	input:focus {
 		border: 2px solid black;
 	}
+	.nav-container {
+		pointer-events: none;
+		z-index: 4;
+		position: absolute;
+		display: flex;
+		justify-content: space-between;
+		align-self: center;
+		align-items: flex-end;
+		gap: 1rem;
+		padding: 0 1.5rem;
+		bottom: 1.5rem;
+		pointer-events: none;
+		max-width: 100%;
+		width: var(--column-width);
+	}
+	.nav-container a,
+	.nav-container button {
+		pointer-events: auto;
+		border-radius: 9999px;
+		background: #fffc;
+		width: 3rem;
+		height: 3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		touch-action: manipulation;
+		font-size: 2rem;
+		box-shadow: 0 0 4px 2px #0003;
+		backdrop-filter: blur(4px);
+		pointer-events: auto;
+	}
+	.nav-container img,
+	.nav-container > img {
+		filter: invert(0.1);
+		height: 1.25rem;
+		width: 1.25rem;
+	}
+
 	@media screen and (min-width: 200px) {
 		form {
 			max-width: 480px;
