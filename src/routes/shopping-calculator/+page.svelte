@@ -81,16 +81,6 @@
 </div>
 
 <div class="input-area">
-	{#if items.length}
-		<div class="mod-buttons">
-			<button on:click|preventDefault={handleUndo}
-				><img src="/minus-circle.svg" />${lastItem.price}</button
-			>
-			<button on:click|preventDefault={handleRepeat}
-				><img src="/plus-circle.svg" />${lastItem.price}</button
-			>
-		</div>
-	{/if}
 	<form bind:this={formElement} on:submit|preventDefault={handleSubmit}>
 		<!-- {#each priceList as item}
 			<span>{item.label} {item.price * item.quantity * } {item.price}</span> -->
@@ -141,6 +131,16 @@
 			<p>Taxable? {taxable}</p>
 		</div> -->
 	</form>
+	{#if items.length}
+		<div class="mod-buttons">
+			<button on:click|preventDefault={handleUndo}
+				><img src="/minus-circle.svg" />${lastItem.price}</button
+			>
+			<button on:click|preventDefault={handleRepeat}
+				><img src="/plus-circle.svg" />${lastItem.price}</button
+			>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -154,15 +154,21 @@
 	/* Firefox */
 	input[type='number'] {
 		-moz-appearance: textfield;
+		border: 1px solid white;
 	}
 	#price-input {
-		font-size: 2rem;
-		height: 100%;
-		border: 1px solid #0003;
+		font-size: 1.5rem;
+		height: 42px;
+		border: 1px solid #fff;
 	}
 	#submit {
+		background: #fff;
 		position: relative;
-		top: -3px;
+		top: -2px;
+		height: 42px;
+		width: 42px;
+		/* border: 1px solid #666; */
+		border-radius: 0 8px 8px 0;
 	}
 	.display-total {
 		padding: 0.5rem;
@@ -187,13 +193,11 @@
 		display: flex;
 		flex-direction: column;
 		margin: auto;
-		position: relative;
 		/* width: 100%; */
-		bottom: -8px;
-		background: white;
-		padding: 0.75rem 0.75rem 2rem;
+		/* background: white; */
+		padding: 0.75rem;
 		justify-content: stretch;
-		font-size: 2rem;
+		font-size: 1.5rem;
 	}
 	form section {
 		display: flex;
@@ -202,16 +206,18 @@
 		/* gap: 1rem; */
 		flex-wrap: wrap;
 		justify-content: flex-end;
-		width: 100%;
 	}
 	label {
 		font-size: 0.75rem;
 	}
 	.mod-buttons {
+		position: absolute;
 		display: flex;
 		justify-content: flex-end;
 		justify-self: center;
 		align-self: center;
+		bottom: 0;
+		bottom: -32px;
 	}
 	.mod-buttons button {
 		background: #fff8;
@@ -231,12 +237,14 @@
 		min-width: 40px;
 	}
 	.input-area {
-		position: fixed;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 		display: flex;
 		flex-direction: column;
 		/* height: 150px; */
 		width: 100%;
-		bottom: -12px;
 	}
 	.price-input {
 		width: 100%;
@@ -248,7 +256,14 @@
 	}
 	.price-input input {
 		width: 100%;
-		height: 2rem;
+		height: 40px;
+		padding-left: 24px;
+		border-radius: 8px 0 0 8px;
+	}
+	.dollar-sign {
+		position: absolute;
+		padding-left: 8px;
+		font-size: 1.5rem;
 	}
 	.name-input {
 		flex: 5;
@@ -268,6 +283,10 @@
 	}
 	input[type='checkbox'] {
 		margin-top: 0.5rem;
+	}
+	input[type='text'],
+	input:focus {
+		border: 2px solid black;
 	}
 	@media screen and (min-width: 200px) {
 		form {
