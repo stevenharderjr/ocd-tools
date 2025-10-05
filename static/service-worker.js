@@ -3,6 +3,7 @@ import { build, files, version } from '$service-worker';
 
 // Create a unique cache name for this deployment
 const CURRENT_CACHE = `cache-${version}`;
+const DATA_CACHE = `data-cache-${version}`;
 
 const ASSETS = [
 	...build, // the app itself
@@ -23,7 +24,9 @@ self.addEventListener('activate', (event) => {
 	// Remove previous cached data from disk
 	async function deleteOldCaches() {
 		for (const key of await caches.keys()) {
-			if (key !== CURRENT_CACHE) await caches.delete(key);
+			if (key !== CURRENT_CACHE && key !== DATA_CACHE) {
+				await caches.delete(key);
+			}
 		}
 	}
 
@@ -60,3 +63,15 @@ self.addEventListener('fetch', (event) => {
 
 	event.respondWith(respond());
 });
+
+// Handle background sync for data persistence (iOS Safari doesn't support this fully, but helps other browsers)
+self.addEventListener('sync', (event) => {
+	if (event.tag === 'background-sync') {
+		event.waitUntil(syncData());
+	}
+});
+
+async function syncData() {
+	// This would sync any pending localStorage changes
+	// For now, localStorage is handled by the stores directly
+}
